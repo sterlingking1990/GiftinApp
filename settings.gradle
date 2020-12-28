@@ -1,0 +1,4 @@
+include ':mylibrary'
+include ':paystack'
+include ':app'
+rootProject.name = "Merchant"

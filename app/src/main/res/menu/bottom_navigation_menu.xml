@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_gifts"
+        android:title="Merchants Gifts" />
+    <item
+        android:id="@+id/navigation_mygiftcart"
+        android:icon="@drawable/gift_track_icon"
+        android:title="My Gift Cart" />
+    <item
+        android:id="@+id/navigation_gifting_history"
+        android:icon="@drawable/merchants_care"
+        android:title="Gifting History" />
+
+    <item
+        android:id="@+id/navigation_gifting_merchant"
+        android:icon="@drawable/ic_gifting_merchant"
+        android:title="Gifting Business"/>
+
+</menu>

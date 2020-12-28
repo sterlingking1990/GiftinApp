@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.giftinapp.merchant.GiftACustomerFragment">
+
+
+    <LinearLayout
+        android:id="@+id/ll_customer_fan_detail_to_reward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:text="Enter customer/fan email to reward"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/et_customer_fan_email_to_gift"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="izundukingsleyemeka@gmail.com"
+            />
+
+        <EditText
+            android:id="@+id/et_customer_fan_reward_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="2000"
+            />
+        <Button
+            android:id="@+id/btn_add_customer_fan_to_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Add to list" />
+
+        <Button
+            android:id="@+id/btn_reward_customer_fan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reward"
+            android:textSize="20sp"
+            />
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/lv_customer_fan_to_reward_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ll_customer_fan_detail_to_reward"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

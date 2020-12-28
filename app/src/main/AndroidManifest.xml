@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.giftinapp.merchant">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name="com.giftinapp.merchant.PaymentApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Merchant">
+        <activity android:name="com.giftinapp.merchant.MainActivity"></activity>
+        <activity android:name="com.giftinapp.merchant.SignUpActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:host="gifting.com"
+                    android:scheme="http"/>
+                <data
+                    android:host="gifting.com"
+                    android:scheme="https"/>
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="co.paystack.android.PublicKey"
+            android:value="pk_test_c6ee2e7a44ffb088bff0cd3cfe7665336b40b6c0" />
+
+        <activity android:name="com.giftinapp.merchant.MerchantActivity" />
+        <activity android:name="com.giftinapp.merchant.LoginActivity"/>
+    </application>
+
+</manifest>

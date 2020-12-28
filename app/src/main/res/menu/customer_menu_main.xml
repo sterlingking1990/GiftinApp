@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/customer_refresh_page"
+        android:title="Refresh app"
+        android:icon="@drawable/ic_refresh"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/update_settings"
+        android:title="Update profile"
+        android:icon="@drawable/ic_settings"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/about_giftin"
+        android:title="About"
+        android:icon="@drawable/ic_about"
+        app:showAsAction="never"/>
+
+    <item android:title="Refer n Win"
+        android:id="@+id/referwin"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/exit"
+        android:title="Exit"
+        app:showAsAction="never"/>
+
+</menu>
