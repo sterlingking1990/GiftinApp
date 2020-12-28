@@ -45,6 +45,8 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
     public SessionManager sessionManager;
     public AlertDialog.Builder builder;
 
+    public Long totalRewardAmount;
+
     //here, we fetch the gifts from firebase and then we display on my gift cart
 
 //    @Override
@@ -101,7 +103,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                     //on success of getting the total amount, we now want to display the users
                     //gifts and the track based on the total amount vs the cost of each gift
                     if (task.isSuccessful()) {
-                        Integer totalRewardAmount = 0;
+                        totalRewardAmount = 0L;
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             MyTotalReward totalReward = document.toObject(MyTotalReward.class);
                             MyTotalReward giftCost = new MyTotalReward();
@@ -109,9 +111,8 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                             totalRewardAmount += giftCost.gift_coin;
                         }
 
-                        //now we use
-                        Integer finalTotalRewardAmount = totalRewardAmount;
-                        if (finalTotalRewardAmount > 1 ) {
+
+                        if (totalRewardAmount > 1 ) {
                             db.collection("users").document(sessionManager.getEmail()).collection("gift_carts")
                                     .get()
                                     .addOnCompleteListener(task1 -> {
@@ -122,11 +123,12 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                                 MyCartPojo list = new MyCartPojo();
                                                 list.gift_url = listings.gift_url;
                                                 list.gift_name = listings.gift_name;
-                                                Integer finalTotal = finalTotalRewardAmount>1 ? finalTotalRewardAmount : 1;
-                                                list.gift_track = listings.gift_cost < finalTotalRewardAmount ? 100 : (finalTotal/listings.gift_cost);
 
+                                                double track= listings.gift_cost < totalRewardAmount ? 100 : ((totalRewardAmount * 0.1)/(listings.gift_cost*0.1)) * 100;
+                                                int giftTrack = (int) track;
+
+                                                list.gift_track=giftTrack;
                                                 listTop.add(list);
-                                                Log.d("Listin", String.valueOf(listings.gift_cost));
 
                                             }
                                             myGiftCartAdapter.setMyGiftsList(listTop);

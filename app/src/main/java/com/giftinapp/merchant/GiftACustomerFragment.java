@@ -266,7 +266,7 @@ public class GiftACustomerFragment extends Fragment {
 
         MerchantWalletPojo merchantWalletPojo = new MerchantWalletPojo();
        giftinCharge = (long) (0.1 * rewardAmount);
-        merchantWalletPojo.merchant_wallet_amount= (long) (merchant_wallet_amount - (rewardAmount + giftinCharge));
+        merchantWalletPojo.merchant_wallet_amount=  (merchant_wallet_amount - (rewardAmount + giftinCharge));
 
 
         db.collection("merchants").document(sessionManager.getEmail()).collection("reward_wallet").document("deposit").set(merchantWalletPojo);
@@ -291,10 +291,9 @@ public class GiftACustomerFragment extends Fragment {
                                                 if(task2.isSuccessful()){
                                                     DocumentSnapshot referrerDoc=task2.getResult();
                                                     if(referrerDoc.exists()){
-                                                         long referrerBonus=(long) 0.2*giftinCharge;
-                                                         Toast.makeText(getContext(),String.valueOf(referrerBonus),Toast.LENGTH_LONG).show();
+                                                         long referrerBonus=(long) (0.2 * giftinCharge);
                                                          long bonusFromDb= (long) referrerDoc.get("gift_coin");
-                                                        rewardPojo.gift_coin=referrerBonus +bonusFromDb;
+                                                        rewardPojo.gift_coin=referrerBonus + bonusFromDb;
                                                     }
                                                     else{
                                                         rewardPojo.gift_coin=(long)(0.2*giftinCharge);
