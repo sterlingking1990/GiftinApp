@@ -2,26 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/customer_refresh_page"
+    <item android:id="@+id/merchant_refresh_page"
         android:title="Refresh app"
         android:icon="@drawable/ic_refresh"
         app:showAsAction="always"/>
 
-    <item android:id="@+id/update_info"
+    <item android:id="@+id/merchant_update_info"
         android:title="Update Info"
         android:icon="@drawable/ic_settings"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/about_giftin"
+    <item android:id="@+id/merchant_about_giftin"
         android:title="About"
         android:icon="@drawable/ic_about"
         app:showAsAction="never"/>
 
-    <item android:title="Refer n Win"
-        android:id="@+id/referwin"
-        app:showAsAction="never"/>
-
-    <item android:id="@+id/exit"
+    <item android:id="@+id/merchant_exit"
         android:title="Exit"
         app:showAsAction="never"/>
 

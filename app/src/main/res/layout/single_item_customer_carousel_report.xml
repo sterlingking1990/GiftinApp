@@ -34,7 +34,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@color/whitesmoke"
+                        android:textColor="@color/colorPrimaryLight"
                         android:textSize="35sp"
                         android:padding="5dp"
                         android:text="Total Gift Coin"
@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="40sp"
                     android:padding="10dp"
-                    android:textColor="@color/whitesmoke"
+                    android:textColor="@color/colorPrimaryLight"
                     android:text="178"
                     android:gravity="right"
                     android:layout_gravity="center"/>

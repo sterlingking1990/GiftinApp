@@ -1,5 +1,7 @@
 package com.giftinapp.merchant;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,7 +18,11 @@ import android.view.ViewGroup;
 
 import com.giftinapp.merchant.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -116,8 +122,7 @@ public class GiftingMerchantFragment extends Fragment {
                                         .setCancelable(false)
                                         .setPositiveButton("OK", (dialog, id) -> {
                                             //take user to rewarding merchants
-//                                            openFragment(new GiftListFragment());
-                                            openFragment(new ShareAppLinkFragment());
+                                            shareAppLink();
                                         });
                                 AlertDialog alert = builder.create();
                                 alert.show();
@@ -128,12 +133,29 @@ public class GiftingMerchantFragment extends Fragment {
 
     }
 
-    public void openFragment(Fragment fragment) {
-        FragmentManager fm = getFragmentManager();
-        fm.beginTransaction()
-                .replace(R.id.fr_game, fragment)
-                .addToBackStack(null)
-                .commit();
+    public void shareAppLink() {
+
+        String link = "https://giftinapp.page.link/getgifts/?link=gifting.com/?invitedBy=" + sessionManager.getEmail();
+
+        FirebaseDynamicLinks.getInstance().createDynamicLink()
+                .setLink(Uri.parse(link))
+                .setDomainUriPrefix("https://giftinapp.page.link")
+                .setAndroidParameters(
+                        new DynamicLink.AndroidParameters.Builder("com.giftinapp.merchant")
+                                .build())
+                .buildShortDynamicLink()
+                .addOnSuccessListener(new OnSuccessListener<ShortDynamicLink>() {
+                    @Override
+                    public void onSuccess(ShortDynamicLink shortDynamicLink) {
+                        Uri mInvitationUrl = shortDynamicLink.getShortLink();
+
+                        // ...
+                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        intent.setType("text/plain");
+                        intent.putExtra(Intent.EXTRA_TEXT, mInvitationUrl.toString());
+                        startActivity(Intent.createChooser(intent, "Share GiftinApp With"));
+                    }
+                });
     }
 
 }

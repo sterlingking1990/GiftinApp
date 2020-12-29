@@ -10,6 +10,7 @@ import androidx.viewpager.widget.ViewPager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.SparseArray;
@@ -19,11 +20,22 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.giftinapp.merchant.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ViewListener;
 
@@ -39,12 +51,15 @@ public class MainActivity extends AppCompatActivity {
 
     protected SparseArray<ReportsViewHolder> holderList = new SparseArray<>();
 
+    public Long totalGiftCoin;
+
 
     private static Button btnGameList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -85,21 +100,30 @@ public class MainActivity extends AppCompatActivity {
 //        getSupportFragmentManager().beginTransaction()
 //                .add(R.id.fr_game, fragment)
 //                .commit();
+
+        //get update of the total gift coin on create
+        getTotalGiftCoin();
     }
 
     ViewListener viewListener = position -> {
-        View customView = getLayoutInflater().inflate(R.layout.single_item_customer_carousel_report, null);
+        View customView = getLayoutInflater().inflate(R.layout.single_item_customer_carousel_report,null);
 
         ReportsViewHolder holder = new ReportsViewHolder();
         holder.reportValue = customView.findViewById(R.id.kpi_report_value);
         holder.reportName = customView.findViewById(R.id.kpi_report_name);
         holder.reportIcon = customView.findViewById(R.id.kpi_report_icon);
 
+
+
+
         switch (position) {
+
             case 0: {
+                getTotalGiftCoin();
                 holder.reportName.setText("Total Gift Coin");
-                holder.reportValue.setText("0");
                 holder.reportIcon.setImageResource(R.drawable.ic_gifts);
+                long totalGiftCoinSum= totalGiftCoin==null ? 0L : totalGiftCoin;
+                holder.reportValue.setText(String.valueOf(totalGiftCoinSum));
                 holderList.put(0, holder);
                 break;
             }
@@ -121,7 +145,9 @@ public class MainActivity extends AppCompatActivity {
 
         switch (position) {
             case 0: {
-                holderList.get(0).reportValue.setText("0");
+                getTotalGiftCoin();
+                long totalGiftCoinSum= totalGiftCoin==null ? 0L : totalGiftCoin;
+                holderList.get(0).reportValue.setText(String.valueOf(totalGiftCoinSum));
                 break;
             }
             case 1: {
@@ -192,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
                 return true;
-            case R.id.update_settings:
+            case R.id.update_info:
                 carouselView.setVisibility(View.GONE);
                 SettingsFragment settingsFragment = new SettingsFragment();
                 openFragment(settingsFragment);
@@ -205,9 +231,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.referwin:
-                carouselView.setVisibility(View.GONE);
-                ShareAppLinkFragment shareAppLinkFragment = new ShareAppLinkFragment();
-                openFragment(shareAppLinkFragment);
+                shareAppLink();
                 return true;
 
             case R.id.exit:
@@ -229,11 +253,11 @@ public class MainActivity extends AppCompatActivity {
                 builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
                         sessionManager.saveEmailAndUserMode("","","");
+                        mAuth.signOut();
+                        dialog.cancel();
                         MainActivity.this.finish();
                         System.exit(0);
-                        mAuth.signOut();
                     }
                 });
 
@@ -242,4 +266,57 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void getTotalGiftCoin() {
+        //get the total gift coin for this user
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+        db.collection("users").document(sessionManager.getEmail()).collection("rewards").get()
+                .addOnCompleteListener(task -> {
+
+                    if (task.isSuccessful()) {
+                        totalGiftCoin=0L;
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            long giftCoin = (long) queryDocumentSnapshot.get("gift_coin");
+                            totalGiftCoin += giftCoin;
+                        }
+                    }
+                    else{
+                        totalGiftCoin=0L;
+                    }
+                });
+    }
+
+    private void shareAppLink() {
+
+        String link = "https://giftinapp.page.link/getgifts/?link=gifting.com/?invitedBy=" + sessionManager.getEmail();
+
+        FirebaseDynamicLinks.getInstance().createDynamicLink()
+                .setLink(Uri.parse(link))
+                .setDomainUriPrefix("https://giftinapp.page.link")
+                .setAndroidParameters(
+                        new DynamicLink.AndroidParameters.Builder("com.giftinapp.merchant")
+                                .build())
+                .buildShortDynamicLink()
+                .addOnSuccessListener(new OnSuccessListener<ShortDynamicLink>() {
+                    @Override
+                    public void onSuccess(ShortDynamicLink shortDynamicLink) {
+                        Uri mInvitationUrl = shortDynamicLink.getShortLink();
+
+                        // ...
+                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        intent.setType("text/plain");
+                        intent.putExtra(Intent.EXTRA_TEXT, mInvitationUrl.toString());
+                        startActivity(Intent.createChooser(intent, "Share GiftinApp With"));
+                    }
+                });
+    }
+
+
 }
