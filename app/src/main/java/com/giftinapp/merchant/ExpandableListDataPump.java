@@ -35,7 +35,7 @@ public class ExpandableListDataPump {
 
 
         List<String> giftingMerchantHead = new ArrayList<String>();
-        giftingMerchantHead.add("Businesses that use GiftinApp are rewarding businesses that understands the value of her customer. They are verified and profiled");
+        giftingMerchantHead.add("Businesses that use GiftinApp are trusted businesses that understands the value of her customer. They are verified and profiled");
 
 
         expandableListDetail.put("GiftinApp For Customer", giftinAppIntroHead);

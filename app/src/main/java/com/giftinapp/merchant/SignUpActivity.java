@@ -151,6 +151,7 @@ public class SignUpActivity extends AppCompatActivity {
                                         userPojo.login_mode="customer";
                                         userPojo.interest=spInterest.getSelectedItem().toString();
                                         userPojo.referrer=referrerEmail;
+                                        userPojo.verification_status="not verified";
                                         db.collection("users").document(username).set(userPojo)
                                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override

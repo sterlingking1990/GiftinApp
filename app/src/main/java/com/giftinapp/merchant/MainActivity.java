@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
                 builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        sessionManager.saveEmailAndUserMode("","","");
+                        sessionManager.saveEmailAndUserMode("","");
                         mAuth.signOut();
                         dialog.cancel();
                         MainActivity.this.finish();

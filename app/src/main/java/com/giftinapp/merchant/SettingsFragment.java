@@ -31,10 +31,6 @@ public class SettingsFragment extends Fragment {
 
     public SessionManager sessionManager;
 
-    public PhoneNumberValidator phoneNumberValidator;
-
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,9 +48,7 @@ public class SettingsFragment extends Fragment {
         btnUpdateInfo=view.findViewById(R.id.btn_update_info);
 
 
-
         sessionManager=new SessionManager(requireContext());
-        phoneNumberValidator=new PhoneNumberValidator();
 
         fetchInfoOnStart();
         btnUpdateInfo.setOnClickListener(v->{
@@ -76,18 +70,19 @@ public class SettingsFragment extends Fragment {
 
         String email=sessionManager.getEmail();
 
-        db.collection("users").document(email).update("phone_number_1",num1,"phone_number_2",num2,"address",addr)
+        String num1Input=num1.isEmpty()?"empty phone number":num1;
+        String num2Input = num2.isEmpty()?"empty phone number":num2;
+        String addressInput=addr.isEmpty()?"empty address":addr;
+        DeliveryInfoPojo deliveryInfoPojo=new DeliveryInfoPojo();
+        deliveryInfoPojo.phone_number_1=num1Input;
+        deliveryInfoPojo.phone_number_2=num2Input;
+        deliveryInfoPojo.address=addressInput;
+
+        db.collection("users").document(email).update(deliveryInfoPojo.phone_number_1,deliveryInfoPojo.phone_number_2,deliveryInfoPojo.address)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if(task.isSuccessful()){
-                            String num1Input=num1.isEmpty()?"empty phone number":num1;
-                            String num2Input = num2.isEmpty()?"empty phone number":num2;
-                            String addressInput=addr.isEmpty()?"empty address":addr;
-                            DeliveryInfoPojo deliveryInfoPojo=new DeliveryInfoPojo();
-                            deliveryInfoPojo.phone_number_1=num1Input;
-                            deliveryInfoPojo.phone_number_2=num2Input;
-                            deliveryInfoPojo.address=addressInput;
                             Toast.makeText(requireContext(),"details updated successfully",Toast.LENGTH_LONG).show();
                         }
                     }

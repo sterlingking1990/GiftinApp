@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +28,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.ktx.Firebase;
 
 import java.security.PublicKey;
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
     private Button btnLogin;
@@ -37,6 +40,10 @@ public class LoginActivity extends AppCompatActivity {
     private TextView tvResetPassword;
 
     private ProgressDialogUtil progressDialogUtil;
+
+    private Button btnSendVerificationEmail;
+
+    private RadioGroup radioLoginAs;
 
 
     @Override
@@ -53,7 +60,13 @@ public class LoginActivity extends AppCompatActivity {
 
         tvResetPassword=findViewById(R.id.tv_reset_password_trigger);
 
+        btnSendVerificationEmail = findViewById(R.id.btn_resend_email_verification);
+
+        btnSendVerificationEmail.setVisibility(View.GONE);
+
         emailValidator = new EmailValidator();
+
+        radioLoginAs=findViewById(R.id.radioLoginType);
 
 
         btnLogin.setOnClickListener(v -> {
@@ -64,6 +77,10 @@ public class LoginActivity extends AppCompatActivity {
                 progressDialogUtil.stopDialog();
                 Toast.makeText(getApplicationContext(), "either username or password is incorrect", Toast.LENGTH_SHORT).show();
             }
+        });
+
+        btnSendVerificationEmail.setOnClickListener(v->{
+            resendVerificationEmail();
         });
 
 
@@ -78,6 +95,18 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         sessionManager = new SessionManager(getApplicationContext());
+
+
+    }
+
+    private void resendVerificationEmail() {
+        if(mAuth.getCurrentUser()!=null){
+            mAuth.getCurrentUser().reload();
+            if(!mAuth.getCurrentUser().isEmailVerified()){
+                mAuth.getCurrentUser().sendEmailVerification();
+                Toast.makeText(getApplicationContext(),"Another email verification was just sent, please verify you email",Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void resetUserPassword(String email) {
@@ -95,7 +124,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void LoginUser(String username, String password) {
-        progressDialogUtil.startDialog("logging you in...");
+        int selectedLoginTypeId=radioLoginAs.getCheckedRadioButtonId();
+        RadioButton selectedLoginMode=(RadioButton)findViewById(selectedLoginTypeId);
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
 
@@ -105,53 +136,103 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
         db.setFirestoreSettings(settings);
 
-        RewardPojo rewardPojo = new RewardPojo();
-        rewardPojo.email="GiftinAppBonus";
-        rewardPojo.gift_coin=1000L;
+        Boolean selectedCustomer = selectedLoginMode.getText().toString().equals("login as customer".trim());
+        Boolean selectedBusiness = selectedLoginMode.getText().toString().equals("login as business".trim());
 
-        mAuth.signInWithEmailAndPassword(username, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        //check firestore to see if this email was added as a verified merchant then do session update and take user to merchant act
-                        //else take user to main act as customer
-                        db.collection("users").document(username).get()
-                                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<DocumentSnapshot> task2) {
-                                        if (task2.isSuccessful()) {
-                                            DocumentSnapshot documentSnapshot = task2.getResult();
-                                            if (documentSnapshot.exists()) {
-                                                String referrer=(String) documentSnapshot.get("referrer");
-                                                db.collection("merchants").document(username).get()
-                                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task3) {
-                                                                if(task3.isSuccessful()){
-                                                                    DocumentSnapshot doc=task3.getResult();
-                                                                    if(doc.exists()){
-                                                                        sessionManager.saveEmailAndUserMode(username, "business",referrer);
-                                                                        Intent intent = new Intent(getApplicationContext(), MerchantActivity.class);
-                                                                        startActivity(intent);
-                                                                    }
-                                                                    else {
-                                                                        sessionManager.saveEmailAndUserMode(username, "customer",referrer);
-                                                                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                                                        startActivity(intent);
-                                                                    }
-                                                                }
+        if(selectedCustomer){
+            progressDialogUtil.startDialog("logging you in...");
+            mAuth.signInWithEmailAndPassword(username,password)
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()){
+                                db.collection("users").document(username).get()
+                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                if(task.isSuccessful()){
+                                                    if(FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()){
+                                                        DocumentSnapshot documentSnapshot = task.getResult();
+                                                        if(documentSnapshot.exists()){
+                                                            if(documentSnapshot.getId().equals("giftinappinc@gmail.com".trim())){
+                                                                progressDialogUtil.stopDialog();
+                                                                sessionManager.saveEmailAndUserMode(username, "giftinauthority");
+                                                                Intent intent = new Intent(getApplicationContext(), GiftinAppAuthorityActivity.class);
+                                                                startActivity(intent);
                                                             }
-                                                        });
-                                                    //check maybe there is a referrer then reward that referrer
-                                                    //it exists but not an agent, update session
+                                                            else {
+                                                                progressDialogUtil.stopDialog();
+                                                                sessionManager.saveEmailAndUserMode(username, "customer");
+                                                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                                                startActivity(intent);
+                                                            }
+                                                        }
+                                                        else{
+                                                            Toast.makeText(getApplicationContext(),"This account might not exist as a customer",Toast.LENGTH_LONG).show();
+                                                            progressDialogUtil.stopDialog();
+                                                        }
+                                                    }
+                                                    else{
+                                                        Toast.makeText(getApplicationContext(),"You should verify your email address before login",Toast.LENGTH_LONG).show();
+                                                        btnSendVerificationEmail.setVisibility(View.VISIBLE);
+                                                        progressDialogUtil.stopDialog();
+                                                    }
+                                                }
+
                                             }
-                                        }
-                                    }
-                                });
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Could not sign you in, please make sure you have signed up", Toast.LENGTH_LONG).show();
-                        progressDialogUtil.stopDialog();
-                    }
-                });
+                                        });
+                            }
+                            else{
+                                Toast.makeText(getApplicationContext(),"Could not log in, email or password might not exist",Toast.LENGTH_LONG).show();
+                                progressDialogUtil.stopDialog();
+                            }
+                        }
+                    });
+
+        }
+        if(selectedBusiness){
+
+            progressDialogUtil.startDialog("logging you in...");
+            mAuth.signInWithEmailAndPassword(username,password)
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()){
+                                db.collection("merchants").document(username).get()
+                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                if(task.isSuccessful()){
+                                                    if(FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()){
+                                                        DocumentSnapshot documentSnapshot = task.getResult();
+                                                        if(documentSnapshot.exists()){
+                                                            progressDialogUtil.stopDialog();
+                                                            sessionManager.saveEmailAndUserMode(username, "business");
+                                                            Intent intent = new Intent(getApplicationContext(), MerchantActivity.class);
+                                                            startActivity(intent);
+                                                        }
+                                                        else{
+                                                            Toast.makeText(getApplicationContext(),"This account might not exist as a business",Toast.LENGTH_LONG).show();
+                                                            progressDialogUtil.stopDialog();
+                                                        }
+                                                    }
+                                                    else{
+                                                        Toast.makeText(getApplicationContext(),"You should verify your email address before login",Toast.LENGTH_LONG).show();
+                                                        btnSendVerificationEmail.setVisibility(View.VISIBLE);
+                                                        progressDialogUtil.stopDialog();
+                                                    }
+                                                }
+
+                                            }
+                                        });
+                            }
+                            else{
+                                Toast.makeText(getApplicationContext(),"Could not log in, email or password might not exist",Toast.LENGTH_LONG).show();
+                                progressDialogUtil.stopDialog();
+                            }
+                        }
+                    });
+        }
     }
 
     @Override

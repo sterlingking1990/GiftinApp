@@ -9,6 +9,7 @@ public class UserPojo {
     public String login_mode;
     public String interest;
     public String referrer;
+    public String verification_status;
 
     public UserPojo(){}
 }

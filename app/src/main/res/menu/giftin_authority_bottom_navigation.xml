@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_verify_business"
+        android:icon="@drawable/ic_gift_customer_fan"
+        android:title="Verify Business"/>
+    <item
+        android:id="@+id/navigation_redeem_gift"
+        android:icon="@drawable/ic_wallet_info"
+        android:title="Redeem Gifts"/>
+    <item
+        android:id="@+id/navigation_gifted_customers"
+        android:icon="@drawable/ic_merchant_gift_stats"
+        android:title="Gifted Customers"/>
+
+</menu>

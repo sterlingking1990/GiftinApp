@@ -58,11 +58,10 @@ class SessionManager(context: Context) {
     }
 
 
-    fun saveEmailAndUserMode(email:String,userMode:String,referrer:String){
+    fun saveEmailAndUserMode(email:String,userMode:String){
         val editor =prefs.edit()
         editor.putString(EMAIL,email)
         editor.putString(USERMODE,userMode)
-        editor.putString(REFERRER,referrer)
         editor.apply()
     }
 
