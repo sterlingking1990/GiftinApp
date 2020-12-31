@@ -73,14 +73,14 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/tv_address"
+                android:id="@+id/tv_delivery_info_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Address"
                 android:textSize="20sp" />
 
             <EditText
-                android:id="@+id/et_address"
+                android:id="@+id/et_delivery_info_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

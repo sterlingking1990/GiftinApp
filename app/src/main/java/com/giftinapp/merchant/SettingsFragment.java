@@ -44,7 +44,7 @@ public class SettingsFragment extends Fragment {
 
         etPhoneNumber1=view.findViewById(R.id.et_phone_number_1);
         etPhoneNumber2=view.findViewById(R.id.et_phone_number_2);
-        etAddress=view.findViewById(R.id.et_address);
+        etAddress=view.findViewById(R.id.et_delivery_info_address);
         btnUpdateInfo=view.findViewById(R.id.btn_update_info);
 
 
