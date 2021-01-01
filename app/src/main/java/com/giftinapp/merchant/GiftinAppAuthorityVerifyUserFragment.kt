@@ -63,11 +63,11 @@ class GiftinAppAuthorityVerifyUserFragment : Fragment(), GiftinAppAuthorityVerif
                         var listOfUsers=ArrayList<DataForVerificationPojo>()
                         for (users in it.result!!){
 
-                            val email = if (users.get("email").toString().isEmpty()) "no email" else users.get("email").toString()
-                            var interest=if (users.get("interest").toString().isEmpty()) "no login mode" else users.get("interest").toString()
-                            var phone_num_1=if (users.get("phone_number_1").toString().isEmpty()) "no number 1" else users.get("phone_number_1").toString()
-                            var phone_num_2 = if (users.get("phone_number_2").toString().isEmpty()) "no number 2" else users.get("phone_number_2").toString()
-                            var address=if (users.get("address").toString().isEmpty()) "no address" else users.get("address").toString()
+                            val email = users.get("email").toString()
+                            var interest=users.get("interest").toString()
+                            var phone_num_1=users.get("phone_number_1").toString()
+                            var phone_num_2 =users.get("phone_number_2").toString()
+                            var address=users.get("address").toString()
                             var verification_status=users.get("verification_status").toString()
 
                             listOfUsers.add(DataForVerificationPojo(email, interest, phone_num_1, phone_num_2, address,verification_status))
@@ -76,6 +76,9 @@ class GiftinAppAuthorityVerifyUserFragment : Fragment(), GiftinAppAuthorityVerif
                         giftinAppAuthorityVerifyUserAdapter.populateRegisteredUserList(listOfUsers)
                         recyclerView.adapter=giftinAppAuthorityVerifyUserAdapter
                         giftinAppAuthorityVerifyUserAdapter.notifyDataSetChanged()
+                    }
+                    else{
+                        Toast.makeText(requireContext(),"no user registered for verification",Toast.LENGTH_LONG).show()
                     }
                 }
     }

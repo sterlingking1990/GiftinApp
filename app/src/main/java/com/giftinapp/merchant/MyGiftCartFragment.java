@@ -32,6 +32,7 @@ import com.squareup.picasso.Picasso;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.MyGiftCartItemClickable {
     private MyGiftCartAdapter myGiftCartAdapter;
@@ -128,6 +129,12 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                                 int giftTrack = (int) track;
 
                                                 list.gift_track=giftTrack;
+                                                if (track==100) {
+                                                    list.redeemable=true;
+                                                }
+                                                else{
+                                                    list.redeemable=false;
+                                                }
                                                 listTop.add(list);
 
                                             }
@@ -194,4 +201,74 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
         AlertDialog alert = builder.create();
         alert.show();
     }
+
+    @Override
+    public void sendGiftToRedeem(@NotNull MyCartPojo giftToRedeem) {
+        //send the gift to giftin company for redeeming
+
+        String emailOfGiftOwner = sessionManager.getEmail();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        //check if this user already added this gift to redeemable
+        db.collection("redeemable_gifts").document(emailOfGiftOwner).collection("gift_lists").document(giftToRedeem.gift_name).get()
+                .addOnCompleteListener(task -> {
+                    if(task.isSuccessful()) {
+                        DocumentSnapshot documentSnapshot = task.getResult();
+                        if (documentSnapshot.exists()) {
+                            Toast.makeText(requireContext(), "your gift have already been accepted for redeeming, please be patient as we are preparing your treat. Thank you", Toast.LENGTH_LONG).show();
+                        } else {
+                            //check if the user has his info updated
+                            db.collection("users").document(emailOfGiftOwner).get()
+                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                            if(task.isSuccessful()){
+                                                DocumentSnapshot userInfo = task.getResult();
+                                                if(userInfo.exists()){
+                                                    if(userInfo.get("phone_number_1")=="" && userInfo.get("phone_number_2")=="" && userInfo.get("address")==""){
+                                                        builder.setMessage("Please update your info before redeeming your gifts")
+                                                                .setCancelable(false)
+                                                                .setPositiveButton("Ok", (dialog, id) -> {
+                                                                    //take user to place to update info
+                                                                    openFragment(new SettingsFragment());
+                                                                });
+                                                        AlertDialog alert = builder.create();
+                                                        alert.show();
+
+                                                    }
+                                                    else{
+                                                        //means this user has his details updated...now send this to redeemable gifts
+                                                        db.collection("redeemable_gifts").document(emailOfGiftOwner).collection("gift_lists").document(giftToRedeem.gift_name).set(giftToRedeem)
+                                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                        if(task.isSuccessful()){
+                                                                            builder.setMessage("Congratulations, your gift to be redeemed has been received and you will receive your special treat within 3 days from now")
+                                                                                    .setCancelable(false)
+                                                                                    .setPositiveButton("Ok", (dialog, id) -> {
+                                                                                    });
+                                                                            AlertDialog alert = builder.create();
+                                                                            alert.show();
+
+                                                                        }
+                                                                    }
+                                                                });
+
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+                        }
+                    }
+                });
+    }
+
 }

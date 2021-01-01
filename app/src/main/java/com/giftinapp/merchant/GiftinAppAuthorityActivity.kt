@@ -11,7 +11,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -20,7 +19,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.synnapps.carouselview.CarouselView
 import com.synnapps.carouselview.ViewListener
-import kotlin.properties.Delegates
 import kotlin.system.exitProcess
 
 class GiftinAppAuthorityActivity : AppCompatActivity() {
@@ -186,21 +184,22 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
     var navigationItem = BottomNavigationView.OnNavigationItemSelectedListener { item: MenuItem ->
         when (item.itemId) {
             R.id.navigation_verify_business -> {
-                carouselViewGiftinAuthority?.visibility=View.GONE
-                var verifyBusiness:Fragment = GiftinAppAuthorityVerifyUserFragment()
+                carouselViewGiftinAuthority?.visibility = View.GONE
+                var verifyBusiness: Fragment = GiftinAppAuthorityVerifyUserFragment()
                 openFragment(verifyBusiness)
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_redeem_gift -> {
-                carouselViewGiftinAuthority?.visibility=View.GONE
-                val giftinAppAuthorityRedeemGiftFragment:Fragment = GiftinAppAuthorityRedeemGiftFragment()
+                carouselViewGiftinAuthority?.visibility = View.GONE
+                val giftinAppAuthorityRedeemGiftFragment: Fragment = GiftinAppAuthorityRedeemGiftFragment()
                 openFragment(giftinAppAuthorityRedeemGiftFragment)
                 return@OnNavigationItemSelectedListener true
             }
+
             R.id.navigation_gifted_customers -> {
-                carouselViewGiftinAuthority?.visibility=View.GONE
-                val merchantGiftStatsFragment:Fragment = MerchantGiftStatsFragment()
-                openFragment(merchantGiftStatsFragment)
+                carouselViewGiftinAuthority?.visibility = View.GONE
+                val giftinAppAuthorityRedeemedCustomersFragment: Fragment = GiftinAppAuthorityRedeemedCustomersFragment()
+                openFragment(giftinAppAuthorityRedeemedCustomersFragment)
                 return@OnNavigationItemSelectedListener true
             }
         }
@@ -224,6 +223,13 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
             R.id.giftin_authority_refresh -> {
                 val intent = Intent(this, GiftinAppAuthorityActivity::class.java)
                 startActivity(intent)
+                return true
+            }
+
+            R.id.giftin_authority_customers_to_redeem -> {
+                carouselViewGiftinAuthority?.visibility = View.GONE
+                val giftinAppAuthorityRedeemableCustomers = GiftinAppAuthorityRedeemableCustomers()
+                openFragment(giftinAppAuthorityRedeemableCustomers)
                 return true
             }
 

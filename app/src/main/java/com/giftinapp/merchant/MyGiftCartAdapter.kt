@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.squareup.picasso.Picasso
 import java.util.ArrayList
 
@@ -32,14 +33,23 @@ class MyGiftCartAdapter(var giftCartItemClickable:MyGiftCartItemClickable):Recyc
             var tvMyGiftCartGiftName= findViewById<TextView>(R.id.tv_mygift_singleitem_caption)
             var tvMyGiftCartGiftTrack=findViewById<TextView>(R.id.tv_mygift_singleitem_progressBar_Text)
             var pgMyGiftCartGiftTrack=findViewById<ProgressBar>(R.id.pg_mygift_singleitem_progressBar)
+            var fbRedeemMyGift = findViewById<FloatingActionButton>(R.id.fbRedeemMyGift)
 
             tvMyGiftCartGiftName.text=listOfMyGift[position].gift_name
             tvMyGiftCartGiftTrack.text= listOfMyGift[position].gift_track.toString() + " %"
             pgMyGiftCartGiftTrack.progress=listOfMyGift[position].gift_track
-
+            if(listOfMyGift[position].redeemable){
+                fbRedeemMyGift.visibility=View.VISIBLE
+                fbRedeemMyGift.setOnClickListener {
+                    giftCartItemClickable.sendGiftToRedeem(listOfMyGift[position])
+                }
+            }else{
+                fbRedeemMyGift.visibility=View.GONE
+            }
             //Loading image using Picasso
             Picasso.get().load(listOfMyGift[position].gift_url).into(ivMyGiftCartGiftImage);
         }
+
 
         holder.itemView.setOnClickListener {
             var item= listOfMyGift[position]
@@ -54,5 +64,9 @@ class MyGiftCartAdapter(var giftCartItemClickable:MyGiftCartItemClickable):Recyc
 
     interface MyGiftCartItemClickable{
         fun onGiftClick(itemId: MyCartPojo)
+
+        fun sendGiftToRedeem(giftToRedeem:MyCartPojo)
     }
+
+
 }

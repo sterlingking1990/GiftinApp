@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -21,6 +22,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
+import java.util.Map;
+
 public class SettingsFragment extends Fragment {
 
     public EditText etPhoneNumber1;
@@ -30,6 +33,8 @@ public class SettingsFragment extends Fragment {
     public Button btnUpdateInfo;
 
     public SessionManager sessionManager;
+
+    public AlertDialog.Builder builder;
 
 
     @Override
@@ -70,25 +75,39 @@ public class SettingsFragment extends Fragment {
 
         String email=sessionManager.getEmail();
 
-        String num1Input=num1.isEmpty()?"empty phone number":num1;
-        String num2Input = num2.isEmpty()?"empty phone number":num2;
-        String addressInput=addr.isEmpty()?"empty address":addr;
-        DeliveryInfoPojo deliveryInfoPojo=new DeliveryInfoPojo();
-        deliveryInfoPojo.phone_number_1=num1Input;
-        deliveryInfoPojo.phone_number_2=num2Input;
-        deliveryInfoPojo.address=addressInput;
+        String num1Input=num1.isEmpty()?"":num1;
+        String num2Input = num2.isEmpty()?"":num2;
+        String addressInput=addr.isEmpty()?"":addr;
+        if(validateDetails(num1Input,num2Input,addressInput)){
+            DeliveryInfoPojo deliveryInfoPojo=new DeliveryInfoPojo();
+            deliveryInfoPojo.phone_number_1=num1Input;
+            deliveryInfoPojo.phone_number_2=num2Input;
+            deliveryInfoPojo.address=addressInput;
 
-        db.collection("users").document(email).update(deliveryInfoPojo.phone_number_1,deliveryInfoPojo.phone_number_2,deliveryInfoPojo.address)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isSuccessful()){
-                            Toast.makeText(requireContext(),"details updated successfully",Toast.LENGTH_LONG).show();
+            db.collection("users").document(email).update("phone_number_1",num1Input,"phone_number_2",num2Input,"address",addressInput)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                Toast.makeText(requireContext(),"details updated successfully",Toast.LENGTH_LONG).show();
+                            }
                         }
-                    }
-                });
+                    });
+            fetchInfoOnStart();
+        }
+        else{
+            builder.setMessage("one or more info provided is invalid, leave blank for detail you wish not to provide")
+                    .setCancelable(false)
+                    .setPositiveButton("OK", (dialog, id) -> {
+                        //take user to rewarding merchants
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+    }
 
-        fetchInfoOnStart();
+    private boolean validateDetails(String num1Input, String num2Input, String addressInput) {
+        return true;
     }
 
     public void fetchInfoOnStart(){
@@ -106,18 +125,14 @@ public class SettingsFragment extends Fragment {
                    if(task.isSuccessful()){
                        DocumentSnapshot documentSnapshot =task.getResult();
                        if(documentSnapshot.exists()) {
-                           if(documentSnapshot.get("phone_number_1")!=null && documentSnapshot.get("phone_number_2")!=null
-                           && documentSnapshot.get("address")!=null) {
-                               etPhoneNumber1.setText(documentSnapshot.get("phone_number_1").toString());
-                               etPhoneNumber2.setText(documentSnapshot.get("phone_number_2").toString());
-                               etAddress.setText(documentSnapshot.get("address").toString());
+                               String  contact_1=documentSnapshot.get("phone_number_1")==""?"no number 1":documentSnapshot.get("phone_number_1").toString();
+                               String contact_2=documentSnapshot.get("phone_number_2")==""?"no number 2":documentSnapshot.get("phone_number_2").toString();
+                               String address=documentSnapshot.get("address").toString()==""?"no address":documentSnapshot.get("address").toString();
+
+                               etPhoneNumber1.setText(contact_1);
+                               etPhoneNumber2.setText(contact_2);
+                               etAddress.setText(address);
                            }
-                           else {
-                               etPhoneNumber1.setText("");
-                               etPhoneNumber2.setText("");
-                               etAddress.setText("");
-                           }
-                       }
                    }
                 });
     }

@@ -7,6 +7,17 @@
         android:icon="@drawable/ic_refresh"
         app:showAsAction="always"/>
 
+    <item android:id="@+id/giftin_authority_add_gifts"
+        android:title="Add Gifts"
+        android:icon="@drawable/ic_refresh"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/giftin_authority_customers_to_redeem"
+        android:title="Customers Redeemable"
+        android:icon="@drawable/ic_refresh"
+        app:showAsAction="never"/>
+
+
     <item android:id="@+id/giftin_authority_exit"
         android:title="Exit"
         app:showAsAction="never"/>

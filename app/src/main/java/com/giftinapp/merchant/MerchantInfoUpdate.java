@@ -19,6 +19,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
+import java.util.Map;
+
 public class MerchantInfoUpdate extends Fragment {
 
 
@@ -86,9 +88,8 @@ public class MerchantInfoUpdate extends Fragment {
         merchantInfoUpdatePojo.merchant_biz_name=bizNameInput;
         merchantInfoUpdatePojo.merchant_biz_description=bizDescInput;
 
-        db.collection("merchants").document(email).update(
-                merchantInfoUpdatePojo.merchant_phone_number_1,merchantInfoUpdatePojo.merchant_phone_number_2,merchantInfoUpdatePojo.merchant_address,
-                merchantInfoUpdatePojo.merchant_biz_name,merchantInfoUpdatePojo.merchant_biz_description)
+        db.collection("merchants").document(email).update("merchant_phone_number_1",num1Input,"merchant_phone_number_2",num2Input,
+                "merchant_address",addressInput,"merchant_biz_name",bizNameInput,"merchant_biz_description",bizDescInput)
                 .addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
                         Toast.makeText(requireContext(),"details updated successfully",Toast.LENGTH_LONG).show();
