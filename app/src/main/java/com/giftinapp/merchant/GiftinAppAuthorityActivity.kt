@@ -226,12 +226,20 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
                 return true
             }
 
+            R.id.giftin_authority_add_gifts -> {
+                carouselViewGiftinAuthority?.visibility = View.GONE
+                val giftinAppAuthorityAddGiftsFragment = GiftinAppAuthorityAddGiftsFragment()
+                openFragment(giftinAppAuthorityAddGiftsFragment)
+                return true
+            }
+
             R.id.giftin_authority_customers_to_redeem -> {
                 carouselViewGiftinAuthority?.visibility = View.GONE
                 val giftinAppAuthorityRedeemableCustomers = GiftinAppAuthorityRedeemableCustomers()
                 openFragment(giftinAppAuthorityRedeemableCustomers)
                 return true
             }
+
 
             R.id.giftin_authority_exit -> {
                 val vibrator = this.getSystemService(VIBRATOR_SERVICE) as Vibrator
@@ -244,7 +252,6 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
                 builder.setNegativeButton("Cancel"
                 ) { _, _ -> }
                 builder.setNeutralButton("Ok") { dialog, _ ->
-                    sessionManager.saveEmailAndUserMode("", "")
                     mAuth.signOut()
                     dialog.cancel()
                     this.finish()

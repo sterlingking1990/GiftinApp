@@ -124,6 +124,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                                 MyCartPojo list = new MyCartPojo();
                                                 list.gift_url = listings.gift_url;
                                                 list.gift_name = listings.gift_name;
+                                                list.gift_cost=listings.gift_cost;
 
                                                 double track= listings.gift_cost < totalRewardAmount ? 100 : ((totalRewardAmount * 0.1)/(listings.gift_cost*0.1)) * 100;
                                                 int giftTrack = (int) track;
@@ -226,42 +227,37 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                         } else {
                             //check if the user has his info updated
                             db.collection("users").document(emailOfGiftOwner).get()
-                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                            if(task.isSuccessful()){
-                                                DocumentSnapshot userInfo = task.getResult();
-                                                if(userInfo.exists()){
-                                                    if(userInfo.get("phone_number_1")=="" && userInfo.get("phone_number_2")=="" && userInfo.get("address")==""){
-                                                        builder.setMessage("Please update your info before redeeming your gifts")
-                                                                .setCancelable(false)
-                                                                .setPositiveButton("Ok", (dialog, id) -> {
-                                                                    //take user to place to update info
-                                                                    openFragment(new SettingsFragment());
-                                                                });
-                                                        AlertDialog alert = builder.create();
-                                                        alert.show();
+                                    .addOnCompleteListener(task12 -> {
+                                        if(task12.isSuccessful()){
+                                            DocumentSnapshot userInfo = task12.getResult();
+                                            if(userInfo.exists()){
+                                                if(userInfo.get("phone_number_1")=="" && userInfo.get("phone_number_2")=="" && userInfo.get("address")==""){
+                                                    builder.setMessage("Please update your info before redeeming your gifts")
+                                                            .setCancelable(false)
+                                                            .setPositiveButton("Ok", (dialog, id) -> {
+                                                                //take user to place to update info
+                                                                openFragment(new SettingsFragment());
+                                                            });
+                                                    AlertDialog alert = builder.create();
+                                                    alert.show();
 
-                                                    }
-                                                    else{
-                                                        //means this user has his details updated...now send this to redeemable gifts
-                                                        db.collection("redeemable_gifts").document(emailOfGiftOwner).collection("gift_lists").document(giftToRedeem.gift_name).set(giftToRedeem)
-                                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                        if(task.isSuccessful()){
-                                                                            builder.setMessage("Congratulations, your gift to be redeemed has been received and you will receive your special treat within 3 days from now")
-                                                                                    .setCancelable(false)
-                                                                                    .setPositiveButton("Ok", (dialog, id) -> {
-                                                                                    });
-                                                                            AlertDialog alert = builder.create();
-                                                                            alert.show();
+                                                }
 
-                                                                        }
-                                                                    }
-                                                                });
+                                                else{
+                                                    SendGiftPojo sendGiftPojo = new SendGiftPojo("empty stirng");
+                                                    //means this user has his details updated...now send this to redeemable gifts
+                                                    db.collection("redeemable_gifts").document(emailOfGiftOwner).set(sendGiftPojo)
+                                                            .addOnCompleteListener(task1 -> {
+                                                                if(task1.isSuccessful()){
+                                                                    db.collection("redeemable_gifts").document(emailOfGiftOwner).collection("gift_lists").document(giftToRedeem.gift_name).set(giftToRedeem)
+                                                                            .addOnCompleteListener(task2 -> {
+                                                                                if(task2.isSuccessful()){
+                                                                                    Toast.makeText(requireContext(),"gift sent for redeeming",Toast.LENGTH_SHORT).show();
+                                                                                }
+                                                                            });
 
-                                                    }
+                                                                }
+                                                            });
                                                 }
                                             }
                                         }

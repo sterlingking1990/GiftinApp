@@ -60,8 +60,7 @@ public class MerchantActivity extends AppCompatActivity {
         sessionManager = new SessionManager(getApplicationContext());
 
         bottomNavigation = findViewById(R.id.bottom_navigation_merchant);
-
-//        bottomNavigation.setOnNavigationItemSelectedListener(navigationItem);
+        bottomNavigation.setOnNavigationItemSelectedListener(navigationItem);
 //        openFragment(new GiftACustomerFragment());
 
         carouselViewMerchant = findViewById(R.id.carouselView);
@@ -256,15 +255,18 @@ public class MerchantActivity extends AppCompatActivity {
                 item -> {
                     switch (item.getItemId()) {
                         case R.id.navigation_gift_customer_fan:
+                            carouselViewMerchant.setVisibility(View.GONE);
                             GiftACustomerFragment giftACustomer = new GiftACustomerFragment();
                             openFragment(giftACustomer);
                             return true;
                         case R.id.navigation_wallet_info:
+                            carouselViewMerchant.setVisibility(View.GONE);
                             WalletInfo walletInfo = new WalletInfo();
                             openFragment(walletInfo);
                             return true;
 
                         case R.id.navigation_merchant_gift_stats:
+                            carouselViewMerchant.setVisibility(View.GONE);
                             MerchantGiftStatsFragment merchantGiftStatsFragment = new MerchantGiftStatsFragment();
                             openFragment(merchantGiftStatsFragment);
                             return true;
@@ -326,7 +328,6 @@ public class MerchantActivity extends AppCompatActivity {
                 builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        sessionManager.saveEmailAndUserMode("","");
                         mAuth.signOut();
                         dialog.cancel();
                         MerchantActivity.this.finish();

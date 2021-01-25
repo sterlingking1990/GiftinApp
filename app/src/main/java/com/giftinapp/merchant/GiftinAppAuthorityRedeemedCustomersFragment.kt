@@ -26,7 +26,7 @@ class GiftinAppAuthorityRedeemedCustomersFragment : Fragment() {
 
     var contactView1="no contact 1"
     var contactView2="no contact 2"
-    var addressView="no address"
+    var addressView:String?="no address"
 
 
 
@@ -81,7 +81,7 @@ class GiftinAppAuthorityRedeemedCustomersFragment : Fragment() {
                         redeemedCustomerAdapter.notifyDataSetChanged()
                     }
                     else{
-                        Toast.makeText(requireContext(),"No customer have redeemed her gifts yet",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(),"You have not redeemed any customer gifts yet",Toast.LENGTH_SHORT).show()
                     }
                 }
     }
@@ -107,7 +107,7 @@ class GiftinAppAuthorityRedeemedCustomersFragment : Fragment() {
                         if (documentSnapshot?.exists()!!) {
                             contactView1 = if (documentSnapshot.get("phone_number_1") == null) "no contact 1" else documentSnapshot.get("phone_number_1") as String
                             contactView2 = if (documentSnapshot.get("phone_number_2") == null) "no contact 2" else documentSnapshot.get("phone_number_2") as String
-                            addressView = if (documentSnapshot.get("address") == null) "no address" else documentSnapshot.get("no address") as String
+                            addressView = if (documentSnapshot.get("address") == null) "no address" else documentSnapshot.get("no address") as String?
                         }
                     }
                 }

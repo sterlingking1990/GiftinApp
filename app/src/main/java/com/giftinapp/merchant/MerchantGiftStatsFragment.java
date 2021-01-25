@@ -62,53 +62,48 @@ public class MerchantGiftStatsFragment extends Fragment {
                 .setPersistenceEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
-        db.collection("merchants").document(sessionManager.getEmail()).collection("reward_statistics").document("customers").get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if(task.isSuccessful()){
-                            DocumentSnapshot result = task.getResult();
-                            if(result.exists()){
+        db.collection("merchants").document(sessionManager.getEmail()).collection("reward_statistics").document("customers").collection("customer_details").get()
+                .addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        //now we would get the document id and then the data for the document
+                        ArrayList<MerchantGiftStatsIdPojo> merchantGiftStatsIdPojos = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task1.getResult()) {
+                            //get the data for the document id, map to class then reset it on the class gift history id pojo to
+                            //include the document id and the data
+                            GiftHistoryPojo giftHistoryPojo = document.toObject(GiftHistoryPojo.class);
 
-                                db.collection("merchants").document(sessionManager.getEmail()).collection("reward_statistics").document("customers").collection("customer_details")
-                                        .get()
-                                        .addOnCompleteListener(task1 -> {
-                                            if(task1.isSuccessful()){
-                                                //now we would get the document id and then the data for the document
-                                                ArrayList<MerchantGiftStatsIdPojo> merchantGiftStatsIdPojos = new ArrayList<>();
-                                                for (QueryDocumentSnapshot document : task1.getResult()) {
-                                                        //get the data for the document id, map to class then reset it on the class gift history id pojo to
-                                                        //include the document id and the data
-                                                        GiftHistoryPojo giftHistoryPojo = document.toObject(GiftHistoryPojo.class);
+                            MerchantGiftStatsIdPojo merchantGiftStatsIdPojo = new MerchantGiftStatsIdPojo();
 
-                                                        MerchantGiftStatsIdPojo merchantGiftStatsIdPojo = new MerchantGiftStatsIdPojo();
+                            merchantGiftStatsIdPojo.customerId = document.getId();
+                            merchantGiftStatsIdPojo.giftHistoryPojo = giftHistoryPojo;
 
-                                                        merchantGiftStatsIdPojo.customerId = document.getId();
-                                                        merchantGiftStatsIdPojo.giftHistoryPojo = giftHistoryPojo;
+                            merchantGiftStatsIdPojos.add(merchantGiftStatsIdPojo);
 
-                                                        merchantGiftStatsIdPojos.add(merchantGiftStatsIdPojo);
+                            rvMerchantGiftStats = view.findViewById(R.id.rv_merchant_gift_stats);
 
-                                                        rvMerchantGiftStats = view.findViewById(R.id.rv_merchant_gift_stats);
-
-                                                        merchantGiftStatsAdapter.setMerchantGiftStats(merchantGiftStatsIdPojos);
-                                                        rvMerchantGiftStats.setLayoutManager(layoutManager);
-                                                        rvMerchantGiftStats.setAdapter(merchantGiftStatsAdapter);
-                                                }
-                                            }
-                                        });
-                            }
-                            else{
-
-                                builder.setMessage("You have no gifting history yet, gift a customer today!")
-                                        .setCancelable(false)
-                                        .setPositiveButton("OK", (dialog, id) -> {
-                                            //take user to fund wallet fragment
-                                            openFragment(new GiftACustomerFragment());
-                                        });
-                                AlertDialog alert = builder.create();
-                                alert.show();
-                            }
+                            merchantGiftStatsAdapter.setMerchantGiftStats(merchantGiftStatsIdPojos);
+                            rvMerchantGiftStats.setLayoutManager(layoutManager);
+                            rvMerchantGiftStats.setAdapter(merchantGiftStatsAdapter);
                         }
+                        if (merchantGiftStatsIdPojos.size() == 0) {
+                            builder.setMessage("You have no gifting history yet, gift a customer today!")
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK", (dialog, id) -> {
+                                        //take user to fund wallet fragment
+                                        openFragment(new GiftACustomerFragment());
+                                    });
+                            AlertDialog alert = builder.create();
+                            alert.show();
+                        }
+                    }
+                    else{
+                        builder.setMessage("There are no history of give aways yet, please try gifting a customer today")
+                                .setCancelable(false)
+                                .setPositiveButton("OK", (dialog, id) -> {
+                                    openFragment(new GiftACustomerFragment());
+                                });
+                        AlertDialog alert = builder.create();
+                        alert.show();
                     }
                 });
     }

@@ -14,6 +14,7 @@ class SessionManager(context: Context) {
         const val EMAIL="email"
         const val USERMODE="user_mode"
         const val REFERRER="referrer"
+        const val TOTAL_CUSTOMER_GIFTED="total_customer_gifted"
     }
 
     /**
@@ -71,6 +72,16 @@ class SessionManager(context: Context) {
 
     fun getReferrer():String?{
         return prefs.getString(REFERRER,null)
+    }
+
+    fun saveTotalCustomerGifted(totalCustomer:Int){
+        val editor =prefs.edit()
+        editor.putInt(TOTAL_CUSTOMER_GIFTED,totalCustomer)
+        editor.apply()
+    }
+
+    fun getTotalCustomerGifted():Int{
+        return prefs.getInt(TOTAL_CUSTOMER_GIFTED,0)
     }
 
 }

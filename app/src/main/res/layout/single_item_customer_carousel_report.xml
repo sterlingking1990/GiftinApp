@@ -27,6 +27,7 @@
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:layout_weight="1"
+                        android:backgroundTintMode="add"
                         android:src="@drawable/ic_gifts" />
 
                     <TextView

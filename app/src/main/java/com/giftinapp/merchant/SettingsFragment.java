@@ -23,12 +23,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class SettingsFragment extends Fragment {
 
-    public EditText etPhoneNumber1;
-    public EditText etPhoneNumber2;
-    public EditText etAddress;
+    public EditText etFacebook;
+    public EditText etInstagram;
+    public EditText etWhatsApp;
 
     public Button btnUpdateInfo;
 
@@ -47,9 +48,10 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        etPhoneNumber1=view.findViewById(R.id.et_phone_number_1);
-        etPhoneNumber2=view.findViewById(R.id.et_phone_number_2);
-        etAddress=view.findViewById(R.id.et_delivery_info_address);
+        etFacebook=view.findViewById(R.id.et_facebook);
+        etInstagram=view.findViewById(R.id.et_instagram);
+        etWhatsApp=view.findViewById(R.id.et_whatsapp);
+
         btnUpdateInfo=view.findViewById(R.id.btn_update_info);
 
 
@@ -57,12 +59,12 @@ public class SettingsFragment extends Fragment {
 
         fetchInfoOnStart();
         btnUpdateInfo.setOnClickListener(v->{
-            updateUserInfo(etPhoneNumber1.getText().toString(),etPhoneNumber2.getText().toString(),etAddress.getText().toString());
+            updateUserInfo(etFacebook.getText().toString(),etInstagram.getText().toString(),etWhatsApp.getText().toString());
         });
 
     }
 
-    private void updateUserInfo(String num1,String num2,String addr) {
+    private void updateUserInfo(String facebook,String instagram,String whatsapp) {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
@@ -75,16 +77,16 @@ public class SettingsFragment extends Fragment {
 
         String email=sessionManager.getEmail();
 
-        String num1Input=num1.isEmpty()?"":num1;
-        String num2Input = num2.isEmpty()?"":num2;
-        String addressInput=addr.isEmpty()?"":addr;
-        if(validateDetails(num1Input,num2Input,addressInput)){
+        String facebookInput=facebook.isEmpty()?"":facebook;
+        String instagramInput = instagram.isEmpty()?"":instagram;
+        String whatsAppInput=whatsapp.isEmpty()?"":whatsapp;
+        if(validateDetails(facebookInput,instagramInput,whatsAppInput)){
             DeliveryInfoPojo deliveryInfoPojo=new DeliveryInfoPojo();
-            deliveryInfoPojo.phone_number_1=num1Input;
-            deliveryInfoPojo.phone_number_2=num2Input;
-            deliveryInfoPojo.address=addressInput;
+            deliveryInfoPojo.facebook=facebookInput;
+            deliveryInfoPojo.instagram=instagramInput;
+            deliveryInfoPojo.whatsapp=whatsAppInput;
 
-            db.collection("users").document(email).update("phone_number_1",num1Input,"phone_number_2",num2Input,"address",addressInput)
+            db.collection("users").document(email).update("facebook",facebookInput,"instagram",instagramInput,"whatsapp",whatsAppInput)
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -125,13 +127,13 @@ public class SettingsFragment extends Fragment {
                    if(task.isSuccessful()){
                        DocumentSnapshot documentSnapshot =task.getResult();
                        if(documentSnapshot.exists()) {
-                               String  contact_1=documentSnapshot.get("phone_number_1")==""?"no number 1":documentSnapshot.get("phone_number_1").toString();
-                               String contact_2=documentSnapshot.get("phone_number_2")==""?"no number 2":documentSnapshot.get("phone_number_2").toString();
-                               String address=documentSnapshot.get("address").toString()==""?"no address":documentSnapshot.get("address").toString();
+                               String  facebook=documentSnapshot.get("facebook") == "" ? "no facebook" : Objects.requireNonNull(documentSnapshot.get("facebook")).toString();
+                               String instagram=documentSnapshot.get("instagram") == "" ? "no instagram" : Objects.requireNonNull(documentSnapshot.get("instagram")).toString();
+                               String whatsapp= Objects.requireNonNull(documentSnapshot.get("whatsapp")).toString().equals("") ? "no whatsapp" : Objects.requireNonNull(documentSnapshot.get("whatsapp")).toString();
 
-                               etPhoneNumber1.setText(contact_1);
-                               etPhoneNumber2.setText(contact_2);
-                               etAddress.setText(address);
+                               etFacebook.setText(facebook);
+                               etInstagram.setText(instagram);
+                               etWhatsApp.setText(whatsapp);
                            }
                    }
                 });

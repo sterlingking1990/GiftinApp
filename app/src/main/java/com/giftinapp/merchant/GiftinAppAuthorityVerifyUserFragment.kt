@@ -123,11 +123,11 @@ class GiftinAppAuthorityVerifyUserFragment : Fragment(), GiftinAppAuthorityVerif
                         else{
                             //means the document does not exist, we should add it
                             var merchantInfoUpdatePojo=MerchantInfoUpdatePojo()
-                            merchantInfoUpdatePojo.merchant_address="your address"
-                            merchantInfoUpdatePojo.merchant_biz_description="your business description"
-                            merchantInfoUpdatePojo.merchant_biz_name="your business name"
-                            merchantInfoUpdatePojo.merchant_phone_number_1="your business number 1"
-                            merchantInfoUpdatePojo.merchant_phone_number_2="your business number 2"
+                            merchantInfoUpdatePojo.facebook="your facebook"
+                            merchantInfoUpdatePojo.instagram="your instagram"
+                            merchantInfoUpdatePojo.whatsapp="your whatsapp"
+                            merchantInfoUpdatePojo.address="your address"
+
 
 
                             db.collection("merchants").document(item.email.toString()).set(merchantInfoUpdatePojo)

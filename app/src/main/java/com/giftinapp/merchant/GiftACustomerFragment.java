@@ -89,7 +89,7 @@ public class GiftACustomerFragment extends Fragment {
         btnAddCustomerFanToList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addCustomerFanToList();
+                addCustomerFanToList(etCustomerFanEmailToReward.getText().toString(),etCustomerFanRewardCoin.getText().toString());
             }
         });
 
@@ -126,6 +126,15 @@ public class GiftACustomerFragment extends Fragment {
     }
 
     private void rewardCustomerFanList() {
+        if(list.isEmpty() || etCustomerFanEmailToReward.getText().toString().isEmpty() || etCustomerFanRewardCoin.getText().toString().isEmpty()){
+            builder.setMessage("Customer email and amount must be provided to reward")
+                    .setCancelable(false)
+                    .setPositiveButton("OK", (dialog, id) -> {
+
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
 
@@ -310,40 +319,50 @@ public class GiftACustomerFragment extends Fragment {
     }
 
 
-    private void addCustomerFanToList() {
+    private void addCustomerFanToList(String email,String amount) {
         //check if email exist
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        // [END get_firestore_instance]
+        if(email.isEmpty() || amount.isEmpty()){
+            builder.setMessage("Email of Customer and gift amount must not be empty")
+                    .setCancelable(false)
+                    .setPositiveButton("OK", (dialog, id) -> {
 
-        // [START set_firestore_settings]
-        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                .setPersistenceEnabled(true)
-                .build();
-        db.setFirestoreSettings(settings);
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+        else {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            // [END get_firestore_instance]
 
-        db.collection("users").document(etCustomerFanEmailToReward.getText().toString()).get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()){
-                            DocumentSnapshot documentSnapshot=task.getResult();
+            // [START set_firestore_settings]
+            FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                    .setPersistenceEnabled(true)
+                    .build();
+            db.setFirestoreSettings(settings);
 
-                            if(documentSnapshot.exists()){
+            db.collection("users").document(etCustomerFanEmailToReward.getText().toString()).get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot documentSnapshot = task.getResult();
 
-                                //add the customer to the list
-                                CustomerFanToGiftPojo customerFanToGiftPojo = new CustomerFanToGiftPojo();
-                                customerFanToGiftPojo.CustomerToGiftEmail = etCustomerFanEmailToReward.getText().toString();
-                                customerFanToGiftPojo.CustomerToGiftRewardCoin = Integer.parseInt(etCustomerFanRewardCoin.getText().toString());
+                                if (documentSnapshot.exists()) {
 
-                                list.add(customerFanToGiftPojo.toString());
-                                arrayAdapter.notifyDataSetChanged();
-                            }
-                            else{
-                                Toast.makeText(requireContext(),"Email does not exist, please re-verify",Toast.LENGTH_SHORT).show();
+                                    //add the customer to the list
+                                    CustomerFanToGiftPojo customerFanToGiftPojo = new CustomerFanToGiftPojo();
+                                    customerFanToGiftPojo.CustomerToGiftEmail = etCustomerFanEmailToReward.getText().toString();
+                                    customerFanToGiftPojo.CustomerToGiftRewardCoin = Integer.parseInt(etCustomerFanRewardCoin.getText().toString());
+
+                                    list.add(customerFanToGiftPojo.toString());
+                                    arrayAdapter.notifyDataSetChanged();
+                                } else {
+                                    Toast.makeText(requireContext(), "Email does not exist, please re-verify", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         }
-                    }
-                });
+                    });
+        }
 
     }
 

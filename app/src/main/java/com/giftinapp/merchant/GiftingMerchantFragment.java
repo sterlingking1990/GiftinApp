@@ -8,15 +8,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-import com.giftinapp.merchant.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -28,9 +27,12 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
+import org.jetbrains.annotations.NotNull;
 
-public class GiftingMerchantFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.Objects;
+
+public class GiftingMerchantFragment extends Fragment implements GiftingMerchantAdapter.ClickableIcon {
     private GiftingMerchantAdapter giftingMerchantAdapter;
     private RecyclerView rvGiftingMerchant;
     private RecyclerView.LayoutManager layoutManager;
@@ -41,13 +43,15 @@ public class GiftingMerchantFragment extends Fragment {
 
     public AlertDialog.Builder builder;
 
-    public Integer totalCustomerRewarded=0;
+    public String merchantGiftor ="";
+
+    private int totalCustGifted =0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        giftingMerchantAdapter=new GiftingMerchantAdapter();
+        giftingMerchantAdapter=new GiftingMerchantAdapter(this);
         layoutManager=new LinearLayoutManager(requireContext(),RecyclerView.VERTICAL,false);
         // Inflate the layout for this fragment
         giftingMerchantView = inflater.inflate(R.layout.fragment_gifting_merchant, container, false);
@@ -79,43 +83,35 @@ public class GiftingMerchantFragment extends Fragment {
 
                             ArrayList<GiftingMerchantViewPojo> giftingMerchantViewPojos = new ArrayList<>();
 
-                            for (QueryDocumentSnapshot document:task.getResult()) {
+                            GiftingMerchantViewPojo giftingMerchantViewPojo = new GiftingMerchantViewPojo();
+                            for (QueryDocumentSnapshot document: Objects.requireNonNull(task.getResult())) {
                                 GiftingMerchantPojo giftingMerchantPojo = document.toObject(GiftingMerchantPojo.class);
-
-                                GiftingMerchantViewPojo giftingMerchantViewPojo = new GiftingMerchantViewPojo();
 
                                 giftingMerchantViewPojo.giftingMerchantId = document.getId();
                                 giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo;
 
                                 //getting the total number of customers rewarded
-                                db.collection("merchants").document(document.getId()).collection("reward_statistics").get()
+                                merchantGiftor=document.getId();
+
+                                db.collection("merchants").document(merchantGiftor).collection("reward_statistics").document("customers").collection("customer_details").get()
                                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                             @Override
                                             public void onComplete(@NonNull Task<QuerySnapshot> task1) {
                                                 if (task1.isSuccessful()) {
-                                                    db.collection("merchants").document(document.getId()).collection("reward_statistics").document("customers").collection("customer_details").get()
-                                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<QuerySnapshot> task2) {
-                                                                    if (task2.isSuccessful()) {
-                                                                        for (QueryDocumentSnapshot eachCustomer : task2.getResult()) {
-                                                                            totalCustomerRewarded += 1;
-                                                                        }
-                                                                    }
-                                                                }
-                                                            });
+                                                    ArrayList<String> giftedCustomersEmail = new ArrayList<>();
+                                                    for (QueryDocumentSnapshot eachCustomer : Objects.requireNonNull(task1.getResult())) {
+                                                        RewardPojo rewardPojo = eachCustomer.toObject(RewardPojo.class);
+                                                       giftedCustomersEmail.add(rewardPojo.email);
+                                                    }
+
+                                                    sessionManager.saveTotalCustomerGifted(giftedCustomersEmail.size());
                                                 }
                                             }
                                         });
-                                giftingMerchantViewPojo.numberOfCustomerGifted=totalCustomerRewarded;
+
+                                giftingMerchantViewPojo.numberOfCustomerGifted=sessionManager.getTotalCustomerGifted();
                                 giftingMerchantViewPojos.add(giftingMerchantViewPojo);
-
-
-                                giftingMerchantAdapter.setGiftingMerchantList(giftingMerchantViewPojos);
-                                rvGiftingMerchant.setLayoutManager(layoutManager);
-                                rvGiftingMerchant.setAdapter(giftingMerchantAdapter);
                             }
-
                             if(giftingMerchantViewPojos.size()==0){
                                 //no merchants yet
                                 builder.setMessage("There is no merchants registered with GiftinApp yet, help us reach out and win gift coin. Thank you!")
@@ -127,11 +123,17 @@ public class GiftingMerchantFragment extends Fragment {
                                 AlertDialog alert = builder.create();
                                 alert.show();
                             }
+                            else{
+                                giftingMerchantAdapter.setGiftingMerchantList(giftingMerchantViewPojos);
+                                rvGiftingMerchant.setLayoutManager(layoutManager);
+                                rvGiftingMerchant.setAdapter(giftingMerchantAdapter);
+                            }
                         }
                     }
                 });
 
     }
+
 
     public void shareAppLink() {
 
@@ -158,4 +160,18 @@ public class GiftingMerchantFragment extends Fragment {
                 });
     }
 
+    @Override
+    public void openMerchantFacebookDetail(@NotNull String facebookHandle) {
+
+    }
+
+    @Override
+    public void openMerchantInstagramDetail(@NotNull String instagramHandle) {
+
+    }
+
+    @Override
+    public void openMerchantWhatsApp(@NotNull String whatsApp) {
+
+    }
 }

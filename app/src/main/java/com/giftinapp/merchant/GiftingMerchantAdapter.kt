@@ -3,11 +3,12 @@ package com.giftinapp.merchant
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.ArrayList
 
-class GiftingMerchantAdapter:RecyclerView.Adapter<GiftingMerchantAdapter.ViewHolder>(){
+class GiftingMerchantAdapter(var clickableIcon:ClickableIcon):RecyclerView.Adapter<GiftingMerchantAdapter.ViewHolder>(){
     private var giftingMerchantList:List<GiftingMerchantViewPojo> = ArrayList()
 
     fun setGiftingMerchantList(giftingMerchantList:List<GiftingMerchantViewPojo>){
@@ -25,15 +26,27 @@ class GiftingMerchantAdapter:RecyclerView.Adapter<GiftingMerchantAdapter.ViewHol
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.itemView.apply {
-            var giftingMerchantBusinessName = findViewById<TextView>(R.id.tv_gifting_merchant_business_name)
-            var giftingMerchantTotalCustomerGifted= findViewById<TextView>(R.id.tv_gifting_merchant_total_customer_gifted)
-            var giftingMerchantContact = findViewById<TextView>(R.id.tv_gifting_merchant_contact)
-            var giftingMerchantLocation =findViewById<TextView>(R.id.tv_gifting_merchant_location)
+            var iconFacebook = findViewById<ImageView>(R.id.icon_facebook)
+            var iconInstagram= findViewById<ImageView>(R.id.icon_instagram)
+            var iconWhatsApp = findViewById<ImageView>(R.id.icon_whatsapp)
+            var giftinMerchantBusinessName =findViewById<TextView>(R.id.tv_gifting_merchant_business_name)
+            var totalCustomerGifted=findViewById<TextView>(R.id.tv_gifting_merchant_total_customer_gifted)
 
-            giftingMerchantBusinessName.text=giftingMerchantList[position].giftingMerchantPojo.business_name
-            giftingMerchantTotalCustomerGifted.text=giftingMerchantList[position].numberOfCustomerGifted.toString() + " ctm gifted"
-            giftingMerchantContact.text=giftingMerchantList[position].giftingMerchantPojo.contact
-            giftingMerchantLocation.text=giftingMerchantList[position].giftingMerchantPojo.location
+            giftinMerchantBusinessName.text=giftingMerchantList[position].giftingMerchantId
+            totalCustomerGifted.text = giftingMerchantList[position].numberOfCustomerGifted.toString()
+
+            iconFacebook.setOnClickListener {
+                clickableIcon.openMerchantFacebookDetail(giftingMerchantList[position].giftingMerchantPojo.facebook)
+            }
+
+            iconInstagram.setOnClickListener {
+                clickableIcon.openMerchantInstagramDetail(giftingMerchantList[position].giftingMerchantPojo.instagram)
+            }
+
+            iconWhatsApp.setOnClickListener {
+                clickableIcon.openMerchantWhatsApp(giftingMerchantList[position].giftingMerchantPojo.whatsapp)
+            }
+
 
 
         }
@@ -41,5 +54,12 @@ class GiftingMerchantAdapter:RecyclerView.Adapter<GiftingMerchantAdapter.ViewHol
 
     override fun getItemCount(): Int {
         return giftingMerchantList.size
+    }
+
+    interface ClickableIcon{
+        fun openMerchantFacebookDetail(facebookHandle: String)
+        fun openMerchantInstagramDetail(instagramHandle: String)
+        fun openMerchantWhatsApp(whatsApp: String)
+
     }
 }

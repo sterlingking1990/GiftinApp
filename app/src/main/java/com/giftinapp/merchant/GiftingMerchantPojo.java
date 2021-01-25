@@ -5,11 +5,10 @@ import androidx.annotation.Keep;
 
 @Keep
 public class GiftingMerchantPojo {
-    public String business_name;
-    public String contact;
-    public String email;
-    public String location;
-    public String login_mode;
+    public String facebook;
+    public String instagram;
+    public String whatsapp;
+    public String address;
 
 
     public GiftingMerchantPojo(){}

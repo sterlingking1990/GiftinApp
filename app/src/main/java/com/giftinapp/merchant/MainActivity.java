@@ -1,6 +1,7 @@
 package com.giftinapp.merchant;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.SparseArray;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private static Button btnGameList;
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigation = findViewById(R.id.bottom_navigation);
 //        bottomNavigation = findViewById(R.id.bottom_navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
+        bottomNavigation.setBackgroundColor(getColor(R.color.secondColorType));
 //        openFragment(new GiftListFragment());
 
 
@@ -121,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
             case 0: {
                 getTotalGiftCoin();
                 holder.reportName.setText("Total Gift Coin");
-                holder.reportIcon.setImageResource(R.drawable.ic_gifts);
+                holder.reportIcon.setImageResource(R.drawable.gift_coin_icon);
                 long totalGiftCoinSum= totalGiftCoin==null ? 0L : totalGiftCoin;
                 holder.reportValue.setText(String.valueOf(totalGiftCoinSum));
                 holderList.put(0, holder);
@@ -131,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
             case 1: {
                 holder.reportName.setText("Total Gift Received");
                 holder.reportValue.setText("0");
-                holder.reportIcon.setImageResource(R.drawable.ic_gifts);
+                holder.reportIcon.setImageResource(R.drawable.gift);
                 holderList.put(1, holder);
                 break;
             }
@@ -213,17 +217,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-
             case R.id.customer_refresh_page:
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
-                return true;
             case R.id.update_info:
                 carouselView.setVisibility(View.GONE);
                 SettingsFragment settingsFragment = new SettingsFragment();
                 openFragment(settingsFragment);
                 return true;
-
             case R.id.about_giftin:
                 carouselView.setVisibility(View.GONE);
                 AboutFragment aboutFragment = new AboutFragment();
@@ -250,17 +251,12 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
 
-                builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        sessionManager.saveEmailAndUserMode("","");
-                        mAuth.signOut();
-                        dialog.cancel();
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
+                builder.setNeutralButton("Ok", (dialog, id) -> {
+                    mAuth.signOut();
+                    MainActivity.this.finish();
+                    System.exit(0);
+                    dialog.cancel();
                 });
-
                 builder.show();
                 return true;
         }
