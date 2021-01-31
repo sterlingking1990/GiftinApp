@@ -183,7 +183,7 @@ public class LoginActivity extends AppCompatActivity {
                                         });
                             }
                             else{
-                                Toast.makeText(getApplicationContext(),"Could not log in, email or password might not exist",Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(),"Could not sign in: Details entered might be incorrect",Toast.LENGTH_LONG).show();
                                 progressDialogUtil.stopDialog();
                             }
                         }

@@ -47,13 +47,13 @@ public class MainActivity extends AppCompatActivity {
     public SessionManager sessionManager;
     public AlertDialog.Builder builder;
 
-    private FirebaseAuth mAuth;
-
     protected CarouselView carouselView;
 
     protected SparseArray<ReportsViewHolder> holderList = new SparseArray<>();
 
     public Long totalGiftCoin;
+
+    FirebaseAuth mauth;
 
 
     private static Button btnGameList;
@@ -63,9 +63,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        mAuth = FirebaseAuth.getInstance();
-
+        mauth = FirebaseAuth.getInstance();
         carouselView = findViewById(R.id.carouselView);
 
         carouselView.setPageCount(2);
@@ -220,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.customer_refresh_page:
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                return true;
             case R.id.update_info:
                 carouselView.setVisibility(View.GONE);
                 SettingsFragment settingsFragment = new SettingsFragment();
@@ -252,10 +251,11 @@ public class MainActivity extends AppCompatActivity {
                         });
 
                 builder.setNeutralButton("Ok", (dialog, id) -> {
-                    mAuth.signOut();
+                    dialog.cancel();
+                    mauth.signOut();
                     MainActivity.this.finish();
                     System.exit(0);
-                    dialog.cancel();
+
                 });
                 builder.show();
                 return true;

@@ -24,7 +24,8 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            >
 
             <TextView
                 android:id="@+id/tv_giftlist_caption"
@@ -43,18 +44,50 @@
                 android:layout_height="171dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ps4" />
+        </LinearLayout>
 
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:layout_marginTop="70dp"
+                android:weightSum="2">
 
                 <TextView
                     android:id="@+id/tv_giftlist_cost"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
+                    android:layout_gravity="bottom"
+                    android:layout_marginTop="50dp"
+                    android:layout_weight="1"
+                    android:gravity="bottom|center"
                     android:text="5000"
                     android:textColor="@android:color/black"
                     android:textSize="24sp" />
-        </LinearLayout>
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/addtocart"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="1"
+                    android:elevation="2dp"
+                    android:scaleType="centerCrop"
+                    android:translationZ="1dp"
+                    app:lottie_speed="2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.9"
+                    app:lottie_autoPlay="false"
+                    app:lottie_fileName="addtocart.json"
+                    app:lottie_loop="false" />
+            </LinearLayout>
 
     </androidx.cardview.widget.CardView>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

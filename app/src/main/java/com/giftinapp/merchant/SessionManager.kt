@@ -15,6 +15,7 @@ class SessionManager(context: Context) {
         const val USERMODE="user_mode"
         const val REFERRER="referrer"
         const val TOTAL_CUSTOMER_GIFTED="total_customer_gifted"
+        const val IS_ADDED_TO_CART = "is_added_to_cart"
     }
 
     /**
@@ -82,6 +83,16 @@ class SessionManager(context: Context) {
 
     fun getTotalCustomerGifted():Int{
         return prefs.getInt(TOTAL_CUSTOMER_GIFTED,0)
+    }
+
+    fun setAddedToGet(addedToCart:Boolean){
+        val editor =prefs.edit()
+        editor.putBoolean(IS_ADDED_TO_CART,addedToCart)
+        editor.apply()
+    }
+
+    fun isAddedToCart():Boolean{
+        return prefs.getBoolean(IS_ADDED_TO_CART,false)
     }
 
 }

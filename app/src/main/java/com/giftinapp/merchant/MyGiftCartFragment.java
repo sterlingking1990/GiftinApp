@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.giftinapp.merchant.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -139,7 +140,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                                 listTop.add(list);
 
                                             }
-                                            myGiftCartAdapter.setMyGiftsList(listTop);
+                                            myGiftCartAdapter.setMyGiftsList(listTop, requireContext());
 
                                             rvMyGiftCart.setAdapter(myGiftCartAdapter);
                                             if (listTop.size()==0){
@@ -204,9 +205,8 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
     }
 
     @Override
-    public void sendGiftToRedeem(@NotNull MyCartPojo giftToRedeem) {
+    public void sendGiftToRedeem(@NotNull MyCartPojo giftToRedeem, LottieAnimationView fb) {
         //send the gift to giftin company for redeeming
-
         String emailOfGiftOwner = sessionManager.getEmail();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
@@ -249,10 +249,15 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                                     db.collection("redeemable_gifts").document(emailOfGiftOwner).set(sendGiftPojo)
                                                             .addOnCompleteListener(task1 -> {
                                                                 if(task1.isSuccessful()){
+                                                                    fb.playAnimation();
                                                                     db.collection("redeemable_gifts").document(emailOfGiftOwner).collection("gift_lists").document(giftToRedeem.gift_name).set(giftToRedeem)
                                                                             .addOnCompleteListener(task2 -> {
                                                                                 if(task2.isSuccessful()){
+                                                                                    fb.pauseAnimation();
+                                                                                    fb.playAnimation();
                                                                                     Toast.makeText(requireContext(),"gift sent for redeeming",Toast.LENGTH_SHORT).show();
+                                                                                    fb.setVisibility(View.GONE);
+
                                                                                 }
                                                                             });
 
@@ -262,6 +267,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                             }
                                         }
                                     });
+
                         }
                     }
                 });
