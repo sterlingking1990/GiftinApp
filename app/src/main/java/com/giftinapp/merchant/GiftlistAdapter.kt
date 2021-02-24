@@ -5,6 +5,8 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -16,15 +18,18 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.squareup.picasso.Picasso
 import kotlin.collections.ArrayList
 
-class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Adapter<GiftlistAdapter.ViewHolder>(){
+class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Adapter<GiftlistAdapter.ViewHolder>(), Filterable{
 
-    private var giftList:List<GiftList> = ArrayList()
+    private var giftList:MutableList<GiftList> = ArrayList()
+    private var giftListAll:MutableList<GiftList> = ArrayList()
     private lateinit var context: Context
 
-    fun setGiftList(giftList:List<GiftList>, context: Context){
+    fun setGiftList(giftList:MutableList<GiftList>, context: Context){
         this.giftList=giftList
+        this.giftListAll = giftList
         this.context = context
     }
+
 
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -37,11 +42,16 @@ class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Ad
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.itemView.apply {
-            var giftImage =findViewById<ImageView>(R.id.iv_giftlist_image)
-            var giftCaption=findViewById<TextView>(R.id.tv_giftlist_caption)
-            var giftCost=findViewById<TextView>(R.id.tv_giftlist_cost)
-            var addToCart = findViewById<LottieAnimationView>(R.id.addtocart)
-            var shimmer = Shimmer.ColorHighlightBuilder()
+            val giftImage =findViewById<ImageView>(R.id.iv_giftlist_image)
+            val giftCaption=findViewById<TextView>(R.id.tv_giftlist_caption)
+            val giftCost=findViewById<TextView>(R.id.tv_giftlist_cost)
+            val addToCart = findViewById<LottieAnimationView>(R.id.addtocart)
+
+            val fbIcon = findViewById<ImageView>(R.id.icon_facebook)
+            val igIcon = findViewById<ImageView>(R.id.icon_instagram)
+            val wappIcon = findViewById<ImageView>(R.id.icon_whatsapp)
+
+            val shimmer = Shimmer.ColorHighlightBuilder()
                     .setBaseColor(Color.parseColor("#f3f3f3"))
                     .setHighlightColor(Color.parseColor("#E7E7E7"))
                     .setHighlightAlpha(1F)
@@ -51,8 +61,24 @@ class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Ad
                     .setAutoStart(true)
                     .build()
 
-            var shimmerDrawable=ShimmerDrawable()
+            val shimmerDrawable=ShimmerDrawable()
             shimmerDrawable.setShimmer(shimmer)
+
+            giftImage.setOnClickListener {
+                giftItemClickable.displayMoreGiftDetail(giftList[position])
+            }
+
+            fbIcon.setOnClickListener {
+                giftItemClickable.displayFacebookInfo(giftList[position])
+            }
+
+            igIcon.setOnClickListener {
+                giftItemClickable.displayIgInfo(giftList[position])
+            }
+
+            wappIcon.setOnClickListener {
+                giftItemClickable.displayWhatsAppInfo(giftList[position])
+            }
 
 
             //Loading image using Picasso
@@ -73,7 +99,12 @@ class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Ad
 
     interface GiftItemClickable{
         fun onGiftClick(itemId: GiftList, itemAnim:LottieAnimationView)
+        fun displayMoreGiftDetail(gift:GiftList)
+        fun displayFacebookInfo(gift: GiftList)
+        fun displayWhatsAppInfo(gift: GiftList)
+        fun displayIgInfo(gift: GiftList)
     }
+
 
     private fun checkIfItemInCart(giftList: GiftList, addToCart: LottieAnimationView, context: Context) {
 
@@ -119,4 +150,36 @@ class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Ad
         }
 
     }
+
+    override fun getFilter(): Filter {
+        return object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val charSearch = constraint.toString()
+                val filteredList:MutableList<GiftList> = ArrayList()
+                if (charSearch.isEmpty()) {
+                    filteredList.addAll(giftListAll)
+                } else {
+                    for (row in giftListAll) {
+                        if (row.gift_name.contains(constraint.toString().toLowerCase())) {
+                            filteredList.add(row)
+                        }
+                    }
+                }
+                val filterResults = FilterResults()
+                filterResults.values = filteredList
+                return filterResults
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                giftList.clear()
+                if (results != null) {
+                    giftList.addAll(results.values as Collection<GiftList>)
+                }
+                notifyDataSetChanged()
+            }
+        }
+    }
+
+
+
 }

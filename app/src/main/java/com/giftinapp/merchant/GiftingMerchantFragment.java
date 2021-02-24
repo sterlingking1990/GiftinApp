@@ -162,16 +162,31 @@ public class GiftingMerchantFragment extends Fragment implements GiftingMerchant
 
     @Override
     public void openMerchantFacebookDetail(@NotNull String facebookHandle) {
-
+        builder.setMessage(facebookHandle)
+                .setCancelable(true)
+                .setPositiveButton("OK", (dialog, id) -> {
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     @Override
     public void openMerchantInstagramDetail(@NotNull String instagramHandle) {
-
+        builder.setMessage(instagramHandle)
+                .setCancelable(true)
+                .setPositiveButton("OK", (dialog, id) -> {
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     @Override
     public void openMerchantWhatsApp(@NotNull String whatsApp) {
-
+        builder.setMessage(whatsApp)
+                .setCancelable(true)
+                .setPositiveButton("OK", (dialog, id) -> {
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 }

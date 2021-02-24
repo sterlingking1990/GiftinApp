@@ -44,27 +44,6 @@ public class AboutFragment extends Fragment {
         expandableListAdapter = new CustomExpandableListAdapter(getContext(), expandableListTitle, expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
 
-//        expandableListView.setOnGroupExpandListener(groupPosition -> Toast.makeText(getContext(),
-//                expandableListTitle.get(groupPosition) + " List Expanded.",
-//                Toast.LENGTH_SHORT).show());
-
-//        expandableListView.setOnGroupCollapseListener(groupPosition -> Toast.makeText(getContext(),
-//                expandableListTitle.get(groupPosition) + " List Collapsed.",
-//                Toast.LENGTH_SHORT).show());
-
-
-//        expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
-//            Toast.makeText(
-//                    getContext(),
-//                    expandableListTitle.get(groupPosition)
-//                            + " -> "
-//                            + expandableListDetail.get(
-//                            expandableListTitle.get(groupPosition)).get(
-//                            childPosition), Toast.LENGTH_SHORT
-//            ).show();
-//            return false;
-//        });
-
 
     }
 

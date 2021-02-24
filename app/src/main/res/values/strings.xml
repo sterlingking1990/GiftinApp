@@ -45,4 +45,6 @@
     <string name="giftinapp_link">https://giftinapp.page.link/getgifts</string>
     <string name="share_link">Share</string>
     <string name="about_giftin">GiftinApp is a business customer gifting management platform that handles the taking care of her customers which is an integral part of her business value and revenue generation. GiftinApp Inc., gives customers the opportunity to choose what they fancy as gifts while buying from their favourite businesses that show them gratitude through gifting.</string>
+    <string name="navigation_drawer_open">open</string>
+    <string name="navigation_drawer_close">close</string>
 </resources>

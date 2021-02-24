@@ -127,8 +127,8 @@ public class SettingsFragment extends Fragment {
                    if(task.isSuccessful()){
                        DocumentSnapshot documentSnapshot =task.getResult();
                        if(documentSnapshot.exists()) {
-                               String  facebook=documentSnapshot.get("facebook") == "" ? "no facebook" : Objects.requireNonNull(documentSnapshot.get("facebook")).toString();
-                               String instagram=documentSnapshot.get("instagram") == "" ? "no instagram" : Objects.requireNonNull(documentSnapshot.get("instagram")).toString();
+                               String  facebook=documentSnapshot.get("facebook") == "" ? "not provided" : Objects.requireNonNull(documentSnapshot.get("facebook")).toString();
+                               String instagram=documentSnapshot.get("instagram") == "" ? "not provided" : Objects.requireNonNull(documentSnapshot.get("instagram")).toString();
                                String whatsapp= Objects.requireNonNull(documentSnapshot.get("whatsapp")).toString().equals("") ? "no whatsapp" : Objects.requireNonNull(documentSnapshot.get("whatsapp")).toString();
 
                                etFacebook.setText(facebook);

@@ -1,8 +1,11 @@
 package com.giftinapp.merchant;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
@@ -24,6 +27,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
@@ -33,8 +37,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.squareup.picasso.Picasso;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ViewListener;
+
+import java.util.Objects;
 
 public class MerchantActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigation;
@@ -51,6 +58,10 @@ public class MerchantActivity extends AppCompatActivity {
     public Long totalAmountGifted;
     public Long totalWalletBalance;
 
+    private DrawerLayout drawer;
+    private ActionBarDrawerToggle t;
+    private NavigationView nv;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +70,26 @@ public class MerchantActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(getApplicationContext());
 
-        bottomNavigation = findViewById(R.id.bottom_navigation_merchant);
-        bottomNavigation.setOnNavigationItemSelectedListener(navigationItem);
-//        openFragment(new GiftACustomerFragment());
+        drawer = findViewById(R.id.merchantNavDrawerLayout);
+        t = new ActionBarDrawerToggle(this, drawer,R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
+        drawer.addDrawerListener(t);
+        t.syncState();
+
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+        nv = findViewById(R.id.merchantNavView);
+
+        nv.setNavigationItemSelectedListener(item -> {
+            selectDrawerItem(item);
+            return true;
+        });
+
+        View headerView = nv.getHeaderView(0);
+        TextView navTextView = headerView.findViewById(R.id.nav_header_textView);
+        ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
+        Picasso.get().load(R.drawable.gift).into(navImageView);
+        navTextView.setText(Objects.requireNonNull(mAuth.getCurrentUser()).getEmail());
 
         carouselViewMerchant = findViewById(R.id.carouselView);
 
@@ -101,7 +129,7 @@ public class MerchantActivity extends AppCompatActivity {
             case 0: {
                 getNumberOfCustomersGifted();
                 holder.reportName.setText("Total Customers Gifted");
-                holder.reportIcon.setImageResource(R.drawable.ic_gifts);
+                holder.reportIcon.setImageResource(R.drawable.ic_happy_customer);
                 long totalGiftCoinSum= numberOfCustomerGifted==null ? 0 : numberOfCustomerGifted;
                 holder.reportValue.setText(String.valueOf(totalGiftCoinSum));
                 holderListMerchant.put(0, holder);
@@ -121,7 +149,7 @@ public class MerchantActivity extends AppCompatActivity {
                 getWalletBalance();
                 holder.reportName.setText("Gift Wallet Balance");
                 holder.reportValue.setText(String.valueOf(totalWalletBalance));
-                holder.reportIcon.setImageResource(R.drawable.ic_gifts);
+                holder.reportIcon.setImageResource(R.drawable.gift_coin_icon);
                 holderListMerchant.put(2, holder);
                 break;
             }
@@ -251,31 +279,6 @@ public class MerchantActivity extends AppCompatActivity {
     }
 
 
-        BottomNavigationView.OnNavigationItemSelectedListener navigationItem =
-                item -> {
-                    switch (item.getItemId()) {
-                        case R.id.navigation_gift_customer_fan:
-                            carouselViewMerchant.setVisibility(View.GONE);
-                            GiftACustomerFragment giftACustomer = new GiftACustomerFragment();
-                            openFragment(giftACustomer);
-                            return true;
-                        case R.id.navigation_wallet_info:
-                            carouselViewMerchant.setVisibility(View.GONE);
-                            WalletInfo walletInfo = new WalletInfo();
-                            openFragment(walletInfo);
-                            return true;
-
-                        case R.id.navigation_merchant_gift_stats:
-                            carouselViewMerchant.setVisibility(View.GONE);
-                            MerchantGiftStatsFragment merchantGiftStatsFragment = new MerchantGiftStatsFragment();
-                            openFragment(merchantGiftStatsFragment);
-                            return true;
-
-                    }
-                    return false;
-    };
-
-
     public void openFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fr_layout_merchant, fragment)
@@ -291,6 +294,10 @@ public class MerchantActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(t.onOptionsItemSelected(item)){
+            return true;
+        }
+
         switch (item.getItemId()){
 
             case R.id.merchant_refresh_page:
@@ -339,5 +346,39 @@ public class MerchantActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    private void selectDrawerItem(MenuItem menuitem){
+        switch (menuitem.getItemId()) {
+            case R.id.navigation_gift_customer_fan:
+                carouselViewMerchant.setVisibility(View.GONE);
+                GiftACustomerFragment giftACustomer = new GiftACustomerFragment();
+                openFragment(giftACustomer);
+                break;
+            case R.id.navigation_wallet_info:
+                carouselViewMerchant.setVisibility(View.GONE);
+                WalletInfo walletInfo = new WalletInfo();
+                openFragment(walletInfo);
+               break;
+
+            case R.id.navigation_merchant_gift_stats:
+                carouselViewMerchant.setVisibility(View.GONE);
+                MerchantGiftStatsFragment merchantGiftStatsFragment = new MerchantGiftStatsFragment();
+                openFragment(merchantGiftStatsFragment);
+                break;
+
+        }
+        drawer.close();
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 }

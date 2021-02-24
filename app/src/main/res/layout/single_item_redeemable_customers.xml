@@ -9,6 +9,7 @@
         android:layout_height="wrap_content"
         android:elevation="2dp"
         android:orientation="vertical"
+        android:layout_marginTop="30dp"
         android:translationZ="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -18,28 +19,46 @@
         app:layout_constraintVertical_bias="0.16000003">
 
         <ImageView
-            android:id="@+id/iv_redeemable_customers_address_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/iv_redeemable_customers_facebook_icon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:clickable="true"
-            android:contentDescription="address"
+            android:scaleType="centerCrop"
+            android:contentDescription="Facebook"
             android:layout_margin="10dp"
             android:elevation="2dp"
-            android:src="@drawable/ic_location"
-            android:translationZ="1dp" />
+            android:src="@drawable/facebook"
+            android:translationZ="1dp"
+            android:focusable="true" />
 
 
         <ImageView
-            android:id="@+id/iv_redeemable_customers_phone_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/iv_redeemable_customers_instagram_icon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@color/whitesmoke"
+            android:layout_margin="10dp"
+            android:clickable="true"
+            android:scaleType="centerCrop"
+            android:contentDescription="Instagram"
+            android:elevation="2dp"
+            android:src="@drawable/instagram"
+            android:translationZ="1dp"
+            android:focusable="true" />
+
+        <ImageView
+            android:id="@+id/iv_redeemable_customers_whatsapp_icon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:background="@color/whitesmoke"
             android:layout_margin="10dp"
             android:clickable="true"
             android:contentDescription="phone number"
             android:elevation="2dp"
-            android:src="@drawable/ic_phone"
-            android:translationZ="1dp" />
+            android:scaleType="centerCrop"
+            android:src="@drawable/whatsapp"
+            android:translationZ="1dp"
+            android:focusable="true" />
 
     </LinearLayout>
 
@@ -67,6 +86,9 @@
                 android:layout_height="40dp"
                 android:gravity="center"
                 android:text="Play Station 4"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:scrollHorizontally="true"
                 android:textSize="24sp"
                 android:textStyle="bold">
 

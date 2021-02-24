@@ -7,9 +7,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.giftinapp.merchant.R;
@@ -28,10 +31,12 @@ import com.google.firebase.ktx.Firebase;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity {
+
 
     private FirebaseAuth mAuth;
     private Button btnSignUp;
@@ -48,6 +53,12 @@ public class SignUpActivity extends AppCompatActivity {
 
     private Spinner spInterest;
 
+    private ArrayAdapter<String> loginModeAdapter;
+
+    private String[] loginMode;
+
+    private String selectedLoginMode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,12 +70,20 @@ public class SignUpActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(getApplicationContext());
 
+
+
+        loginMode = new String[]{"As Customer", "As Business"};
+        loginModeAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,loginMode);
+        loginModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         etEmail = findViewById(R.id.et_signup_email);
         etPassword= findViewById(R.id.et_signup_password);
 
         emailValidator = new EmailValidator();
 
         spInterest = findViewById(R.id.sp_signup_interest);
+
+        spInterest.setAdapter(loginModeAdapter);
 
         btnSignUp.setOnClickListener(v -> {
             if(emailValidator.validateEmail(etEmail.getText().toString()) &&
@@ -181,18 +200,26 @@ public class SignUpActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        String modeFromSession = sessionManager.getUserMode();
-        if ( modeFromSession!= null) {
-            if (modeFromSession == "business") {
-                Intent intent = new Intent(this, MerchantActivity.class);
-                startActivity(intent);
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String modeFromSession = sessionManager.getUserMode();
+            if (modeFromSession != null) {
+                if (modeFromSession.equals("business")) {
+                    Intent intent = new Intent(this, MerchantActivity.class);
+                    startActivity(intent);
+                }
+                if (modeFromSession.equals("customer") && !currentUser.getEmail().equals("giftinappinc@gmail.com")) {
+                    Intent intent = new Intent(this, MainActivity.class);
+                    startActivity(intent);
+                }
+                if (modeFromSession.equals("customer") && currentUser.getEmail().equals("giftinappinc@gmail.com")) {
+                    Intent intent = new Intent(this, GiftinAppAuthorityActivity.class);
+                    startActivity(intent);
+                }
+                //verify that the email saved on session is same with the one logged in, if same then check with firestore to know which home to take to home activity the user else logout the user
+                //if the user is an agent, create the user merchant detail again also the session should reflect this mode of login
             }
-            if (modeFromSession == "customer") {
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-            }
-            //verify that the email saved on session is same with the one logged in, if same then check with firestore to know which home to take to home activity the user else logout the user
-            //if the user is an agent, create the user merchant detail again also the session should reflect this mode of login
         }
     }
 }

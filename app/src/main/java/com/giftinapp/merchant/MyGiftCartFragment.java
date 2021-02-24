@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -49,6 +50,8 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
 
     public Long totalRewardAmount;
 
+    public ProgressBar pgLoading;
+
     //here, we fetch the gifts from firebase and then we display on my gift cart
 
 //    @Override
@@ -80,14 +83,16 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
 
         sessionManager = new SessionManager(requireContext());
 
+        pgLoading = view.findViewById(R.id.pgLoadingForGiftInCart);
+
         builder = new AlertDialog.Builder(requireContext());
 
         displayGiftCart();
 
-
     }
 
     public void displayGiftCart(){
+        pgLoading.setVisibility(View.VISIBLE);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
 
@@ -141,8 +146,8 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
 
                                             }
                                             myGiftCartAdapter.setMyGiftsList(listTop, requireContext());
-
                                             rvMyGiftCart.setAdapter(myGiftCartAdapter);
+                                            Toast.makeText(requireContext(),"tap to remove item from gift cart",Toast.LENGTH_LONG).show();
                                             if (listTop.size()==0){
                                                 builder.setMessage("You have not added gifts on your carts yet, please add gifts to carts to see how close you are to meeting your gift goal")
                                                         .setCancelable(false)
@@ -153,6 +158,8 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                                 AlertDialog alert = builder.create();
                                                 alert.show();
                                             }
+
+                                            pgLoading.setVisibility(View.GONE);
                                         }
                                     });
 
@@ -166,7 +173,10 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                     });
                             AlertDialog alert = builder.create();
                             alert.show();
+
+                            pgLoading.setVisibility(View.GONE);
                         }
+
                     }
                 });
     }
@@ -195,6 +205,17 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                     //delete gift from cart
                     db.collection("users").document(sessionManager.getEmail()).collection("gift_carts")
                             .document(itemId.gift_name).delete();
+
+                    //remove from redeemable if it exists there
+                    db.collection("redeemable_gifts").document(sessionManager.getEmail()).collection("gift_lists").document(itemId.gift_name).delete()
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        Toast.makeText(requireContext(),"You have deleted your gift from redeemable list",Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
                     displayGiftCart();
                 })
                 .setNegativeButton("No",((dialog, which) -> {
@@ -231,12 +252,14 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                         if(task12.isSuccessful()){
                                             DocumentSnapshot userInfo = task12.getResult();
                                             if(userInfo.exists()){
-                                                if(userInfo.get("phone_number_1")=="" && userInfo.get("phone_number_2")=="" && userInfo.get("address")==""){
+                                                if(Objects.requireNonNull(userInfo.get("facebook")).toString().equalsIgnoreCase("not provided") &&
+                                                        Objects.requireNonNull(userInfo.get("whatsapp")).toString().equalsIgnoreCase("not provided") &&
+                                                        Objects.requireNonNull(userInfo.get("instagram")).toString().equalsIgnoreCase("not provided")){
                                                     builder.setMessage("Please update your info before redeeming your gifts")
                                                             .setCancelable(false)
                                                             .setPositiveButton("Ok", (dialog, id) -> {
                                                                 //take user to place to update info
-                                                                openFragment(new SettingsFragment());
+                                                                //openFragment(new SettingsFragment());
                                                             });
                                                     AlertDialog alert = builder.create();
                                                     alert.show();

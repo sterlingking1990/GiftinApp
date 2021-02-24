@@ -10,15 +10,20 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.squareup.picasso.Picasso
 import com.synnapps.carouselview.CarouselView
 import com.synnapps.carouselview.ViewListener
+import java.util.*
 import kotlin.system.exitProcess
 
 class GiftinAppAuthorityActivity : AppCompatActivity() {
@@ -36,21 +41,41 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
 
     protected var holderListMerchant = SparseArray<GiftinAuthViewHolder>()
 
+    private var drawer: DrawerLayout? = null
+    private var t: ActionBarDrawerToggle? = null
+    private var nv: NavigationView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_giftin_app_authority)
 
-        bottomNavigationView=findViewById(R.id.bottom_navigation_giftin_authority)
-        bottomNavigationView.setOnNavigationItemSelectedListener(navigationItem)
-
-//        bottomNavigation.setOnNavigationItemSelectedListener(navigationItem);
-//        openFragment(new GiftACustomerFragment());
         carouselViewGiftinAuthority = findViewById<CarouselView>(R.id.carouselView)
 
         carouselViewGiftinAuthority?.pageCount=3
         carouselViewGiftinAuthority?.setViewListener(viewListener)
 
         sessionManager= SessionManager(this);
+
+        drawer = findViewById(R.id.adminDrawerLayout)
+        t = ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+
+        drawer?.addDrawerListener(t!!)
+        t?.syncState()
+
+        Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
+
+        nv = findViewById(R.id.adminNavView)
+
+        nv?.setNavigationItemSelectedListener { item: MenuItem? ->
+            selectDrawerItem(item!!)
+            true
+        }
+
+        val headerView = nv?.getHeaderView(0)
+        val navTextView = headerView?.findViewById<TextView>(R.id.nav_header_textView)
+        val navImageView = headerView?.findViewById<ImageView>(R.id.nav_header_imageView)
+        Picasso.get().load(R.drawable.gift).into(navImageView)
+        navTextView?.text = Objects.requireNonNull(mAuth.currentUser)!!.email
 
         carouselViewGiftinAuthority?.addOnPageChangeListener(object : OnPageChangeListener {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
@@ -180,32 +205,6 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
         var reportIcon: ImageView? = null
     }
 
-
-    var navigationItem = BottomNavigationView.OnNavigationItemSelectedListener { item: MenuItem ->
-        when (item.itemId) {
-            R.id.navigation_verify_business -> {
-                carouselViewGiftinAuthority?.visibility = View.GONE
-                var verifyBusiness: Fragment = GiftinAppAuthorityVerifyUserFragment()
-                openFragment(verifyBusiness)
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_redeem_gift -> {
-                carouselViewGiftinAuthority?.visibility = View.GONE
-                val giftinAppAuthorityRedeemGiftFragment: Fragment = GiftinAppAuthorityRedeemGiftFragment()
-                openFragment(giftinAppAuthorityRedeemGiftFragment)
-                return@OnNavigationItemSelectedListener true
-            }
-
-            R.id.navigation_gifted_customers -> {
-                carouselViewGiftinAuthority?.visibility = View.GONE
-                val giftinAppAuthorityRedeemedCustomersFragment: Fragment = GiftinAppAuthorityRedeemedCustomersFragment()
-                openFragment(giftinAppAuthorityRedeemedCustomersFragment)
-                return@OnNavigationItemSelectedListener true
-            }
-        }
-        false
-    }
-
     private fun openFragment(fragment: Fragment?) {
         supportFragmentManager.beginTransaction()
                 .replace(R.id.fr_giftin_authority, fragment!!)
@@ -219,6 +218,9 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (t!!.onOptionsItemSelected(item)) {
+            return true
+        }
         when (item.itemId) {
             R.id.giftin_authority_refresh -> {
                 val intent = Intent(this, GiftinAppAuthorityActivity::class.java)
@@ -262,6 +264,27 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun selectDrawerItem(menuitem: MenuItem) {
+        when (menuitem.itemId) {
+            R.id.navigation_verify_business -> {
+                carouselViewGiftinAuthority?.visibility = View.GONE
+                val verifyBusiness = GiftinAppAuthorityVerifyUserFragment()
+                openFragment(verifyBusiness)
+            }
+            R.id.navigation_redeem_gift -> {
+                carouselViewGiftinAuthority?.visibility = View.GONE
+                val redeemGift = GiftinAppAuthorityRedeemGiftFragment()
+                openFragment(redeemGift)
+            }
+            R.id.navigation_gifted_customers -> {
+                carouselViewGiftinAuthority?.visibility = View.GONE
+                val redeemableCustomers = GiftinAppAuthorityRedeemedCustomersFragment()
+                openFragment(redeemableCustomers)
+            }
+        }
+        drawer!!.close()
     }
 
 

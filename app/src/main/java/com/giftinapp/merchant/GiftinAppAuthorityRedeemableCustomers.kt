@@ -35,9 +35,9 @@ class GiftinAppAuthorityRedeemableCustomers : Fragment(), GiftinAppAuthorityRede
 
 
 
-    var contactView1="no contact 1"
-    var contactView2="no contact 2"
-    var addressView="no address"
+    var facebook="your facebook"
+    var instagram="your instagram"
+    var whatsapp="your whatsapp"
     lateinit var gift_name:String
     var gift_cost:Long=0L
     lateinit var gift_url:String
@@ -99,6 +99,7 @@ class GiftinAppAuthorityRedeemableCustomers : Fragment(), GiftinAppAuthorityRede
                     if(eachGift.isSuccessful) {
                         for (eachRedeemableCustomerGifts in eachGift.result!!) {
                             emailView = eachRedeemableCustomerGifts.id
+                            sessionManager.saveRedeemedCustomerEmail(emailView)
                             redeemableCustomerEmailList.add(GiftinAppAuthorityRedeemableCustomerEmailPojo(emailView))
                         }
                         redeemableCustomerEmailAdapter.populateRedeemableCustomerEmail(redeemableCustomerEmailList)
@@ -121,9 +122,9 @@ class GiftinAppAuthorityRedeemableCustomers : Fragment(), GiftinAppAuthorityRede
                     if(it.isSuccessful) {
                         var detailOfUser = it.result!!
                         if(detailOfUser.exists()){
-                            contactView1=if(detailOfUser.get("phone_number_1").toString()=="" ) "no number 1" else detailOfUser.get("phone_number_1").toString()
-                            contactView2=if(detailOfUser.get("phone_number_2").toString()=="" ) "no number 2" else detailOfUser.get("phone_number_2").toString()
-                            addressView=if(detailOfUser.get("address").toString()=="") "no address" else detailOfUser.get("address").toString()
+                            facebook=detailOfUser.get("facebook").toString()
+                            instagram=detailOfUser.get("instagram").toString()
+                            whatsapp=detailOfUser.get("whatsapp").toString()
                             loadCustomerRedeemableGifts(email, loadDbInstance)
                         }
                     }
@@ -152,12 +153,13 @@ class GiftinAppAuthorityRedeemableCustomers : Fragment(), GiftinAppAuthorityRede
         loadDBInstance.collection("redeemable_gifts").document(email).collection("gift_lists").get()
                 .addOnCompleteListener { giftList->
                     if(giftList.isSuccessful){
+
                         for(giftListSnapShot in giftList.result!!){
                             gift_name = giftListSnapShot.id
                             gift_cost = giftListSnapShot.get("gift_cost") as Long
                             gift_url=giftListSnapShot.get("gift_url").toString()
 
-                            redeemableCustomerGiftList.add(GiftinAppAuthorityRedeemableCustomerGiftsPojo(gift_name, gift_cost, gift_url, contactView1, contactView2, addressView))
+                            redeemableCustomerGiftList.add(GiftinAppAuthorityRedeemableCustomerGiftsPojo(gift_name, gift_cost, gift_url, facebook, instagram, whatsapp))
                         }
 
                         if(redeemableCustomerGiftList.size==0){
@@ -172,8 +174,8 @@ class GiftinAppAuthorityRedeemableCustomers : Fragment(), GiftinAppAuthorityRede
                 }
     }
 
-    override fun showPhoneNumber(phoneNumber: String) {
-        builder!!.setMessage("Customers phone number is $phoneNumber")
+    override fun showFacebookInfo(fb: String) {
+        builder!!.setMessage("Customers facebook is $fb")
                 .setCancelable(false)
                 .setPositiveButton("OK") { dialog: DialogInterface?, id: Int ->
                     //take user to fund wallet fragment
@@ -182,12 +184,53 @@ class GiftinAppAuthorityRedeemableCustomers : Fragment(), GiftinAppAuthorityRede
         alert.show()
     }
 
-    override fun showAddress(address: String) {
-        builder!!.setMessage("Customers address is $address")
+    override fun showInstaInfo(insta: String) {
+        builder!!.setMessage("Customers instagram is $insta")
                 .setCancelable(false)
                 .setPositiveButton("OK") { dialog: DialogInterface?, id: Int ->
                     //take user to fund wallet fragment
                 }
+        val alert = builder!!.create()
+        alert.show()
+    }
+
+    override fun showWhatsAppInfo(whatsapp: String) {
+        builder!!.setMessage("Customers whatsapp is $whatsapp")
+                .setCancelable(false)
+                .setPositiveButton("OK") { dialog: DialogInterface?, id: Int ->
+                    //take user to fund wallet fragment
+                }
+        val alert = builder!!.create()
+        alert.show()
+    }
+
+    override fun removeGiftAfterRedeeming(gift: GiftinAppAuthorityRedeemableCustomerGiftsPojo) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+        builder!!.setMessage("Are you sure you want to remove this gift from redeemable items?, please make sure you have redeemed this gift before making this decision")
+                .setCancelable(false)
+                .setPositiveButton("Yes") { dialog: DialogInterface?, id: Int ->
+                    //delete gift from cart
+                    sessionManager.getRedeemedCustomerEmail()?.let {
+                        db.collection("redeemable_gifts").document(it).collection("gift_lists").document(gift.gift_name)
+                                .delete()
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        Toast.makeText(requireContext(), "You have successfully removed customer gift from redeemable list", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                    }
+                }
+                .setNegativeButton("No") { dialog: DialogInterface?, which: Int -> }
         val alert = builder!!.create()
         alert.show()
     }

@@ -1,10 +1,10 @@
 package com.giftinapp.merchant
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -12,8 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import java.util.*
+import kotlin.collections.ArrayList
 
-class GiftinAppAuthorityRedeemedCustomersFragment : Fragment() {
+
+class GiftinAppAuthorityRedeemedCustomersFragment : Fragment(), GiftinAppAuthorityRedeemedCustomerAdapter.Contactable{
     lateinit var rvRedeemedCustomers:RecyclerView
 
     lateinit var layoutManager: LinearLayoutManager
@@ -23,12 +26,6 @@ class GiftinAppAuthorityRedeemedCustomersFragment : Fragment() {
 
 
     lateinit var sessionManager:SessionManager
-
-    var contactView1="no contact 1"
-    var contactView2="no contact 2"
-    var addressView:String?="no address"
-
-
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -46,7 +43,7 @@ class GiftinAppAuthorityRedeemedCustomersFragment : Fragment() {
 
         layoutManager= LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
 
-        redeemedCustomerAdapter = GiftinAppAuthorityRedeemedCustomerAdapter()
+        redeemedCustomerAdapter = GiftinAppAuthorityRedeemedCustomerAdapter(this)
 
         getRedeemedCustomerList()
     }
@@ -72,8 +69,7 @@ class GiftinAppAuthorityRedeemedCustomersFragment : Fragment() {
                         for (eachRedeemedCustomer in it.result!!) {
                             var email = eachRedeemedCustomer.id
                             var amountRedeemed: Long = eachRedeemedCustomer.get("gift_coin") as Long
-                            getOtherDetails(email)
-                            redeemedCustomerList.add(RedeemedCustomerPojo(email, amountRedeemed, contactView1, contactView2, addressView))
+                            redeemedCustomerList.add(RedeemedCustomerPojo(email, amountRedeemed,null,null,null))
                         }
                         redeemedCustomerAdapter.populateListOfRedeemedCustomers(redeemedCustomerList)
                         rvRedeemedCustomers.layoutManager=layoutManager
@@ -81,12 +77,13 @@ class GiftinAppAuthorityRedeemedCustomersFragment : Fragment() {
                         redeemedCustomerAdapter.notifyDataSetChanged()
                     }
                     else{
-                        Toast.makeText(requireContext(),"You have not redeemed any customer gifts yet",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "You have not redeemed any customer gifts yet", Toast.LENGTH_SHORT).show()
                     }
                 }
     }
 
-    fun getOtherDetails(email:String){
+
+    override fun loadCustomerContact(amount: String, customerEmail: String) {
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
 
@@ -100,14 +97,27 @@ class GiftinAppAuthorityRedeemedCustomersFragment : Fragment() {
 
         db.firestoreSettings = settings
 
-        db.collection("users").document(email).get()
+        db.collection("users").document(customerEmail).get()
                 .addOnCompleteListener { t ->
                     if (t.isSuccessful) {
-                        var documentSnapshot = t.result
+                        val documentSnapshot = t.result
                         if (documentSnapshot?.exists()!!) {
-                            contactView1 = if (documentSnapshot.get("phone_number_1") == null) "no contact 1" else documentSnapshot.get("phone_number_1") as String
-                            contactView2 = if (documentSnapshot.get("phone_number_2") == null) "no contact 2" else documentSnapshot.get("phone_number_2") as String
-                            addressView = if (documentSnapshot.get("address") == null) "no address" else documentSnapshot.get("no address") as String?
+
+                            val builderSingle = AlertDialog.Builder(requireContext())
+                            builderSingle.setTitle("Customer Info")
+
+                            val arrayAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.select_dialog_singlechoice)
+                            arrayAdapter.add("redeemed $amount")
+                            arrayAdapter.add(documentSnapshot.get("facebook").toString())
+                            arrayAdapter.add(documentSnapshot.get("instagram").toString())
+                            arrayAdapter.add(documentSnapshot.getString("whatsapp"))
+
+                            builderSingle.setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
+
+                            builderSingle.setAdapter(arrayAdapter) { _, _ ->
+
+                            }
+                            builderSingle.show()
                         }
                     }
                 }

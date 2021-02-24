@@ -21,22 +21,38 @@
         app:layout_constraintStart_toStartOf="parent"
         app:strokeWidth="1dp" />
 
-    <FrameLayout
+    <androidx.drawerlayout.widget.DrawerLayout
+        android:id="@+id/adminDrawerLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/fr_giftin_authority">
+        android:fitsSystemWindows="true">
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottom_navigation_giftin_authority"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="@color/purple_200"
-            app:itemIconTint="@color/white"
-            app:itemTextColor="@color/white"
-            app:menu="@menu/giftin_authority_bottom_navigation"
-            />
+            android:layout_height="match_parent"
+            android:id="@+id/fr_giftin_authority"/>
 
-    </FrameLayout>
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/adminNavView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            app:headerLayout="@layout/main_nav_header_menu"
+            app:menu="@menu/giftin_authority_bottom_navigation"/>
+
+    </androidx.drawerlayout.widget.DrawerLayout>
+
+
+
+<!--        <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--            android:id="@+id/bottom_navigation_giftin_authority"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="bottom"-->
+<!--            android:background="@color/purple_200"-->
+<!--            app:itemIconTint="@color/white"-->
+<!--            app:itemTextColor="@color/white"-->
+<!--            app:menu="@menu/giftin_authority_bottom_navigation"-->
+<!--            />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

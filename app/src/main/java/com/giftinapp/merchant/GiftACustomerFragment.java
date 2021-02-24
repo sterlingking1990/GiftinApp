@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public class GiftACustomerFragment extends Fragment {
 
@@ -74,6 +75,11 @@ public class GiftACustomerFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
+        sessionManager = new SessionManager(requireContext());
+
+        checkIfSocialInfoExist(sessionManager.getEmail());
+
+
         lvCustomerFanToRewardList=view.findViewById(R.id.lv_customer_fan_to_reward_list);
         btnAddCustomerFanToList=view.findViewById(R.id.btn_add_customer_fan_to_list);
         btnRewardCustomerFan=view.findViewById(R.id.btn_reward_customer_fan);
@@ -83,7 +89,7 @@ public class GiftACustomerFragment extends Fragment {
         list=new ArrayList<CustomerFanToGiftPojo>();
         arrayAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_list_item_1,list);
 
-        sessionManager = new SessionManager(requireContext());
+
         builder = new AlertDialog.Builder(requireContext());
 
         btnAddCustomerFanToList.setOnClickListener(new View.OnClickListener() {
@@ -374,6 +380,38 @@ public class GiftACustomerFragment extends Fragment {
                 .commit();
     }
 
+    public void checkIfSocialInfoExist(String email) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
 
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        //check if the user has his info updated
+        db.collection("merchants").document(email).get()
+                .addOnCompleteListener(task12 -> {
+                    if (task12.isSuccessful()) {
+                        DocumentSnapshot userInfo = task12.getResult();
+                        if (userInfo.exists()) {
+                            if (Objects.requireNonNull(userInfo.get("facebook")).toString().equalsIgnoreCase("not provided") &&
+                                    Objects.requireNonNull(userInfo.get("whatsapp")).toString().equalsIgnoreCase("not provided") &&
+                                    Objects.requireNonNull(userInfo.get("instagram")).toString().equalsIgnoreCase("not provided")) {
+                                builder.setMessage("Please update your info before redeeming your gifts")
+                                        .setCancelable(false)
+                                        .setPositiveButton("Ok", (dialog, id) -> {
+                                            //take user to place to update info
+                                            openFragment(new MerchantInfoUpdate());
+                                        });
+                                AlertDialog alert = builder.create();
+                                alert.show();
+
+                            }
+                        }
+                    }
+                });
+    }
 
 }

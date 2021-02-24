@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <group android:checkableBehavior="single">
     <item
         android:id="@+id/navigation_home"
         android:icon="@drawable/ic_gifts"
@@ -18,5 +19,6 @@
         android:id="@+id/navigation_gifting_merchant"
         android:icon="@drawable/ic_gifting_merchant"
         android:title="Gifting Business"/>
+    </group>
 
 </menu>

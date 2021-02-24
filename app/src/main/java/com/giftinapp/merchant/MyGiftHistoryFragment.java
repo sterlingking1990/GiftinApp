@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.giftinapp.merchant.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -22,9 +23,11 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
-public class MyGiftHistoryFragment extends Fragment {
+public class MyGiftHistoryFragment extends Fragment implements GiftHistoryAdapter.ClickableIcon {
     private GiftHistoryAdapter giftHistoryAdapter;
     private RecyclerView rvGiftHistoryRecycler;
     private RecyclerView.LayoutManager layoutManager;
@@ -38,7 +41,7 @@ public class MyGiftHistoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        giftHistoryAdapter=new GiftHistoryAdapter();
+        giftHistoryAdapter=new GiftHistoryAdapter(this);
         layoutManager=new LinearLayoutManager(requireContext(),RecyclerView.VERTICAL,false);
         giftHistoryView=inflater.inflate(R.layout.fragment_my_gift_history, container, false);
 
@@ -81,7 +84,7 @@ public class MyGiftHistoryFragment extends Fragment {
                                 rvGiftHistoryRecycler = view.findViewById(R.id.rv_gifthistory);
 
 
-                                    giftHistoryAdapter.setGiftHistoryList(giftHistoryIdPojos);
+                                    giftHistoryAdapter.setGiftHistoryList(giftHistoryIdPojos,requireContext());
                                     rvGiftHistoryRecycler.setLayoutManager(layoutManager);
                                     rvGiftHistoryRecycler.setAdapter(giftHistoryAdapter);
                                 }
@@ -91,7 +94,7 @@ public class MyGiftHistoryFragment extends Fragment {
                                             .setCancelable(false)
                                             .setPositiveButton("OK", (dialog, id) -> {
                                                 //take user to rewarding merchants
-                                                openFragment(new GiftingMerchantFragment());
+                                                //openFragment(new GiftingMerchantFragment());
                                             });
                                     AlertDialog alert = builder.create();
                                     alert.show();
@@ -100,11 +103,41 @@ public class MyGiftHistoryFragment extends Fragment {
                 });
     }
 
-    public void openFragment(Fragment fragment) {
-        FragmentManager fm = getFragmentManager();
-        fm.beginTransaction()
-                .replace(R.id.fr_game, fragment)
-                .addToBackStack(null)
-                .commit();
+//    public void openFragment(Fragment fragment) {
+//        FragmentManager fm = getFragmentManager();
+//        fm.beginTransaction()
+//                .replace(R.id.fr_game, fragment)
+//                .addToBackStack(null)
+//                .commit();
+//    }
+
+    @Override
+    public void openMerchantFacebookDetail(@NotNull String facebookHandle) {
+        builder.setMessage(facebookHandle)
+                .setCancelable(true)
+                .setPositiveButton("OK", (dialog, id) -> {
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    @Override
+    public void openMerchantInstagramDetail(@NotNull String instagramHandle) {
+        builder.setMessage(instagramHandle)
+                .setCancelable(true)
+                .setPositiveButton("OK", (dialog, id) -> {
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    @Override
+    public void openMerchantWhatsApp(@NotNull String whatsApp) {
+        builder.setMessage(whatsApp)
+                .setCancelable(true)
+                .setPositiveButton("OK", (dialog, id) -> {
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 }

@@ -2,8 +2,12 @@ package com.giftinapp.merchant;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
@@ -23,13 +27,14 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 
 import com.giftinapp.merchant.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
@@ -38,12 +43,19 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.squareup.picasso.Picasso;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ViewListener;
 
+import org.w3c.dom.Text;
+
+import java.util.Objects;
+import java.util.zip.Inflater;
+
+import static androidx.navigation.ui.AppBarConfigurationKt.AppBarConfiguration;
+
 public class MainActivity extends AppCompatActivity {
-    BottomNavigationView bottomNavigation;
-    private Toolbar toolbar;
+
     public SessionManager sessionManager;
     public AlertDialog.Builder builder;
 
@@ -55,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
 
     FirebaseAuth mauth;
 
+    private DrawerLayout drawer;
+    private ActionBarDrawerToggle t;
+    private NavigationView nv;
 
     private static Button btnGameList;
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -85,25 +100,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        drawer = findViewById(R.id.drawer_layout);
+        t = new ActionBarDrawerToggle(this, drawer,R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
+        drawer.addDrawerListener(t);
+        t.syncState();
+
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+        nv = findViewById(R.id.nav_view);
+
+        nv.setNavigationItemSelectedListener(item -> {
+            selectDrawerItem(item);
+            return true;
+        });
+
         sessionManager = new SessionManager(getApplicationContext());
 
         builder = new AlertDialog.Builder(getApplicationContext());
 
-        bottomNavigation = findViewById(R.id.bottom_navigation);
-//        bottomNavigation = findViewById(R.id.bottom_navigation);
-        bottomNavigation.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
-        bottomNavigation.setBackgroundColor(getColor(R.color.secondColorType));
-//        openFragment(new GiftListFragment());
+        View headerView = nv.getHeaderView(0);
+        TextView navTextView = headerView.findViewById(R.id.nav_header_textView);
+        ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
+        Picasso.get().load(R.drawable.gift).into(navImageView);
+        navTextView.setText(Objects.requireNonNull(mauth.getCurrentUser()).getEmail());
 
-
-
-//        RewardFragment fragment = new RewardFragment();
-//        // R.id.container - the id of a view that will hold your fragment; usually a FrameLayout
-//        getSupportFragmentManager().beginTransaction()
-//                .add(R.id.fr_game, fragment)
-//                .commit();
-
-        //get update of the total gift coin on create
         getTotalGiftCoin();
     }
 
@@ -143,6 +164,35 @@ public class MainActivity extends AppCompatActivity {
         return customView;
     };
 
+    private void selectDrawerItem(MenuItem menuitem){
+            switch (menuitem.getItemId()) {
+                case R.id.navigation_home:
+                    carouselView.setVisibility(View.GONE);
+                    GiftListFragment fragment = new GiftListFragment();
+                    openFragment(fragment);
+                    break;
+                case R.id.navigation_mygiftcart:
+                    carouselView.setVisibility(View.GONE);
+                    MyGiftCartFragment myGiftCartFragment = new MyGiftCartFragment();
+                    openFragment(myGiftCartFragment);
+                    break;
+
+                case R.id.navigation_gifting_history:
+                    carouselView.setVisibility(View.GONE);
+                    MyGiftHistoryFragment myGiftHistoryFragment = new MyGiftHistoryFragment();
+                    openFragment(myGiftHistoryFragment);
+                    break;
+
+                case R.id.navigation_gifting_merchant:
+                    carouselView.setVisibility(View.GONE);
+                    GiftingMerchantFragment giftingMerchantFragment = new GiftingMerchantFragment();
+                    openFragment(giftingMerchantFragment);
+                    break;
+
+            }
+            drawer.close();
+    }
+
     private void updateCounter(int position) {
 
         switch (position) {
@@ -160,6 +210,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     public class ReportsViewHolder {
         TextView reportValue;
         TextView reportName;
@@ -167,36 +231,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    BottomNavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener =
-            item -> {
-                switch (item.getItemId()) {
-                    case R.id.navigation_home:
-                        carouselView.setVisibility(View.GONE);
-                        GiftListFragment fragment = new GiftListFragment();
-                        openFragment(fragment);
-                        return true;
-                        case R.id.navigation_mygiftcart:
-                            carouselView.setVisibility(View.GONE);
-                            MyGiftCartFragment myGiftCartFragment = new MyGiftCartFragment();
-                            openFragment(myGiftCartFragment);
-                            return true;
 
-                        case R.id.navigation_gifting_history:
-                            carouselView.setVisibility(View.GONE);
-                            MyGiftHistoryFragment myGiftHistoryFragment = new MyGiftHistoryFragment();
-                            openFragment(myGiftHistoryFragment);
-                            return true;
-
-                    case R.id.navigation_gifting_merchant:
-                        carouselView.setVisibility(View.GONE);
-                        GiftingMerchantFragment giftingMerchantFragment = new GiftingMerchantFragment();
-                        openFragment(giftingMerchantFragment);
-                        return true;
-
-
-                }
-                return false;
-            };
 
     public void openFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
@@ -214,6 +249,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if(t.onOptionsItemSelected(item)){
+            return true;
+        }
+
         switch (item.getItemId()){
             case R.id.customer_refresh_page:
                 Intent intent = new Intent(this, MainActivity.class);
@@ -251,16 +291,18 @@ public class MainActivity extends AppCompatActivity {
                         });
 
                 builder.setNeutralButton("Ok", (dialog, id) -> {
-                    dialog.cancel();
-                    mauth.signOut();
-                    MainActivity.this.finish();
+                    this.finish();
                     System.exit(0);
+                    dialog.cancel();
 
                 });
                 builder.show();
+                sessionManager.clearData();
+                mauth.signOut();
                 return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     public void getTotalGiftCoin() {
@@ -313,6 +355,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
 
 
 }

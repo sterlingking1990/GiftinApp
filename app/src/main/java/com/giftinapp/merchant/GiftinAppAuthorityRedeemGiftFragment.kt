@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 
@@ -64,31 +65,38 @@ class GiftinAppAuthorityRedeemGiftFragment : Fragment() {
                 .addOnCompleteListener {
                     if(it.isSuccessful){
                         for (eachBusinessThatGiftedCustomer in it.result!!){
-                            var rewardCoin:Long = eachBusinessThatGiftedCustomer.get("gift_coin") as Long
+                            val rewardCoin:Long = eachBusinessThatGiftedCustomer.get("gift_coin") as Long
                             if(amountToOffsetLong >= rewardCoin) {
 
                                 amountToOffsetLong -= rewardCoin
-
+                                Toast.makeText(requireContext(), "Amount to offset is greater than reward coin", Toast.LENGTH_SHORT).show()
                                 db.collection("users").document(email).collection("rewards").document(eachBusinessThatGiftedCustomer.id).update("gift_coin", 0)
                             }
                             else {
-                                var dbBalance = rewardCoin - amountToOffsetLong
+                                val dbBalance = rewardCoin - amountToOffsetLong
                                 amountToOffsetLong=0L
                                 db.collection("users").document(email).collection("rewards").document(eachBusinessThatGiftedCustomer.id).update("gift_coin", dbBalance)
                                         .addOnCompleteListener { completedGifting ->
                                             if (completedGifting.isSuccessful) {
                                                 Toast.makeText(requireContext(), "Customer gift coin has been redeemed", Toast.LENGTH_SHORT).show()
+                                                sessionManager.setCustomerEmailToRedeemValidity(true)
+                                            }
+                                            else{
+                                                Toast.makeText(requireContext(),"Please check that the email is valid and that you are connected to internet",Toast.LENGTH_LONG).show()
+                                                sessionManager.setCustomerEmailToRedeemValidity(false)
                                             }
                                         }
                             }
                         }
                         //update the record for customers who have redeemed their reward
-                        var amountRedeemed=amount.toLong()
-                        var rewardPojo=RewardPojo()
-                        rewardPojo.email=email
-                        rewardPojo.gift_coin=amountRedeemed
+                        if(sessionManager.isCustomerEmailToRedeemValid()==true) {
+                            val amountRedeemed = amount.toLong()
+                            val rewardPojo = RewardPojo()
+                            rewardPojo.email = email
+                            rewardPojo.gift_coin = amountRedeemed
 
-                        db.collection("users").document(sessionManager.getEmail().toString()).collection("customers_redeemed").document(email).set(rewardPojo)
+                            db.collection("users").document(sessionManager.getEmail().toString()).collection("customers_redeemed").document(email).set(rewardPojo)
+                        }
                     }
                 }
 

@@ -75,10 +75,10 @@ public class MerchantInfoUpdate extends Fragment {
 
         String email=sessionManager.getEmail();
 
-        String facebookInput=facebook.isEmpty()?"your facebook handle":facebook;
-        String instagramInput = instagram.isEmpty()?"your instagram handle":instagram;
-        String whatsAppInput=whatsapp.isEmpty()?"your whatsapp":whatsapp;
-        String addressInput=address.isEmpty()?"your address":address;
+        String facebookInput=facebook.isEmpty()?"not provided":facebook;
+        String instagramInput = instagram.isEmpty()?"not provided":instagram;
+        String whatsAppInput=whatsapp.isEmpty()?"not provided":whatsapp;
+        String addressInput=address.isEmpty()?"not provided":address;
 
         MerchantInfoUpdatePojo merchantInfoUpdatePojo=new MerchantInfoUpdatePojo();
         merchantInfoUpdatePojo.facebook=facebookInput;
@@ -114,8 +114,8 @@ public class MerchantInfoUpdate extends Fragment {
                         if(documentSnapshot.exists()) {
                             etFacebook.setText(documentSnapshot.get("facebook").toString());
                             etInstagram.setText(documentSnapshot.get("instagram").toString());
-                            etWhatsApp.setText(documentSnapshot.get("whatsapp").toString());
-                            etAddress.setText(documentSnapshot.get("address").toString());
+                            etWhatsApp.setText(documentSnapshot.get("whatsAppInput").toString());
+                            etAddress.setText(documentSnapshot.get("addressInput").toString());
 
                         }
                     }

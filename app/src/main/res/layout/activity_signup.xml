@@ -71,6 +71,7 @@
         android:orientation="horizontal"
         android:padding="5dp"
         android:weightSum="2"
+        app:layout_constraintBottom_toTopOf="@id/btn_sign_up"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ll_signup_activity_email_address">
@@ -79,19 +80,18 @@
             android:id="@+id/tv_signup_interest"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="65dp"
             android:layout_weight="1"
-            android:paddingLeft="10dp"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:text="signup mode:"
             android:textSize="20sp" />
 
-        <androidx.appcompat.widget.AppCompatSpinner
+        <Spinner
             android:id="@+id/sp_signup_interest"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
+            android:layout_margin="10dp"
             android:layout_weight="1"
-            android:entries="@array/interest"
-            android:background="@color/whitesmoke"
             android:spinnerMode="dropdown" />
     </LinearLayout>
 
@@ -102,7 +102,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:text="Sign Up"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/ll_signin_notice"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.444"
         app:layout_constraintStart_toStartOf="parent"

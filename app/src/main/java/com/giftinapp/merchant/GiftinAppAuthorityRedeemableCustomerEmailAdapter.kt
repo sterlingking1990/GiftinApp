@@ -12,11 +12,11 @@ class GiftinAppAuthorityRedeemableCustomerEmailAdapter(var clickableRedeemableCu
 
     private var redeemableCustomerEmailList:List<GiftinAppAuthorityRedeemableCustomerEmailPojo> = ArrayList()
 
-
-
     fun populateRedeemableCustomerEmail(listOfRedeemableCustomerEmail:List<GiftinAppAuthorityRedeemableCustomerEmailPojo>){
         this.redeemableCustomerEmailList=listOfRedeemableCustomerEmail
     }
+
+
     class ViewHolder(item: View):RecyclerView.ViewHolder(item)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

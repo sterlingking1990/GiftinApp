@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
+    android:layout_marginEnd="5dp"
+    android:layout_marginStart="5dp"
     android:background="@drawable/recyclerviewgradient"
     android:elevation="8dp"
     app:layout_constraintCircleRadius="30dp">
@@ -26,7 +27,7 @@
                 android:id="@+id/tv_gifting_merchant_business_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="10dp"
                 android:text="MrBiggs"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -34,13 +35,13 @@
                 app:layout_constraintHorizontal_bias="0.11"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintVertical_bias="0.16000003" />
 
             <TextView
                 android:id="@+id/tv_gifting_merchant_total_customer_gifted"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="30dp"
                 android:text="50"
                 android:textSize="20sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -73,7 +74,7 @@
                     android:id="@+id/icon_instagram"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:layout_margin="5dp"
+                    android:layout_marginEnd="5dp"
                     android:layout_marginTop="8dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/instagram" />
@@ -82,7 +83,7 @@
                     android:id="@+id/icon_facebook"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:layout_margin="5dp"
+                    android:layout_marginStart="30dp"
                     android:layout_marginTop="8dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/facebook" />
@@ -91,7 +92,7 @@
                     android:id="@+id/icon_whatsapp"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:layout_margin="5dp"
+                    android:layout_marginStart="30dp"
                     android:layout_marginTop="8dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/whatsapp" />

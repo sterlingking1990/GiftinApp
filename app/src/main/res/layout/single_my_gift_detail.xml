@@ -25,31 +25,35 @@
             <TextView
                 android:id="@+id/tv_mygift_singleitem_caption"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Play Station 4"
-                android:textSize="24sp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:scrollHorizontally="true"
+                android:textSize="20sp"
                 android:textStyle="bold">
 
             </TextView>
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 >
 
-            <com.airbnb.lottie.LottieAnimationView
-                android:id="@+id/fbRedeemMyGift"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:transformPivotY="1dp"
-                android:translationZ="1dp"
-                android:elevation="2dp"
-                app:lottie_autoPlay="false"
-                app:lottie_fileName="sendgift.json"
-                app:lottie_loop="false"
-                app:lottie_speed="2"
-                android:focusable="true" />
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/fbRedeemMyGift"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="right|bottom"
+                    android:elevation="2dp"
+                    android:focusable="true"
+                    android:transformPivotY="1dp"
+                    android:translationZ="1dp"
+                    app:lottie_autoPlay="false"
+                    app:lottie_fileName="sendgift.json"
+                    app:lottie_loop="false"
+                    app:lottie_speed="2" />
 
             <ImageView
                 android:id="@+id/iv_mygift_singleitem_image"

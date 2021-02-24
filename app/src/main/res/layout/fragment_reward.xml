@@ -3,84 +3,70 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="50dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.giftinapp.merchant.GiftListFragment">
 
-    <com.airbnb.lottie.LottieAnimationView
+    <ProgressBar
+        android:id="@+id/pgGiftListLoading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        app:lottie_loop="true"
-        android:id="@+id/loadingProgress"
-        app:lottie_autoPlay="false"
-        app:lottie_fileName="progresslottie.json"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:indeterminateTint="#D5A43A"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
 
+    <EditText
+        android:id="@+id/etSearchGifts"
+        android:layout_width="287dp"
+        android:layout_height="wrap_content"
+        android:hint="What Would you want for a Gift?"
+        android:padding="5dp"
+        android:textColor="#3C4043"
+        android:textColorHint="#3C4043"
+        android:orientation="horizontal"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_category"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        android:translationZ="1dp"
+        app:layout_constraintTop_toBottomOf="@+id/etSearchGifts" />
+
+    <com.giftinapp.merchant.GridRecyclerView
         android:id="@+id/rv_giftlist"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginTop="200dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rv_category" />
+
+    <ImageView
+        android:id="@+id/imgLoadMore"
+        android:layout_width="38dp"
+        android:layout_height="35dp"
+        android:elevation="7dp"
+        android:src="@drawable/ic_loadmore"
+        android:translationZ="1dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.919"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.934" />
 
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmer_giftlist_loading"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@id/rv_giftlist"
-        app:layout_constraintEnd_toEndOf="@id/rv_giftlist"
-        app:layout_constraintStart_toStartOf="@id/rv_giftlist"
-        app:layout_constraintTop_toTopOf="@id/rv_giftlist"
-        app:layout_constraintVertical_bias="0.0">
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="4dp"
-                android:gravity="center_horizontal">
-
-            <TextView
-                android:id="@+id/tv_giftlist_caption"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center"
-                android:background="#E7E7E7"
-                android:layout_margin="2dp"
-                />
-
-
-            <ImageView
-                android:id="@+id/iv_giftlist_image"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:layout_margin="2dp"
-                android:background="#E7E7E7" />
-
-            <TextView
-                android:id="@+id/tv_giftlist_cost"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="2dp"
-                android:background="#E7E7E7" />
-            </LinearLayout>
-    </LinearLayout>
-
-    </com.facebook.shimmer.ShimmerFrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -24,4 +24,6 @@
     <color name="btn_login_color">#5297B6</color>
 
     <color name="secondColorType">#5297B6</color>
+
+    <color name="backgroundNew">#F8F8F8</color>
 </resources>

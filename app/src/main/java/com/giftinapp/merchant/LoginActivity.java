@@ -234,22 +234,4 @@ public class LoginActivity extends AppCompatActivity {
                     });
         }
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        String modeFromSession = sessionManager.getUserMode();
-        if ( modeFromSession!= null) {
-                if (modeFromSession == "business") {
-                    Intent intent = new Intent(this, MerchantActivity.class);
-                    startActivity(intent);
-                }
-                if (modeFromSession == "customer") {
-                    Intent intent = new Intent(this, MainActivity.class);
-                    startActivity(intent);
-                }
-                //verify that the email saved on session is same with the one logged in, if same then check with firestore to know which home to take to home activity the user else logout the user
-                //if the user is an agent, create the user merchant detail again also the session should reflect this mode of login
-            }
-    }
 }

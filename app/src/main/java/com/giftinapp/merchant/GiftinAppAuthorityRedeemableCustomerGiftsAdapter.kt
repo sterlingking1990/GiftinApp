@@ -37,19 +37,28 @@ class GiftinAppAuthorityRedeemableCustomerGiftsAdapter(val displayContactDetails
             var tvRedeemableCustomerGiftName=findViewById<TextView>(R.id.tv_redeemable_gift_name)
             var tvRedeemableCustomerGiftCost= findViewById<TextView>(R.id.tv_redeemable_gift_cost)
             var ivRedeemableCustomerGiftUrl=findViewById<ImageView>(R.id.iv_redeemable_gift_url)
-            var iconRedeembaleGiftPhone1=findViewById<ImageView>(R.id.iv_redeemable_customers_phone_icon)
-            var iconRedeemableGiftAddress=findViewById<ImageView>(R.id.iv_redeemable_customers_address_icon)
+            var iconRedeembaleCustomersFb1=findViewById<ImageView>(R.id.iv_redeemable_customers_facebook_icon)
+            var iconRedeemableCustomersIg=findViewById<ImageView>(R.id.iv_redeemable_customers_instagram_icon)
+            var iconRedeemableCustomersWhatsapp=findViewById<ImageView>(R.id.iv_redeemable_customers_whatsapp_icon)
 
             tvRedeemableCustomerGiftName.text=redeemableCustomerGiftList[position].gift_name
             tvRedeemableCustomerGiftCost.text= redeemableCustomerGiftList[position].gift_cost.toString()
             Picasso.get().load(redeemableCustomerGiftList[position].gift_url).into(ivRedeemableCustomerGiftUrl)
 
-            iconRedeembaleGiftPhone1.setOnClickListener {
-               displayContactDetails.showPhoneNumber(redeemableCustomerGiftList[position].phone_number_1)
+            iconRedeembaleCustomersFb1.setOnClickListener {
+               displayContactDetails.showFacebookInfo(redeemableCustomerGiftList[position].whatsapp)
             }
 
-            iconRedeemableGiftAddress.setOnClickListener {
-                displayContactDetails.showAddress(redeemableCustomerGiftList[position].address)
+            iconRedeemableCustomersIg.setOnClickListener {
+                displayContactDetails.showInstaInfo(redeemableCustomerGiftList[position].instagram)
+            }
+
+            iconRedeemableCustomersWhatsapp.setOnClickListener {
+                displayContactDetails.showWhatsAppInfo(redeemableCustomerGiftList[position].facebook)
+            }
+
+            ivRedeemableCustomerGiftUrl.setOnClickListener {
+                displayContactDetails.removeGiftAfterRedeeming(redeemableCustomerGiftList[position])
             }
         }
 
@@ -61,8 +70,10 @@ class GiftinAppAuthorityRedeemableCustomerGiftsAdapter(val displayContactDetails
 
 
     interface DisplayContactDetails{
-        fun showPhoneNumber(phoneNumber:String)
-        fun showAddress(address:String)
+        fun showFacebookInfo(fb:String)
+        fun showInstaInfo(insta:String)
+        fun showWhatsAppInfo(whatsapp:String)
+        fun removeGiftAfterRedeeming(gift:GiftinAppAuthorityRedeemableCustomerGiftsPojo)
     }
 
 

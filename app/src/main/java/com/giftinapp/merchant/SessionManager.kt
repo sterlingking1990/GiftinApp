@@ -16,6 +16,12 @@ class SessionManager(context: Context) {
         const val REFERRER="referrer"
         const val TOTAL_CUSTOMER_GIFTED="total_customer_gifted"
         const val IS_ADDED_TO_CART = "is_added_to_cart"
+
+        const val IMAGE_URL = "image_url"
+
+        const val REDEEMED_CUSTOMER_EMAIL ="redeemed_customer_email"
+
+        const val IS_CUSTOMER_EMAIL_TO_REDEEM_VALID = "is_customer_email_to_redeem_valid"
     }
 
     /**
@@ -55,8 +61,28 @@ class SessionManager(context: Context) {
 
     }
 
+    fun isCustomerEmailToRedeemValid():Boolean?{
+        return prefs.getBoolean(IS_CUSTOMER_EMAIL_TO_REDEEM_VALID,false)
+    }
+
+    fun setCustomerEmailToRedeemValidity(isValid:Boolean){
+        val editor = prefs.edit()
+        editor.putBoolean(IS_CUSTOMER_EMAIL_TO_REDEEM_VALID,true)
+        editor.apply()
+    }
+
     fun getEmail():String?{
         return prefs.getString(EMAIL,null)
+    }
+
+    fun getRedeemedCustomerEmail():String?{
+        return prefs.getString(REDEEMED_CUSTOMER_EMAIL,null)
+    }
+
+    fun saveRedeemedCustomerEmail(email:String){
+        val editor = prefs.edit()
+        editor.putString(REDEEMED_CUSTOMER_EMAIL,email)
+        editor.apply()
     }
 
 
@@ -93,6 +119,20 @@ class SessionManager(context: Context) {
 
     fun isAddedToCart():Boolean{
         return prefs.getBoolean(IS_ADDED_TO_CART,false)
+    }
+
+    fun setImageUrl(imageUrl:String){
+        val editor =prefs.edit()
+        editor.putString(IMAGE_URL,imageUrl)
+        editor.apply()
+    }
+
+    fun getImageUrl(): String? {
+        return prefs.getString(IMAGE_URL,"")
+    }
+
+    fun clearData(){
+        prefs.all.clear()
     }
 
 }
