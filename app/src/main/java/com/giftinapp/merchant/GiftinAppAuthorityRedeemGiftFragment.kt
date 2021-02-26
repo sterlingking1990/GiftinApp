@@ -70,15 +70,15 @@ class GiftinAppAuthorityRedeemGiftFragment : Fragment() {
 
                                 amountToOffsetLong -= rewardCoin
                                 Toast.makeText(requireContext(), "Amount to offset is greater than reward coin", Toast.LENGTH_SHORT).show()
-                                db.collection("users").document(email).collection("rewards").document(eachBusinessThatGiftedCustomer.id).update("gift_coin", 0)
+                                db.collection("users").document(email).collection("rewards").document(eachBusinessThatGiftedCustomer.id).update("gift_coin", 0, "isRedeemed",true)
                             }
                             else {
                                 val dbBalance = rewardCoin - amountToOffsetLong
                                 amountToOffsetLong=0L
-                                db.collection("users").document(email).collection("rewards").document(eachBusinessThatGiftedCustomer.id).update("gift_coin", dbBalance)
+                                db.collection("users").document(email).collection("rewards").document(eachBusinessThatGiftedCustomer.id).update("gift_coin", dbBalance,"isRedeemed",true)
                                         .addOnCompleteListener { completedGifting ->
                                             if (completedGifting.isSuccessful) {
-                                                Toast.makeText(requireContext(), "Customer gift coin has been redeemed", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(requireContext(), "gift coin deducted for redeeming", Toast.LENGTH_SHORT).show()
                                                 sessionManager.setCustomerEmailToRedeemValidity(true)
                                             }
                                             else{
@@ -88,18 +88,58 @@ class GiftinAppAuthorityRedeemGiftFragment : Fragment() {
                                         }
                             }
                         }
-                        //update the record for customers who have redeemed their reward
-                        if(sessionManager.isCustomerEmailToRedeemValid()==true) {
-                            val amountRedeemed = amount.toLong()
-                            val rewardPojo = RewardPojo()
-                            rewardPojo.email = email
-                            rewardPojo.gift_coin = amountRedeemed
 
-                            db.collection("users").document(sessionManager.getEmail().toString()).collection("customers_redeemed").document(email).set(rewardPojo)
-                        }
+                        updateCustomersRedeemedRecord(amount,email)
                     }
                 }
-
     }
 
+    private fun updateCustomersRedeemedRecord(amount:String,email: String){
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+
+        db.firestoreSettings = settings
+        //update the record for customers who have redeemed their reward
+        if(sessionManager.isCustomerEmailToRedeemValid()==true) {
+            val amountRedeemed = amount.toLong()
+            val rewardPojo = RewardPojo()
+            rewardPojo.email = email
+            rewardPojo.gift_coin = amountRedeemed
+            rewardPojo.isRedeemed = true
+            //if it exist, delet it then write it,  else write it
+            db.collection("users").document(sessionManager.getEmail().toString()).collection("customers_redeemed").document(email).get()
+                    .addOnCompleteListener { getCustomerRedeemed->
+                        if(!getCustomerRedeemed.isSuccessful){
+                            db.collection("users").document(sessionManager.getEmail().toString()).collection("customers_redeemed").document(email).set(rewardPojo)
+                                    .addOnCompleteListener { redeemedCoin->
+                                        if(redeemedCoin.isSuccessful){
+                                            Toast.makeText(requireContext(),"Customer gift coin has been redeemed",Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                        }
+                        else{
+                            db.collection("users").document(sessionManager.getEmail().toString()).collection("customers_redeemed").document(email).delete()
+                                    .addOnCompleteListener { isDeleted->
+                                        if(isDeleted.isSuccessful){
+                                            db.collection("users").document(sessionManager.getEmail().toString()).collection("customers_redeemed").document(email).set(rewardPojo)
+                                                    .addOnCompleteListener { redeemedCoin->
+                                                        if(redeemedCoin.isSuccessful){
+                                                            Toast.makeText(requireContext(),"Customer gift coin has been redeemed",Toast.LENGTH_LONG).show()
+                                                        }
+                                                    }
+                                        }
+                                    }
+                        }
+                    }
+
+        }
+    }
 }

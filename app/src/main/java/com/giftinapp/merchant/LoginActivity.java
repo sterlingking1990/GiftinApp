@@ -31,13 +31,11 @@ import java.security.PublicKey;
 import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
-    private Button btnLogin;
     private FirebaseAuth mAuth;
     public SessionManager sessionManager;
     private EditText etSignInEmail;
     private EditText etSignInPassword;
     public EmailValidator emailValidator;
-    private TextView tvResetPassword;
 
     private ProgressDialogUtil progressDialogUtil;
 
@@ -49,16 +47,17 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_Merchant);
         setContentView(R.layout.activity_login);
 
         progressDialogUtil= new ProgressDialogUtil(LoginActivity.this);
 
-        btnLogin = findViewById(R.id.btn_login_user);
+        Button btnLogin = findViewById(R.id.btn_login_user);
 
         etSignInEmail = findViewById(R.id.et_sign_in_email);
         etSignInPassword = findViewById(R.id.et_sign_in_password);
 
-        tvResetPassword=findViewById(R.id.tv_reset_password_trigger);
+        TextView tvResetPassword = findViewById(R.id.tv_reset_password_trigger);
 
         btnSendVerificationEmail = findViewById(R.id.btn_resend_email_verification);
 

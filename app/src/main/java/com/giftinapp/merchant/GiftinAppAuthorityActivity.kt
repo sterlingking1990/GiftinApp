@@ -47,6 +47,7 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(R.style.Theme_Merchant)
         setContentView(R.layout.activity_giftin_app_authority)
 
         carouselViewGiftinAuthority = findViewById<CarouselView>(R.id.carouselView)

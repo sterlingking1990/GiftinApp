@@ -99,7 +99,6 @@ class GiftinAppAuthorityRedeemableCustomers : Fragment(), GiftinAppAuthorityRede
                     if(eachGift.isSuccessful) {
                         for (eachRedeemableCustomerGifts in eachGift.result!!) {
                             emailView = eachRedeemableCustomerGifts.id
-                            sessionManager.saveRedeemedCustomerEmail(emailView)
                             redeemableCustomerEmailList.add(GiftinAppAuthorityRedeemableCustomerEmailPojo(emailView))
                         }
                         redeemableCustomerEmailAdapter.populateRedeemableCustomerEmail(redeemableCustomerEmailList)
@@ -153,7 +152,7 @@ class GiftinAppAuthorityRedeemableCustomers : Fragment(), GiftinAppAuthorityRede
         loadDBInstance.collection("redeemable_gifts").document(email).collection("gift_lists").get()
                 .addOnCompleteListener { giftList->
                     if(giftList.isSuccessful){
-
+                        sessionManager.saveRedeemedCustomerEmail(email)
                         for(giftListSnapShot in giftList.result!!){
                             gift_name = giftListSnapShot.id
                             gift_cost = giftListSnapShot.get("gift_cost") as Long

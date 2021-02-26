@@ -66,6 +66,7 @@ public class MerchantActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_Merchant);
         setContentView(R.layout.activity_merchant);
 
         sessionManager = new SessionManager(getApplicationContext());

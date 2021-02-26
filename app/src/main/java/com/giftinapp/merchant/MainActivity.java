@@ -69,13 +69,12 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawer;
     private ActionBarDrawerToggle t;
-    private NavigationView nv;
 
-    private static Button btnGameList;
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_Merchant);
         setContentView(R.layout.activity_main);
 
         mauth = FirebaseAuth.getInstance();
@@ -108,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        nv = findViewById(R.id.nav_view);
+        NavigationView nv = findViewById(R.id.nav_view);
 
         nv.setNavigationItemSelectedListener(item -> {
             selectDrawerItem(item);
@@ -342,17 +341,14 @@ public class MainActivity extends AppCompatActivity {
                         new DynamicLink.AndroidParameters.Builder("com.giftinapp.merchant")
                                 .build())
                 .buildShortDynamicLink()
-                .addOnSuccessListener(new OnSuccessListener<ShortDynamicLink>() {
-                    @Override
-                    public void onSuccess(ShortDynamicLink shortDynamicLink) {
-                        Uri mInvitationUrl = shortDynamicLink.getShortLink();
+                .addOnSuccessListener(shortDynamicLink -> {
+                    Uri mInvitationUrl = shortDynamicLink.getShortLink();
 
-                        // ...
-                        Intent intent = new Intent(Intent.ACTION_SEND);
-                        intent.setType("text/plain");
-                        intent.putExtra(Intent.EXTRA_TEXT, mInvitationUrl.toString());
-                        startActivity(Intent.createChooser(intent, "Share GiftinApp With"));
-                    }
+                    // ...
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_TEXT, mInvitationUrl.toString());
+                    startActivity(Intent.createChooser(intent, "Share GiftinApp With"));
                 });
     }
 

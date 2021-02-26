@@ -8,12 +8,12 @@
     <application
         android:name=".PaymentApp"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_gftinicon"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:largeHeap="true"
-        android:theme="@style/Theme.Merchant">
+        android:theme="@style/splashScreenDisplay">
         <activity android:name=".GiftinAppAuthorityActivity"></activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".SignUpActivity">

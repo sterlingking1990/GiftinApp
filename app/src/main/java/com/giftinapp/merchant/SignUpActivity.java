@@ -39,9 +39,7 @@ public class SignUpActivity extends AppCompatActivity {
 
 
     private FirebaseAuth mAuth;
-    private Button btnSignUp;
 
-    private Button btnSignInTrigger;
     public SessionManager sessionManager;
 
     public String referrerEmail="none";
@@ -53,27 +51,23 @@ public class SignUpActivity extends AppCompatActivity {
 
     private Spinner spInterest;
 
-    private ArrayAdapter<String> loginModeAdapter;
-
-    private String[] loginMode;
-
     private String selectedLoginMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_Merchant);
         setContentView(R.layout.activity_signup);
 
-        btnSignUp=findViewById(R.id.btn_sign_up);
+        Button btnSignUp = findViewById(R.id.btn_sign_up);
 
-        btnSignInTrigger = findViewById(R.id.btn_sign_in_trigger);
+        Button btnSignInTrigger = findViewById(R.id.btn_sign_in_trigger);
 
         sessionManager = new SessionManager(getApplicationContext());
 
 
-
-        loginMode = new String[]{"As Customer", "As Business"};
-        loginModeAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,loginMode);
+        String[] loginMode = new String[]{"As Customer", "As Business"};
+        ArrayAdapter<String> loginModeAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, loginMode);
         loginModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         etEmail = findViewById(R.id.et_signup_email);
@@ -138,9 +132,8 @@ public class SignUpActivity extends AppCompatActivity {
 
                             // Replace every matched pattern with the
                             // target string using replaceAll() method
-                            String newEmail=matcher2.replaceAll("");
 
-                            referrerEmail=newEmail;
+                            referrerEmail= matcher2.replaceAll("");
 
                         }
 
@@ -180,12 +173,10 @@ public class SignUpActivity extends AppCompatActivity {
                                                     public void onComplete(@NonNull Task<Void> task1) {
                                                         if(task1.isSuccessful()){
                                                             Toast.makeText(getApplicationContext(),"You have been temporarily registered",Toast.LENGTH_SHORT).show();
-                                                            return;
                                                         }
                                                     }
                                                 });
                                         Toast.makeText(getApplicationContext(),"check your email for verification link",Toast.LENGTH_SHORT).show();
-                                        return;
                                     }
                                 });
                     }

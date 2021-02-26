@@ -133,7 +133,7 @@ public class GiftACustomerFragment extends Fragment {
 
     private void rewardCustomerFanList() {
         if(list.isEmpty() || etCustomerFanEmailToReward.getText().toString().isEmpty() || etCustomerFanRewardCoin.getText().toString().isEmpty()){
-            builder.setMessage("Customer email and amount must be provided to reward")
+            builder.setMessage("Customer email and amount should be provided and added to the list ")
                     .setCancelable(false)
                     .setPositiveButton("OK", (dialog, id) -> {
 
@@ -183,6 +183,8 @@ public class GiftACustomerFragment extends Fragment {
             RewardPojo rewardPojo = new RewardPojo();
             rewardPojo.email = email;
             rewardPojo.gift_coin = Long.parseLong(reward);
+            rewardPojo.isRedeemed = false;
+
 
             //check if the wallet amount is greater than the reward to give customer
             int finalI = i;
@@ -193,7 +195,7 @@ public class GiftACustomerFragment extends Fragment {
                             if (task.isSuccessful()) {
                                 DocumentSnapshot result = task.getResult();
                                 if (result.exists()) {
-                                    Long amount = (long) result.get("merchant_wallet_amount");
+                                    long amount = (long) result.get("merchant_wallet_amount");
                                     if (amount > Long.parseLong(reward)) {
 
                                         //2. The adding of each customers gifting record
@@ -236,7 +238,6 @@ public class GiftACustomerFragment extends Fragment {
                                         Toast.makeText(requireContext(), "Could not reward " + email + " due to insufficient balance, please fund wallet", Toast.LENGTH_LONG).show();
                                         //highlight the list that wasnt rewarded due to insufficient balance
                                         lvCustomerFanToRewardList.getChildAt(finalI).setBackgroundColor(Color.parseColor("#FFB30F"));
-                                        return;
                                     }
                                 } else {
                                     //else create the account with 0 balance
@@ -269,7 +270,7 @@ public class GiftACustomerFragment extends Fragment {
     private void updateMerchantWalletRewardEmailReferrer(Long merchant_wallet_amount,String reward,String email) {
         //here we update wallet by deducting amount as well as reward this persons referrer if they exist and is not none
 
-        Long rewardAmount = Long.parseLong(reward);
+        long rewardAmount = Long.parseLong(reward);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
 
@@ -294,7 +295,7 @@ public class GiftACustomerFragment extends Fragment {
                         if(task.isSuccessful()){
                             DocumentSnapshot documentSnapshot = task.getResult();
                             String referrer= documentSnapshot.getString("referrer");
-                            if(referrer!="none"){
+                            if(!referrer.equals("none")){
                                 //reward the referrer
                                 RewardPojo rewardPojo = new RewardPojo();
                                 rewardPojo.email="GiftinAppBonus";
