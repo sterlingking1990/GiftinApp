@@ -2,17 +2,16 @@ package com.giftinapp.merchant;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.SparseArray;
@@ -22,16 +21,17 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.giftinapp.merchant.R;
+import com.giftinapp.merchant.business.GiftACustomerFragment;
+import com.giftinapp.merchant.business.GiftinAboutForMerchant;
+import com.giftinapp.merchant.business.MerchantGiftStatsFragment;
+import com.giftinapp.merchant.business.MerchantInfoUpdate;
+import com.giftinapp.merchant.business.WalletInfo;
+import com.giftinapp.merchant.utility.SessionManager;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.dynamiclinks.DynamicLink;
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
-import com.google.firebase.dynamiclinks.ShortDynamicLink;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
@@ -115,7 +115,7 @@ public class MerchantActivity extends AppCompatActivity {
     }
 
     ViewListener viewListener = position -> {
-        View customView = getLayoutInflater().inflate(R.layout.single_item_merchant_carousel_report,null);
+        @SuppressLint("InflateParams") View customView = getLayoutInflater().inflate(R.layout.single_item_merchant_carousel_report,null);
 
         MerchantReportsViewHolder holder = new MerchantReportsViewHolder();
         holder.reportValue = customView.findViewById(R.id.kpi_report_value);
@@ -210,8 +210,7 @@ public class MerchantActivity extends AppCompatActivity {
                             totalWalletBalance=0L;
                             DocumentSnapshot documentSnapshot = task.getResult();
                             if(documentSnapshot.exists()){
-                                Long walletBalance= (long) documentSnapshot.get("merchant_wallet_amount");
-                                totalWalletBalance=walletBalance;
+                                totalWalletBalance= (long) documentSnapshot.get("merchant_wallet_amount");
                             }
                         }
                         else{
@@ -318,8 +317,6 @@ public class MerchantActivity extends AppCompatActivity {
                 return true;
 
             case R.id.merchant_exit:
-                Vibrator vibrator = (Vibrator) MerchantActivity.this.getSystemService(Context.VIBRATOR_SERVICE);
-                vibrator.vibrate(500);
                 android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MerchantActivity.this);
                 // builder.setTitle("Alert");
                 // builder.setIcon(R.drawable.ic_launcher);
@@ -333,16 +330,13 @@ public class MerchantActivity extends AppCompatActivity {
                             }
                         });
 
-                builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        mAuth.signOut();
-                        dialog.cancel();
-                        MerchantActivity.this.finish();
-                        System.exit(0);
-                    }
-                });
+                builder.setNeutralButton("Ok", (dialog, id) -> {
+                    mAuth.signOut();
+                    sessionManager.clearData();
+                    startActivity(new Intent(MerchantActivity.this,SignUpActivity.class));
+                    dialog.cancel();
 
+                });
                 builder.show();
                 return true;
         }

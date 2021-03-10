@@ -14,8 +14,10 @@
         android:supportsRtl="true"
         android:largeHeap="true"
         android:theme="@style/splashScreenDisplay">
-        <activity android:name=".GiftinAppAuthorityActivity"></activity>
+        <activity android:name=".GiftinAppAuthorityActivity" />
         <activity android:name=".MainActivity" />
+        <activity android:name=".MerchantActivity"/>
+        <activity android:name=".LoginActivity"/>
         <activity android:name=".SignUpActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,9 +42,6 @@
         <meta-data
             android:name="co.paystack.android.PublicKey"
             android:value="pk_test_c6ee2e7a44ffb088bff0cd3cfe7665336b40b6c0" />
-
-        <activity android:name=".MerchantActivity" />
-        <activity android:name=".LoginActivity" />
     </application>
 
 </manifest>

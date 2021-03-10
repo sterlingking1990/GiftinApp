@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,21 +13,17 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.giftinapp.merchant.R;
+import com.giftinapp.merchant.utility.EmailValidator;
+import com.giftinapp.merchant.utility.PasswordValidator;
+import com.giftinapp.merchant.utility.ProgressDialogUtil;
+import com.giftinapp.merchant.utility.SessionManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.ktx.Firebase;
-
-import java.security.PublicKey;
-import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -115,7 +110,6 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(getApplicationContext(),"please check email for reset link",Toast.LENGTH_SHORT).show();
-                            return;
                         }
                     }
                 });
@@ -135,8 +129,8 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
         db.setFirestoreSettings(settings);
 
-        Boolean selectedCustomer = selectedLoginMode.getText().toString().equals("login as customer".trim());
-        Boolean selectedBusiness = selectedLoginMode.getText().toString().equals("login as business".trim());
+        boolean selectedCustomer = selectedLoginMode.getText().toString().equals("login as customer".trim());
+        boolean selectedBusiness = selectedLoginMode.getText().toString().equals("login as business".trim());
 
         if(selectedCustomer){
             progressDialogUtil.startDialog("logging you in...");

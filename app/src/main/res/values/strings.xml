@@ -24,6 +24,12 @@
         <item>As Business</item>
     </string-array>
 
+    <string-array name="giftorId">
+        <item>Use my facebook</item>
+        <item>Use my Instagram</item>
+        <item>Use my whatsApp</item>
+    </string-array>
+
     <string-array name="wallet_range">
         <item>1000</item>
         <item>2000</item>

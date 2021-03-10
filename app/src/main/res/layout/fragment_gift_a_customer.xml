@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="com.giftinapp.merchant.GiftACustomerFragment">
+    tools:context="com.giftinapp.merchant.business.GiftACustomerFragment">
 
 
     <LinearLayout
@@ -26,7 +26,7 @@
                 android:id="@+id/et_customer_fan_email_to_gift"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter Email to Gift"
+                android:hint="Enter GiftinId or Email"
                 android:imeOptions="actionNext"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"

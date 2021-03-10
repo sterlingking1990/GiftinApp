@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent">
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
     android:orientation="vertical"
-    tools:context="com.giftinapp.merchant.SettingsFragment">
+    tools:context="com.giftinapp.merchant.customer.SettingsFragment">
 
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginTop="100dp"
         android:gravity="center"
         android:orientation="vertical">
 
@@ -84,8 +86,36 @@
                     android:maxLines="1"
                     android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
-
         </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <LinearLayout
+            android:id="@+id/ll_settings_giting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/tv_gifting_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="Gifting Id"
+                android:textSize="16sp"
+                app:drawableEndCompat="@drawable/ic_info" />
+
+            <Spinner
+                android:id="@+id/sp_gifting_id"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:spinnerMode="dropdown" />
+        </LinearLayout>
 
         <Button
             android:id="@+id/btn_update_info"
@@ -99,3 +129,4 @@
     </androidx.appcompat.widget.LinearLayoutCompat>
 
 </LinearLayout>
+</ScrollView>

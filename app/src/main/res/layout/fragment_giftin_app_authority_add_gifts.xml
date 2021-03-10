@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context="com.giftinapp.merchant.GiftinAppAuthorityAddGiftsFragment">
+    tools:context="com.giftinapp.merchant.admin.GiftinAppAuthorityAddGiftsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_added_gifts_lists"

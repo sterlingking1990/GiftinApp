@@ -3,7 +3,6 @@ package com.giftinapp.merchant
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.os.Vibrator
 import android.util.SparseArray
 import android.view.Menu
 import android.view.MenuItem
@@ -15,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
+import com.giftinapp.merchant.admin.*
+import com.giftinapp.merchant.utility.SessionManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -26,10 +27,11 @@ import com.synnapps.carouselview.ViewListener
 import java.util.*
 import kotlin.system.exitProcess
 
+
 class GiftinAppAuthorityActivity : AppCompatActivity() {
 
     lateinit var bottomNavigationView :BottomNavigationView
-    lateinit var sessionManager:SessionManager
+    lateinit var sessionManager: SessionManager
     private val mAuth = FirebaseAuth.getInstance()
 
     var totalRegisteredUsers =0
@@ -125,17 +127,17 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
         when (position) {
             0 -> {
                 getTotalRegisteredUsers()
-                val totalRegistered = if (totalRegisteredUsers == null) 0 else totalRegisteredUsers
+                val totalRegistered = totalRegisteredUsers
                 holderListMerchant[0].reportValue?.text = totalRegistered.toString()
             }
             1 -> {
                 getTotalGiftedUsers()
-                val totalGifted = if (totalGiftedUsers == null) 0 else totalGiftedUsers
+                val totalGifted = totalGiftedUsers
                 holderListMerchant[1].reportValue?.text = totalGifted.toString()
             }
             2 -> {
                 getTotalVerifiedBusiness()
-                val totalVerified = if (totalVerifiedBusiness == null) 0 else totalVerifiedBusiness
+                val totalVerified = totalVerifiedBusiness
                 holderListMerchant[2].reportValue?.text = totalVerified.toString()
             }
         }
@@ -169,6 +171,32 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
     }
 
     private fun getTotalGiftedUsers(){
+
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+        db.collection("users").document("giftinappinc@gmail.com").collection("customers_redeemed")
+                .get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful){
+                        totalGiftedUsers=0
+                        for (item in it.result!!){
+                            totalGiftedUsers+=1
+                        }
+                    }
+                    else{
+                        totalGiftedUsers=0
+                    }
+                }
 
     }
 
@@ -245,8 +273,6 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
 
 
             R.id.giftin_authority_exit -> {
-                val vibrator = this.getSystemService(VIBRATOR_SERVICE) as Vibrator
-                vibrator.vibrate(500)
                 val builder = AlertDialog.Builder(this)
                 // builder.setTitle("Alert");
                 // builder.setIcon(R.drawable.ic_launcher);
@@ -256,9 +282,9 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
                 ) { _, _ -> }
                 builder.setNeutralButton("Ok") { dialog, _ ->
                     mAuth.signOut()
+                    sessionManager.clearData()
+                    startActivity(Intent(this, SignUpActivity::class.java))
                     dialog.cancel()
-                    this.finish()
-                    exitProcess(0)
                 }
                 builder.show()
                 return true
