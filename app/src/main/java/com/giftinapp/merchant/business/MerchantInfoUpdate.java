@@ -119,12 +119,12 @@ public class MerchantInfoUpdate extends Fragment {
 
         btnUpdateMerchantInfo.setOnClickListener(v->{
             updateUserInfo(etFacebook.getText().toString(),etInstagram.getText().toString(),etWhatsApp.getText().toString(),
-                    etAddress.getText().toString());
+                    etAddress.getText().toString(),selectedGiftorId);
         });
 
     }
 
-    private void updateUserInfo(String facebook,String instagram,String whatsapp,String address) {
+    private void updateUserInfo(String facebook, String instagram, String whatsapp, String address,String giftorId) {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
@@ -141,6 +141,7 @@ public class MerchantInfoUpdate extends Fragment {
         String instagramInput = instagram.isEmpty()?"not provided":instagram;
         String whatsAppInput=whatsapp.isEmpty()?"not provided":whatsapp;
         String addressInput=address.isEmpty()?"not provided":address;
+        String giftorIdInput = giftorId.isEmpty()?email:giftorId;
 
         MerchantInfoUpdatePojo merchantInfoUpdatePojo=new MerchantInfoUpdatePojo();
         merchantInfoUpdatePojo.facebook=facebookInput;
@@ -149,10 +150,10 @@ public class MerchantInfoUpdate extends Fragment {
         merchantInfoUpdatePojo.address=addressInput;
 
         db.collection("merchants").document(email).update("facebook",facebookInput,"instagram",instagramInput,
-                "whatsapp",whatsAppInput,"address",addressInput)
+                "whatsapp",whatsAppInput,"address",addressInput,"giftorId", giftorIdInput)
                 .addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
-                        sessionManager.setGiftorId(selectedGiftorId);
+                        sessionManager.setGiftorId(giftorIdInput);
                         Toast.makeText(requireContext(),"details updated successfully",Toast.LENGTH_LONG).show();
                     }
                 });
@@ -179,6 +180,7 @@ public class MerchantInfoUpdate extends Fragment {
                             etInstagram.setText(documentSnapshot.get("instagram").toString());
                             etWhatsApp.setText(documentSnapshot.get("whatsapp").toString());
                             etAddress.setText(documentSnapshot.get("address").toString());
+                            tvGiftorId.setText(documentSnapshot.get("giftorId").toString());
                             String giftorText = "Giftor Id" + "<b><p>" +  "* " + sessionManager.getGiftorId() + "</p></b> ";
                             tvGiftorId.setText(Html.fromHtml(giftorText));
 

@@ -11,24 +11,23 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.giftinapp.merchant.customer.AboutFragment;
+import com.giftinapp.merchant.customer.CustomerRewardStories;
 import com.giftinapp.merchant.customer.GiftListFragment;
 import com.giftinapp.merchant.customer.GiftingMerchantFragment;
+import com.giftinapp.merchant.customer.MerchantStoryList;
 import com.giftinapp.merchant.customer.MyGiftCartFragment;
 import com.giftinapp.merchant.customer.MyGiftHistoryFragment;
 import com.giftinapp.merchant.customer.SettingsFragment;
@@ -186,6 +185,12 @@ public class MainActivity extends AppCompatActivity {
                     carouselView.setVisibility(View.GONE);
                     GiftingMerchantFragment giftingMerchantFragment = new GiftingMerchantFragment();
                     openFragment(giftingMerchantFragment);
+                    break;
+
+                case R.id.navigation_view_reward_deal:
+                    carouselView.setVisibility(View.GONE);
+                    MerchantStoryList merchantStoryList = new MerchantStoryList();
+                    openFragment(merchantStoryList);
                     break;
 
             }

@@ -2,23 +2,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-    <item
-        android:id="@+id/navigation_home"
-        android:icon="@drawable/ic_gifts"
-        android:title="Merchants Gifts" />
-    <item
-        android:id="@+id/navigation_mygiftcart"
-        android:icon="@drawable/gift_track_icon"
-        android:title="My Gift Cart" />
-    <item
-        android:id="@+id/navigation_gifting_history"
-        android:icon="@drawable/merchants_care"
-        android:title="Gifting History" />
+        <item
+            android:id="@+id/navigation_home"
+            android:icon="@drawable/ic_gifts"
+            android:title="Merchants Gifts" />
+        <item
+            android:id="@+id/navigation_mygiftcart"
+            android:icon="@drawable/gift_track_icon"
+            android:title="My Gift Cart" />
+        <item
+            android:id="@+id/navigation_gifting_history"
+            android:icon="@drawable/merchants_care"
+            android:title="Gifting History" />
 
-    <item
-        android:id="@+id/navigation_gifting_merchant"
-        android:icon="@drawable/ic_gifting_merchant"
-        android:title="Gifting Business"/>
+        <item
+            android:id="@+id/navigation_gifting_merchant"
+            android:icon="@drawable/ic_gifting_merchant"
+            android:title="Gifting Business"/>
+
+        <item
+            android:id="@+id/navigation_view_reward_deal"
+            android:icon="@drawable/ic_view_reward_deal"
+            android:title="View Reward Deals"/>
     </group>
 
 </menu>

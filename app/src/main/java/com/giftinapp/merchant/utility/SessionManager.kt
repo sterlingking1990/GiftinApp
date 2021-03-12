@@ -3,6 +3,9 @@ package com.giftinapp.merchant.utility
 import android.content.Context
 import android.content.SharedPreferences
 import com.giftinapp.merchant.R
+import com.giftinapp.merchant.model.MerchantStoryListPojo
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class SessionManager(context: Context) {
     private var prefs: SharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE)
@@ -25,6 +28,7 @@ class SessionManager(context: Context) {
         const val IS_CUSTOMER_EMAIL_TO_REDEEM_VALID = "is_customer_email_to_redeem_valid"
 
         const val GIFTOR_ID = "giftor_id"
+
     }
 
     /**
@@ -35,6 +39,8 @@ class SessionManager(context: Context) {
         editor.putString(USER_TOKEN, token)
         editor.apply()
     }
+
+
 
     /**
      * Function to fetch auth token

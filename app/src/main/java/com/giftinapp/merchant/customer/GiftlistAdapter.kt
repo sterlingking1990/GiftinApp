@@ -112,7 +112,7 @@ class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Ad
     private fun checkIfItemInCart(giftList: GiftList, addToCart: LottieAnimationView, context: Context) {
 
         //send the gift to giftin company for redeeming
-        var sessionManager: SessionManager = SessionManager(context)
+        val sessionManager: SessionManager = SessionManager(context)
         val emailOfGiftOwner: String? = sessionManager.getEmail()
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
