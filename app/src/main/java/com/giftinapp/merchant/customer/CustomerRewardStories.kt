@@ -13,8 +13,11 @@ import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import com.giftinapp.merchant.R
 import com.giftinapp.merchant.model.MerchantStoryListPojo
+import com.giftinapp.merchant.model.MerchantStoryPojo
 import com.giftinapp.merchant.utility.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -22,12 +25,17 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import java.io.Serializable
+import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.fixedRateTimer
 
 
 class CustomerRewardStories : Fragment() {
 
-    private var imagesList:List<MerchantStoryListPojo>?=null
+    var imagesList:ArrayList<MerchantStoryListPojo>?=null
+    var allStories:ArrayList<MerchantStoryPojo>?=null
+    var currentStoryPos:Int? = 0
 
     lateinit var ll_status:FrameLayout;
     lateinit var ll_progress_bar:LinearLayout;
@@ -36,15 +44,20 @@ class CustomerRewardStories : Fragment() {
     var mCurrentIndex: Int = 0
     var startTime: Long = System.currentTimeMillis()
 
+    private lateinit var tvRewardStoryTag:TextView
+    var hasHeader:Boolean =false
+
     lateinit var sessionManager:SessionManager
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         arguments?.let {
-            imagesList = it.get("storyList") as List<MerchantStoryListPojo>
+            imagesList = it.get("storyList") as ArrayList<MerchantStoryListPojo>
+            allStories = it.get("allStory") as ArrayList<MerchantStoryPojo>
+            currentStoryPos = it.getInt("currentStoryPos")
+            hasHeader = it.getBoolean("hasHeader")
 
         }
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -57,10 +70,11 @@ class CustomerRewardStories : Fragment() {
         ll_status = view.findViewById(R.id.ll_status)
         ll_progress_bar = view.findViewById(R.id.ll_progress_bar)
 
+        tvRewardStoryTag = view.findViewById(R.id.tvRewardStatusTag)
+
         view.setOnTouchListener(onTouchListener)
 
         sessionManager = SessionManager(requireContext())
-
 
 
         setImageStatusData()
@@ -123,22 +137,48 @@ class CustomerRewardStories : Fragment() {
     }
 
     private fun moveToNextStatus() {
+
         if ( mCurrentIndex < imagesList?.size!!-1) {
             mCurrentProgress = 0
             mDisposable?.dispose()
             mDisposable = null
             runOnUiThread {
-                ll_status[mCurrentIndex].gone()
                 updateStoryAsViewed(mCurrentIndex)
+                ll_status[mCurrentIndex].gone()
                 mCurrentIndex++
                 ll_status[mCurrentIndex].show()
-
+                //showStatusTag(mCurrentIndex)
             }
             if (mCurrentIndex != imagesList?.size!! - 1)
                 emitStatusProgress()
             } else {
-                mDisposable?.dispose()
-                mDisposable = null
+
+            runOnUiThread {
+                if(currentStoryPos!! < (allStories?.size?.minus(1)!!)) {
+                    updateStoryAsViewed(mCurrentIndex) //if the story gets to the end, just mark as seen
+                    currentStoryPos = currentStoryPos!! +1
+                    imagesList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList
+
+                    }
+                    mDisposable = null
+                    mCurrentProgress = 0L
+                    mCurrentIndex = 0
+                    ll_status.removeAllViews()
+                    ll_progress_bar.removeAllViews()
+                    startTime = System.currentTimeMillis()
+                    setImageStatusData()
+                    setProgressData()
+                    startViewing()
+                }
+                else {
+                    updateStoryAsViewed(mCurrentIndex) //if the story gets to the end, just mark as seen
+                    mDisposable?.dispose()
+                    mDisposable = null
+                    val fragmentToMoveTo: Fragment = MerchantStoryList::class.java.newInstance()
+                    openFragment(fragmentToMoveTo)
+                }
+            }
+
             }
     }
 
@@ -158,17 +198,26 @@ class CustomerRewardStories : Fragment() {
         val storyId = imagesList?.get(mCurrentIndex)?.merchantStatusId.toString()
 
         val imageLink = imagesList?.get(mCurrentIndex)?.merchantStatusImageLink.toString()
+
+        val storyTag = imagesList?.get(mCurrentIndex)?.storyTag.toString()
+
         val storyIsSeen = true
 
-        val merchantStoryListPojo = MerchantStoryListPojo(storyId, imageLink, storyIsSeen)
+        val merchantStoryListPojo = MerchantStoryListPojo()
+        merchantStoryListPojo.storyTag = storyTag
+        merchantStoryListPojo.seen = storyIsSeen
+        merchantStoryListPojo.merchantStatusImageLink = imageLink
+        merchantStoryListPojo.merchantStatusId = storyId
 
         db.collection("users").document(sessionManager.getEmail().toString()).collection("statuswatch").document(storyId).set(merchantStoryListPojo)
+
     }
 
     private fun updateProgress(progress: Long) {
         mCurrentProgress = progress
         runOnUiThread {
             (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = progress.toInt()
+            tvRewardStoryTag.text = imagesList?.get(mCurrentIndex)?.storyTag
         }
     }
 
@@ -252,6 +301,18 @@ class CustomerRewardStories : Fragment() {
                 emitStatusProgress()
             }
         }
+    }
+
+    private fun openFragment(fragment: Fragment?) {
+        var fragmentType = R.id.fr_game
+
+        if(hasHeader){
+            fragmentType = R.id.fr_layout_merchant
+        }
+        fragmentManager?.beginTransaction()
+                ?.replace(fragmentType, fragment!!)
+                ?.addToBackStack(null)
+                ?.commit()
     }
 
 }

@@ -2,15 +2,18 @@ package com.giftinapp.merchant.customer
 
 import android.content.Context
 import android.graphics.Color
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.airbnb.lottie.LottieAnimationView
 import com.devlomi.circularstatusview.CircularStatusView
+import com.facebook.shimmer.Shimmer
+import com.facebook.shimmer.ShimmerDrawable
 import com.giftinapp.merchant.R
 import com.giftinapp.merchant.model.GiftList
 import com.giftinapp.merchant.model.MerchantStoryListPojo
@@ -22,56 +25,78 @@ import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
 
-class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.Adapter<MerchantStoryListAdapter.ViewHolder>() {
+class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.Adapter<MerchantStoryListAdapter.ViewHolder>(), Filterable {
 
-    private var merchantStories:List<MerchantStoryPojo> = ArrayList()
+    private var merchantStories:ArrayList<MerchantStoryPojo> = ArrayList()
+    private var merchantStoriesAll:ArrayList<MerchantStoryPojo> = ArrayList()
     private lateinit var context: Context
+    private lateinit var sessionManager: SessionManager
+    private var isHasStoryHeader:Boolean = false
 
-    fun setMerchantStatus(merchantStats: List<MerchantStoryPojo>, context: Context){
+
+    fun setMerchantStatus(merchantStats: ArrayList<MerchantStoryPojo>, context: Context, isStoryHeader: Boolean){
         this.merchantStories = merchantStats
         this.context = context
+        this.sessionManager = SessionManager(context)
+        this.isHasStoryHeader = isStoryHeader
+        this.merchantStoriesAll = merchantStats
     }
 
-    class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-
-        val inflatedView = LayoutInflater.from(parent.context).inflate(R.layout.single_item_status_list, parent, false)
-        return ViewHolder(inflatedView)
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.single_item_status_list, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-       holder.itemView.apply {
-           val circularStatusView = findViewById<CircularStatusView>(R.id.circular_status_view)
-           val merchantName = findViewById<TextView>(R.id.merchantId)
-           val frontImage = findViewById<CircleImageView>(R.id.imgFrontImage)
+            holder.itemView.apply {
+                val circularStatusView = findViewById<CircularStatusView>(R.id.circular_status_view)
+                val merchantName = findViewById<TextView>(R.id.merchantId)
+                val frontImage = findViewById<CircleImageView>(R.id.imgFrontImage)
 
-           Picasso.get().load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink).into(frontImage)
-           merchantName.text = merchantStories[position].merchantId
-           circularStatusView.setPortionsCount(merchantStories[position].merchantStoryList.size)
 
-           frontImage.setOnClickListener {
-               storyClickable.onStoryClicked(merchantStories[position].merchantStoryList)
-           }
+                val shimmer = Shimmer.ColorHighlightBuilder()
+                        .setBaseColor(Color.parseColor("#f3f3f3"))
+                        .setHighlightColor(Color.parseColor("#E7E7E7"))
+                        .setHighlightAlpha(1F)
+                        .setRepeatCount(2)
+                        .setDropoff(10F)
+                        .setShape(Shimmer.Shape.RADIAL)
+                        .setAutoStart(true)
+                        .build()
 
-           checkIfStatusSeen(merchantStories[position].merchantStoryList, context, circularStatusView)
-       }
+                val shimmerDrawable = ShimmerDrawable()
+                shimmerDrawable.setShimmer(shimmer)
+
+                Picasso.get().load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink).placeholder(shimmerDrawable).into(frontImage)
+
+                merchantName.text = if (isHasStoryHeader && merchantStories[position].merchantId == sessionManager.getEmail()) (Html.fromHtml("<b>My Reward Deal</b>")) else merchantStories[position].merchantId
+                circularStatusView.setPortionsCount(merchantStories[position].merchantStoryList.size)
+
+                frontImage.setOnClickListener {
+                    storyClickable.onStoryClicked(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, merchantStories, position)
+                }
+
+                checkIfStatusSeen(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, context, circularStatusView)
+            }
     }
 
     override fun getItemCount(): Int {
         return merchantStories.size
     }
 
+
+
     interface StoryClickable{
-        fun onStoryClicked(merchantStoryList: List<MerchantStoryListPojo>)
+        fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int)
     }
 
-    private fun checkIfStatusSeen(merchantStoryList: List<MerchantStoryListPojo>,
+    private fun checkIfStatusSeen(merchantStoryList: ArrayList<MerchantStoryListPojo>,
                                   context: Context,
                                   circularStatusView: CircularStatusView) {
 
         //send the gift to giftin company for redeeming
-        val sessionManager: SessionManager = SessionManager(context)
+
         val emailOfUser = sessionManager.getEmail()
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
@@ -109,4 +134,35 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                         }
                     }
     }
+
+    override fun getFilter(): Filter {
+        return object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val charSearch = constraint.toString()
+                val filteredList:MutableList<MerchantStoryPojo> = ArrayList()
+                if (charSearch.isEmpty()) {
+                    filteredList.addAll(merchantStoriesAll)
+                } else {
+                    for (row in merchantStoriesAll) {
+                        if (row.merchantId.contains(constraint.toString().toLowerCase())) {
+                            filteredList.add(row)
+                        }
+                    }
+                }
+                val filterResults = FilterResults()
+                filterResults.values = filteredList
+                return filterResults
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                merchantStories.clear()
+                if (results != null) {
+                    merchantStories.addAll(results.values as Collection<MerchantStoryPojo>)
+                }
+                notifyDataSetChanged()
+            }
+        }
+    }
+
 }
+

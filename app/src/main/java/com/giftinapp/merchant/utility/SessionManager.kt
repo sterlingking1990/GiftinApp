@@ -3,9 +3,6 @@ package com.giftinapp.merchant.utility
 import android.content.Context
 import android.content.SharedPreferences
 import com.giftinapp.merchant.R
-import com.giftinapp.merchant.model.MerchantStoryListPojo
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 class SessionManager(context: Context) {
     private var prefs: SharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE)

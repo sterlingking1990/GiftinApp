@@ -1,6 +1,7 @@
 package com.giftinapp.merchant;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
@@ -14,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +27,9 @@ import com.giftinapp.merchant.business.GiftACustomerFragment;
 import com.giftinapp.merchant.business.GiftinAboutForMerchant;
 import com.giftinapp.merchant.business.MerchantGiftStatsFragment;
 import com.giftinapp.merchant.business.MerchantInfoUpdate;
+import com.giftinapp.merchant.business.SetRewardDeal;
 import com.giftinapp.merchant.business.WalletInfo;
+import com.giftinapp.merchant.customer.MerchantStoryList;
 import com.giftinapp.merchant.utility.SessionManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -66,7 +70,6 @@ public class MerchantActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.Theme_Merchant);
         setContentView(R.layout.activity_merchant);
 
         sessionManager = new SessionManager(getApplicationContext());
@@ -94,7 +97,7 @@ public class MerchantActivity extends AppCompatActivity {
 
         carouselViewMerchant = findViewById(R.id.carouselView);
 
-        carouselViewMerchant.setPageCount(3);
+        carouselViewMerchant.setPageCount(2);
         carouselViewMerchant.setViewListener(viewListener);
 
         carouselViewMerchant.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -130,23 +133,23 @@ public class MerchantActivity extends AppCompatActivity {
             case 0: {
                 getNumberOfCustomersGifted();
                 holder.reportName.setText("Total Customers Gifted");
-                holder.reportIcon.setImageResource(R.drawable.ic_happy_customer);
+                holder.reportIcon.setImageResource(R.drawable.happycustomer);
                 long totalGiftCoinSum= numberOfCustomerGifted==null ? 0 : numberOfCustomerGifted;
                 holder.reportValue.setText(String.valueOf(totalGiftCoinSum));
                 holderListMerchant.put(0, holder);
                 break;
             }
 
-            case 1: {
-                getTotalAmountGifted();
-                holder.reportName.setText("Total Amount Gifted");
-                holder.reportValue.setText(String.valueOf(totalAmountGifted));
-                holder.reportIcon.setImageResource(R.drawable.ic_gifts);
-                holderListMerchant.put(1, holder);
-                break;
-            }
+//            case 1: {
+//                getTotalAmountGifted();
+//                holder.reportName.setText("Total Amount Gifted");
+//                holder.reportValue.setText(String.valueOf(totalAmountGifted));
+//                holder.reportIcon.setImageResource(R.drawable.ic_gifts);
+//                holderListMerchant.put(1, holder);
+//                break;
+//            }
 
-            case 2: {
+            case 1: {
                 getWalletBalance();
                 holder.reportName.setText("Gift Wallet Balance");
                 holder.reportValue.setText(String.valueOf(totalWalletBalance));
@@ -169,14 +172,14 @@ public class MerchantActivity extends AppCompatActivity {
                 holderListMerchant.get(0).reportValue.setText(String.valueOf(totalGiftCoinSum));
                 break;
             }
-            case 1: {
-                getTotalAmountGifted();
-                long totalAmountGiftedCustomer= totalAmountGifted==null ? 0L : totalAmountGifted;
-                holderListMerchant.get(1).reportValue.setText(String.valueOf(totalAmountGiftedCustomer));
-                break;
-            }
+//            case 1: {
+//                getTotalAmountGifted();
+//                long totalAmountGiftedCustomer= totalAmountGifted==null ? 0L : totalAmountGifted;
+//                holderListMerchant.get(1).reportValue.setText(String.valueOf(totalAmountGiftedCustomer));
+//                break;
+//            }
 
-            case 2: {
+            case 1: {
                 getWalletBalance();
                 long walletBalanceTotal= totalWalletBalance==null ? 0L : totalWalletBalance;
                 holderListMerchant.get(2).reportValue.setText(String.valueOf(walletBalanceTotal));
@@ -362,6 +365,18 @@ public class MerchantActivity extends AppCompatActivity {
                 MerchantGiftStatsFragment merchantGiftStatsFragment = new MerchantGiftStatsFragment();
                 openFragment(merchantGiftStatsFragment);
                 break;
+            case R.id.navigation_set_reward_deal:
+                carouselViewMerchant.setVisibility(View.GONE);
+                SetRewardDeal setRewardDeal = new SetRewardDeal();
+                openFragment(setRewardDeal);
+                break;
+
+            case R.id.navigation_view_reward_deal:
+                carouselViewMerchant.setVisibility(View.GONE);
+                MerchantStoryList merchantStoryList = new MerchantStoryList();
+                openFragment(merchantStoryList);
+                break;
+
 
         }
         drawer.close();
@@ -375,5 +390,11 @@ public class MerchantActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        carouselViewMerchant.setVisibility(View.GONE);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

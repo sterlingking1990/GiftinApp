@@ -15,7 +15,7 @@ class StorySession(context: Context) {
         const val STORY_LIST = "story_list"
     }
 
-    fun setStoryStatusList(list:MutableList<MerchantStoryListPojo>){
+    fun setStoryStatusList(list: ArrayList<MerchantStoryListPojo>){
         val editor = prefs.edit()
         val gson = Gson()
         val json = gson.toJson(list)
@@ -23,10 +23,18 @@ class StorySession(context: Context) {
         editor.apply()
     }
 
-    fun getStoryStatusList():MutableList<MerchantStoryListPojo>{
-        val gson = Gson()
-        val json = prefs.getString(STORY_LIST,null)
-        val type = object : TypeToken<MutableList<MerchantStoryListPojo>>(){}.type//converting the json to list
-        return gson.fromJson(json,type)//returning the list
+    fun getStoryStatusList():ArrayList<MerchantStoryListPojo>{
+        val emptyList = Gson().toJson(ArrayList<MerchantStoryListPojo>())
+        return Gson().fromJson(
+                prefs.getString(STORY_LIST, emptyList),
+                object : TypeToken<ArrayList<MerchantStoryListPojo>>() {
+                }.type
+        )
+    }
+
+
+    fun clearData(){
+        prefs.all.clear()
     }
 }
+

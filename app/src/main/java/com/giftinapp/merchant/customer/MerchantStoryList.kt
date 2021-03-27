@@ -1,26 +1,28 @@
 package com.giftinapp.merchant.customer
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.add
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.merchant.R
 import com.giftinapp.merchant.model.MerchantStoryListPojo
 import com.giftinapp.merchant.model.MerchantStoryPojo
+import com.giftinapp.merchant.model.StoryHeaderPojo
+import com.giftinapp.merchant.utility.SessionManager
 import com.giftinapp.merchant.utility.StorySession
-import com.google.android.gms.common.ErrorDialogFragment.newInstance
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.QuerySnapshot
 import java.io.Serializable
-import java.lang.reflect.Array.newInstance
-import javax.xml.validation.SchemaFactory.newInstance
-import kotlin.concurrent.fixedRateTimer
 
 class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
     lateinit var merchantStoryListAdapter:MerchantStoryListAdapter
@@ -31,7 +33,17 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
 
     private lateinit var storySession: StorySession
 
+    private lateinit var sessionManager: SessionManager
+
+    private lateinit var etSearchStoryId:EditText
+
     lateinit var pgLoading:ProgressBar
+
+    var builder: AlertDialog.Builder? = null
+
+    var isStoryHasHeader = false
+
+    private  var allListStory: ArrayList<MerchantStoryListPojo> = ArrayList()
 
 
 
@@ -47,12 +59,41 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
         merchantStoryListRecyclerView = view.findViewById(R.id.rvMerchantStoryList)
         merchantRecyclerViewLayoutManager = LinearLayoutManager(requireContext())
         merchantRecyclerViewLayoutManager.orientation = LinearLayoutManager.VERTICAL
+        merchantStoryListRecyclerView.layoutManager=merchantRecyclerViewLayoutManager
+        merchantStoryListRecyclerView.setHasFixedSize(true)
+
 
         merchantStoryListAdapter = MerchantStoryListAdapter(this)
 
         storySession = StorySession(requireContext())
 
+        sessionManager = SessionManager(requireContext())
+
         pgLoading = view.findViewById(R.id.pgLoadingStatus)
+
+        builder = AlertDialog.Builder(requireContext())
+
+        etSearchStoryId = view.findViewById(R.id.etSearchStoryId)
+
+        etSearchStoryId.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {
+                if (etSearchStoryId.length() < 1) {
+                    loadRewardStoryList()
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                if (s.toString().isEmpty()) {
+                    merchantStoryListAdapter.filter.filter("")
+                } else {
+                    merchantStoryListAdapter.filter.filter(s)
+                }
+            }
+        })
 
         loadRewardStoryList()
 
@@ -73,55 +114,70 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
         db.firestoreSettings = settings
 
         db.collection("merchants").get()
-                .addOnCompleteListener { task->
-                    if(task.isSuccessful){
-                        val story:MutableList<MerchantStoryPojo> = mutableListOf()
-                        val result = task.result
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val result: QuerySnapshot? = task.result
                         if (result != null) {
-                            for(eachRes in result){
+                            val merchantStoryPojos = ArrayList<MerchantStoryPojo>()
+                            for (eachRes in result) {
                                 db.collection("merchants").document(eachRes.id).collection("statuslist").get()
-                                        .addOnCompleteListener { tast2->
-                                            if(tast2.isSuccessful){
-                                                val listOfStories:ArrayList<MerchantStoryListPojo> = ArrayList()
-                                                for(eachList in tast2.result!!){
-                                                    listOfStories.add(MerchantStoryListPojo(eachList.id, eachList.getString("gift_url"), null))
+                                        .addOnCompleteListener { task2 ->
+                                            if (task2.isSuccessful) {
+
+                                                //now we would get the document id and then the data for the document
+
+                                                val merchantStoryListPojos = ArrayList<MerchantStoryListPojo>()
+                                                val merchantStoryHeaderPojos = ArrayList<StoryHeaderPojo>()
+                                                for (eachList in task2.result!!) {
+                                                    val merchantStoryListPojo = eachList.toObject(MerchantStoryListPojo::class.java)
+                                                    merchantStoryListPojo.merchantStatusId = eachList.id
+                                                    merchantStoryListPojos.add(merchantStoryListPojo)
+
                                                 }
+                                                    val merchantStoryPojo = MerchantStoryPojo()
+                                                    merchantStoryPojo.merchantId = eachRes.getString("giftorId")
+                                                    merchantStoryPojo.merchantStoryList = merchantStoryListPojos
+                                                    merchantStoryPojos.add(merchantStoryPojo)
 
-                                                storySession.setStoryStatusList(listOfStories)
-
+                                                if (merchantStoryPojos.size > 0) {
+                                                    if(eachRes.id == sessionManager.getEmail()){
+                                                        isStoryHasHeader = true
+                                                    }
+                                                    pgLoading.visibility = View.GONE
+                                                    merchantStoryListAdapter.setMerchantStatus(merchantStoryPojos, requireContext(), isStoryHasHeader)
+                                                    merchantStoryListRecyclerView.adapter = merchantStoryListAdapter
+                                                }
                                             }
 
+                                            }
                                         }
 
-                                story.add(MerchantStoryPojo(eachRes.getString("giftorId").toString(), storySession.getStoryStatusList()))
                             }
 
-                            if(story.size>0){
-                                pgLoading.visibility = View.GONE
-                                merchantStoryListAdapter.setMerchantStatus(story, requireContext())
-                                merchantStoryListRecyclerView.layoutManager = merchantRecyclerViewLayoutManager
-                                merchantStoryListRecyclerView.adapter=merchantStoryListAdapter
-                            }
                         }
                     }
                 }
 
-
-    }
-
-    override fun onStoryClicked(merchantStoryList: List<MerchantStoryListPojo>) {
+    override fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int) {
         val fragment = CustomerRewardStories()
-        val fm = parentFragmentManager
+        val fm = fragmentManager
         val arguments= Bundle()
-        arguments.putSerializable("storyList",merchantStoryList as Serializable)
 
+        var fragmentType = R.id.fr_game
+        arguments.putSerializable("storyList", merchantStoryList as Serializable)
+        arguments.putSerializable("allStory", allList as Serializable)
+        arguments.putInt("currentStoryPos", currentStoryPos)
+        arguments.putBoolean("hasHeader", isStoryHasHeader)
+        if(isStoryHasHeader){
+            fragmentType = R.id.fr_layout_merchant
+        }
         fragment.arguments = arguments
 
         CustomerRewardStories().arguments = arguments
-            fm.beginTransaction()
-                    .replace(R.id.fr_game, fragment)
-                    .addToBackStack(null)
-                    .commit()
+            fm?.beginTransaction()
+                    ?.replace(fragmentType, fragment)
+                    ?.addToBackStack(null)
+                    ?.commit()
     }
 
 

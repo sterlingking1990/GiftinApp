@@ -67,8 +67,6 @@ dependencies {
 
     //Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
-
-    implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'com.google.firebase:firebase-firestore'
 
@@ -97,7 +95,9 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.devlomi:circularstatusview:1.0.1'
 
-    implementation 'com.google.firebase:firebase-storage-ktx'
+    //messaging
+    implementation 'com.google.firebase:firebase-messaging-ktx'
+
 
 }
 repositories {

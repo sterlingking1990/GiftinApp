@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.giftinapp.merchant.model.GiftingMerchantPojo;
 import com.giftinapp.merchant.model.GiftingMerchantViewPojo;
@@ -81,60 +82,75 @@ public class GiftingMerchantFragment extends Fragment implements GiftingMerchant
 
         db.collection("merchants").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()){
+                                           @Override
+                                           public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                               if (task.isSuccessful()) {
 
-                            ArrayList<GiftingMerchantViewPojo> giftingMerchantViewPojos = new ArrayList<>();
+                                                   ArrayList<GiftingMerchantViewPojo> giftingMerchantViewPojos = new ArrayList<GiftingMerchantViewPojo>();
 
-                            GiftingMerchantViewPojo giftingMerchantViewPojo = new GiftingMerchantViewPojo();
-                            for (QueryDocumentSnapshot document: Objects.requireNonNull(task.getResult())) {
-                                GiftingMerchantPojo giftingMerchantPojo = document.toObject(GiftingMerchantPojo.class);
+                                                   for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                                                       GiftingMerchantPojo giftingMerchantPojo = document.toObject(GiftingMerchantPojo.class);
+                                                       if (giftingMerchantPojo.whatsapp == null || giftingMerchantPojo.instagram == null || giftingMerchantPojo.facebook == null || giftingMerchantPojo.address == null) {
+                                                           giftingMerchantPojo.whatsapp = "not provided";
+                                                           giftingMerchantPojo.address = "not provided";
+                                                           giftingMerchantPojo.facebook = "not provided";
+                                                           giftingMerchantPojo.instagram = "not provided";
+                                                       }
 
-                                giftingMerchantViewPojo.giftingMerchantId = document.getId();
-                                giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo;
+                                                       db.collection("merchants").document(document.getId()).collection("reward_statistics").document("customers").collection("customer_details").get()
+                                                               .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                                   @Override
+                                                                   public void onComplete(@NonNull Task<QuerySnapshot> task1) {
+                                                                       if (task1.isSuccessful()) {
+                                                                           ArrayList<String> giftedCustomersEmail = new ArrayList<>();
+                                                                           for (QueryDocumentSnapshot eachCustomer : Objects.requireNonNull(task1.getResult())) {
+                                                                               RewardPojo rewardPojo = eachCustomer.toObject(RewardPojo.class);
+                                                                               giftedCustomersEmail.add(rewardPojo.email);
+                                                                           }
 
-                                //getting the total number of customers rewarded
-                                merchantGiftor=document.getId();
 
-                                db.collection("merchants").document(merchantGiftor).collection("reward_statistics").document("customers").collection("customer_details").get()
-                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task1) {
-                                                if (task1.isSuccessful()) {
-                                                    ArrayList<String> giftedCustomersEmail = new ArrayList<>();
-                                                    for (QueryDocumentSnapshot eachCustomer : Objects.requireNonNull(task1.getResult())) {
-                                                        RewardPojo rewardPojo = eachCustomer.toObject(RewardPojo.class);
-                                                       giftedCustomersEmail.add(rewardPojo.email);
-                                                    }
+                                                                           GiftingMerchantViewPojo giftingMerchantViewPojo = new GiftingMerchantViewPojo();
+                                                                           giftingMerchantViewPojo.giftingMerchantId = document.getId();
+                                                                           if (giftedCustomersEmail.size() == 0) {
+                                                                               giftingMerchantViewPojo.numberOfCustomerGifted = 0;
+                                                                           } else {
+                                                                               giftingMerchantViewPojo.numberOfCustomerGifted = giftedCustomersEmail.size();
+                                                                           }
+                                                                           giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo;
 
-                                                    sessionManager.saveTotalCustomerGifted(giftedCustomersEmail.size());
-                                                }
-                                            }
-                                        });
+                                                                           giftingMerchantViewPojos.add(giftingMerchantViewPojo);
 
-                                giftingMerchantViewPojo.numberOfCustomerGifted=sessionManager.getTotalCustomerGifted();
-                                giftingMerchantViewPojos.add(giftingMerchantViewPojo);
-                            }
-                            if(giftingMerchantViewPojos.size()==0){
-                                //no merchants yet
-                                builder.setMessage("There is no merchants registered with GiftinApp yet, help us reach out and win gift coin. Thank you!")
-                                        .setCancelable(false)
-                                        .setPositiveButton("OK", (dialog, id) -> {
-                                            //take user to rewarding merchants
-                                            shareAppLink();
-                                        });
-                                AlertDialog alert = builder.create();
-                                alert.show();
-                            }
-                            else{
-                                giftingMerchantAdapter.setGiftingMerchantList(giftingMerchantViewPojos);
-                                rvGiftingMerchant.setLayoutManager(layoutManager);
-                                rvGiftingMerchant.setAdapter(giftingMerchantAdapter);
-                            }
-                        }
-                    }
-                });
+                                                                           giftingMerchantAdapter.setGiftingMerchantList(giftingMerchantViewPojos);
+                                                                           rvGiftingMerchant.setLayoutManager(layoutManager);
+                                                                           rvGiftingMerchant.setAdapter(giftingMerchantAdapter);
+                                                                           giftingMerchantAdapter.notifyDataSetChanged();
+                                                                       }
+                                                                   }
+                                                               });
+                                                   }
+
+                                               }
+                                           }
+                                       });
+//                            if(giftingMerchantViewPojos.size()==0){
+//                                //no merchants yet
+//                                builder.setMessage("There is no merchants registered with GiftinApp yet, help us reach out and win gift coin. Thank you!")
+//                                        .setCancelable(false)
+//                                        .setPositiveButton("OK", (dialog, id) -> {
+//                                            //take user to rewarding merchants
+//                                            shareAppLink();
+//                                        });
+//                                AlertDialog alert = builder.create();
+//                                alert.show();
+//                            }
+//                            else{
+//                                giftingMerchantAdapter.setGiftingMerchantList(giftingMerchantViewPojos);
+//                                rvGiftingMerchant.setLayoutManager(layoutManager);
+//                                rvGiftingMerchant.setAdapter(giftingMerchantAdapter);
+//                            }
+                     //   }
+                  //  }
+                //});
 
     }
 

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/ll_listStory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@color/whitesmoke"
+        app:layout_constraintStart_toStartOf="parent"
+        android:weightSum="2"
+        >
+
+    <TextView
+        android:id="@+id/tvStoryLink"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:elevation="100dp"
+        android:lines="3"
+        android:ellipsize="end"
+        android:layout_weight="0.5"
+        android:textAlignment="center"
+        android:background="@color/whitesmoke"
+        android:padding="10dp"
+        android:text="https://firebase.com/storage/link/uplloadeditems"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+        <ImageView
+            android:id="@+id/ivDeleteStory"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_weight="1.5"
+            android:src="@drawable/ic_delete_story"
+            android:text="Delete"
+            android:textSize="18sp"
+            />
+
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/tabColor"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_listStory" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

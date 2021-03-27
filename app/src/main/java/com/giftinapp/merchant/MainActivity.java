@@ -32,6 +32,7 @@ import com.giftinapp.merchant.customer.MyGiftCartFragment;
 import com.giftinapp.merchant.customer.MyGiftHistoryFragment;
 import com.giftinapp.merchant.customer.SettingsFragment;
 import com.giftinapp.merchant.utility.SessionManager;
+import com.giftinapp.merchant.utility.StorySession;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.dynamiclinks.DynamicLink;
@@ -51,6 +52,7 @@ import static androidx.navigation.ui.AppBarConfigurationKt.AppBarConfiguration;
 public class MainActivity extends AppCompatActivity {
 
     public SessionManager sessionManager;
+    public StorySession storySession;
     public AlertDialog.Builder builder;
 
     protected CarouselView carouselView;
@@ -70,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.Theme_Merchant);
         setContentView(R.layout.activity_main);
 
         mauth = FirebaseAuth.getInstance();
@@ -111,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         sessionManager = new SessionManager(getApplicationContext());
+
+        storySession = new StorySession(this);
 
         builder = new AlertDialog.Builder(getApplicationContext());
 
@@ -296,6 +299,7 @@ public class MainActivity extends AppCompatActivity {
                 builder.setNeutralButton("Ok", (dialog, id) -> {
                     mauth.signOut();
                     sessionManager.clearData();
+                    storySession.clearData();
                     startActivity(new Intent(MainActivity.this,SignUpActivity.class));
                     dialog.cancel();
                 });
