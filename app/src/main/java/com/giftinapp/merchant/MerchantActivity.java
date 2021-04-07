@@ -58,9 +58,9 @@ public class MerchantActivity extends AppCompatActivity {
 
     protected SparseArray<MerchantReportsViewHolder> holderListMerchant = new SparseArray<>();
 
-    public Integer numberOfCustomerGifted;
-    public Long totalAmountGifted;
-    public Long totalWalletBalance;
+    public Integer numberOfCustomerGifted = null;
+    public Long totalAmountGifted = null;
+    public Long totalWalletBalance = null;
 
     private DrawerLayout drawer;
     private ActionBarDrawerToggle t;

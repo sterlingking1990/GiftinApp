@@ -13,8 +13,6 @@ import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import com.giftinapp.merchant.R
 import com.giftinapp.merchant.model.MerchantStoryListPojo
 import com.giftinapp.merchant.model.MerchantStoryPojo
@@ -25,10 +23,8 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import java.io.Serializable
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.fixedRateTimer
 
 
 class CustomerRewardStories : Fragment() {
@@ -36,6 +32,7 @@ class CustomerRewardStories : Fragment() {
     var imagesList:ArrayList<MerchantStoryListPojo>?=null
     var allStories:ArrayList<MerchantStoryPojo>?=null
     var currentStoryPos:Int? = 0
+    var storyOwner:String? = null
 
     lateinit var ll_status:FrameLayout;
     lateinit var ll_progress_bar:LinearLayout;
@@ -55,6 +52,7 @@ class CustomerRewardStories : Fragment() {
             imagesList = it.get("storyList") as ArrayList<MerchantStoryListPojo>
             allStories = it.get("allStory") as ArrayList<MerchantStoryPojo>
             currentStoryPos = it.getInt("currentStoryPos")
+            storyOwner = it.getString("storyOwner")
             hasHeader = it.getBoolean("hasHeader")
 
         }
@@ -160,6 +158,10 @@ class CustomerRewardStories : Fragment() {
                     imagesList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList
 
                     }
+                    storyOwner =  currentStoryPos?.let { allStories?.get(it)?.storyOwner
+
+                    }
+
                     mDisposable = null
                     mCurrentProgress = 0L
                     mCurrentIndex = 0
@@ -183,6 +185,8 @@ class CustomerRewardStories : Fragment() {
     }
 
     private fun updateStoryAsViewed(mCurrentIndex: Int) {
+
+        
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
 
@@ -209,7 +213,24 @@ class CustomerRewardStories : Fragment() {
         merchantStoryListPojo.merchantStatusImageLink = imageLink
         merchantStoryListPojo.merchantStatusId = storyId
 
-        db.collection("users").document(sessionManager.getEmail().toString()).collection("statuswatch").document(storyId).set(merchantStoryListPojo)
+
+        //here i need to keep track of whether current status have reache the story size -1 then i will increment the number of view of the stauts right in the document of story owner
+        //first i have to get the number of view, if null then it will be set to 1, else incremented by 1 if only the person viewing it is not the owner of the story i.e sessionManager.email
+                //is not equal to the story owner
+
+
+
+        //db.collection("users").document(sessionManager.getEmail().toString()).collection("statusowners").document(storyOwner.toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
+
+                //.addOnCompleteListener {
+                // if(it.isSuccessful){
+        db.collection("statusowners").document(storyOwner.toString()).collection("viewers").document(sessionManager.getEmail().toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
+                   // }
+                //}
+        //get the list of viewers and then update it with the viewers record
+        db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document(storyId)
+
+
 
     }
 

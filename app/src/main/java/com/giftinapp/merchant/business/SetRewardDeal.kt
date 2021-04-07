@@ -238,11 +238,13 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 .build()
         db.firestoreSettings = settings
 
+
         val merchantStoryListPojo = MerchantStoryListPojo()
         merchantStoryListPojo.seen = false
         merchantStoryListPojo.storyTag = imageText.text.toString()
         merchantStoryListPojo.merchantStatusId = null
         merchantStoryListPojo.merchantStatusImageLink = tvDownloadUri.text.toString()
+        merchantStoryListPojo.viewers = arrayListOf()
 
         db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document().set(merchantStoryListPojo)
                 .addOnCompleteListener {

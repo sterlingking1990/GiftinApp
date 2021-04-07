@@ -59,9 +59,9 @@ public class MainActivity extends AppCompatActivity {
 
     protected SparseArray<ReportsViewHolder> holderList = new SparseArray<>();
 
-    public Long totalGiftCoin;
+    public Long totalGiftCoin =null;
 
-    public Long latestAmountRedeemed;
+    public Long latestAmountRedeemed =null;
 
     FirebaseAuth mauth;
 
@@ -228,11 +228,12 @@ public class MainActivity extends AppCompatActivity {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+            finish();
             super.onBackPressed();
         }
     }
 
-    public class ReportsViewHolder {
+    public static class ReportsViewHolder {
         TextView reportValue;
         TextView reportName;
         ImageView reportIcon;

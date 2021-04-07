@@ -2,6 +2,8 @@ package com.giftinapp.merchant.model;
 
 import androidx.annotation.Keep;
 
+import java.util.ArrayList;
+
 @Keep
  public class MerchantStoryListPojo {
 
@@ -9,6 +11,7 @@ import androidx.annotation.Keep;
     public String merchantStatusImageLink = null;
     public String storyTag = null;
     public Boolean seen = false;
+    public ArrayList<String> viewers;
 
     public MerchantStoryListPojo(){}
 }

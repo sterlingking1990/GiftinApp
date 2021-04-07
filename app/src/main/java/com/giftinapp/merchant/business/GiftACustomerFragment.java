@@ -272,7 +272,6 @@ public class GiftACustomerFragment extends Fragment {
         }
     }
 
-
     private void updateMerchantWalletRewardEmailReferrer(Long merchant_wallet_amount,String reward,String email) {
         //here we update wallet by deducting amount as well as reward this persons referrer if they exist and is not none
 

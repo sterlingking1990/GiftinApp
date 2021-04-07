@@ -9,13 +9,13 @@ import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.devlomi.circularstatusview.CircularStatusView
 import com.facebook.shimmer.Shimmer
 import com.facebook.shimmer.ShimmerDrawable
 import com.giftinapp.merchant.R
-import com.giftinapp.merchant.model.GiftList
 import com.giftinapp.merchant.model.MerchantStoryListPojo
 import com.giftinapp.merchant.model.MerchantStoryPojo
 import com.giftinapp.merchant.utility.SessionManager
@@ -32,6 +32,7 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
     private lateinit var context: Context
     private lateinit var sessionManager: SessionManager
     private var isHasStoryHeader:Boolean = false
+    //private var numberOfViews:String = "0"
 
 
     fun setMerchantStatus(merchantStats: ArrayList<MerchantStoryPojo>, context: Context, isStoryHeader: Boolean){
@@ -70,14 +71,16 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
 
                 Picasso.get().load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink).placeholder(shimmerDrawable).into(frontImage)
 
+                //getNumberOfViewersForStatus(merchantStories[position].storyOwner)
+
                 merchantName.text = if (isHasStoryHeader && merchantStories[position].merchantId == sessionManager.getEmail()) (Html.fromHtml("<b>My Reward Deal</b>")) else merchantStories[position].merchantId
                 circularStatusView.setPortionsCount(merchantStories[position].merchantStoryList.size)
 
                 frontImage.setOnClickListener {
-                    storyClickable.onStoryClicked(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, merchantStories, position)
+                    storyClickable.onStoryClicked(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, merchantStories, position, merchantStories[position].storyOwner)
                 }
 
-                checkIfStatusSeen(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, context, circularStatusView)
+                checkIfStatusSeen(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, context, circularStatusView, merchantStories[position].storyOwner)
             }
     }
 
@@ -88,12 +91,12 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
 
 
     interface StoryClickable{
-        fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int)
+        fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, storyOwner:String)
     }
 
     private fun checkIfStatusSeen(merchantStoryList: ArrayList<MerchantStoryListPojo>,
                                   context: Context,
-                                  circularStatusView: CircularStatusView) {
+                                  circularStatusView: CircularStatusView, owner: String) {
 
         //send the gift to giftin company for redeeming
 
@@ -110,8 +113,8 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 .build()
         db.firestoreSettings = settings
 
-        //check if this user already added this gift to redeemable
-            db.collection("users").document(sessionManager.getEmail().toString()).collection("statuswatch")
+            //db.collection("users").document(sessionManager.getEmail().toString()).collection("statusowners").document(owner).collection("stories")
+               db.collection("statusowners").document(owner).collection("viewers").document(sessionManager.getEmail().toString()).collection("stories")
                     .get()
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
@@ -162,6 +165,47 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 notifyDataSetChanged()
             }
         }
+    }
+
+    private fun getNumberOfViewersForStatus(storyOwner: String) {
+        //get the users views in a map
+
+
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+        db.collection("users").get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful){
+                        val merchantStoryIdWatched = mutableListOf<String>()
+                        for (eachUser in it.result!!){
+                            //now we get the status list watched by each of this users
+                            db.collection("statusowners").document(storyOwner).get()
+                            //db.collection("users").document(eachUser.id).collection("statusowners").get()
+
+                                    .addOnCompleteListener { task->
+                                        if(task.isSuccessful){
+                                            val results = task.result
+                                           // numberOfViews = results?.get("numberOfViews").toString()
+
+                                        }
+                                    }
+                        }
+                    }
+                }
+
+
+        //lets count the values in the users story watched which has the story owner
+
     }
 
 }

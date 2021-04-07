@@ -19,6 +19,7 @@ public class UserPojo {
     public String instagram;
     public String whatsapp;
     public String giftingId;
+    public String token;
 
     public UserPojo(){}
 }

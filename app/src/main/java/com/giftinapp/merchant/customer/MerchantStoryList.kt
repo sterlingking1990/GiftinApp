@@ -129,13 +129,19 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                 val merchantStoryListPojos = ArrayList<MerchantStoryListPojo>()
                                                 val merchantStoryHeaderPojos = ArrayList<StoryHeaderPojo>()
                                                 for (eachList in task2.result!!) {
-                                                    val merchantStoryListPojo = eachList.toObject(MerchantStoryListPojo::class.java)
+                                                    val merchantStoryListPojo = MerchantStoryListPojo()
+                                                    merchantStoryListPojo.merchantStatusId = eachList.getString("merchantStatusId")
+                                                    merchantStoryListPojo.seen = eachList.getBoolean("seen")
+                                                    merchantStoryListPojo.storyTag = eachList.getString("storyTag")
+                                                    merchantStoryListPojo.merchantStatusImageLink = eachList.getString("merchantStatusImageLink")
+                                                    //val merchantStoryListPojo = eachList.toObject(MerchantStoryListPojo::class.java)
                                                     merchantStoryListPojo.merchantStatusId = eachList.id
                                                     merchantStoryListPojos.add(merchantStoryListPojo)
 
                                                 }
                                                     val merchantStoryPojo = MerchantStoryPojo()
                                                     merchantStoryPojo.merchantId = eachRes.getString("giftorId")
+                                                    merchantStoryPojo.storyOwner = eachRes.id
                                                     merchantStoryPojo.merchantStoryList = merchantStoryListPojos
                                                     merchantStoryPojos.add(merchantStoryPojo)
 
@@ -158,7 +164,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                     }
                 }
 
-    override fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int) {
+    override fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, owner:String) {
         val fragment = CustomerRewardStories()
         val fm = fragmentManager
         val arguments= Bundle()
@@ -167,6 +173,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
         arguments.putSerializable("storyList", merchantStoryList as Serializable)
         arguments.putSerializable("allStory", allList as Serializable)
         arguments.putInt("currentStoryPos", currentStoryPos)
+        arguments.putString("storyOwner",owner)
         arguments.putBoolean("hasHeader", isStoryHasHeader)
         if(isStoryHasHeader){
             fragmentType = R.id.fr_layout_merchant

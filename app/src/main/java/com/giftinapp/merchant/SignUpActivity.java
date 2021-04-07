@@ -1,6 +1,7 @@
 package com.giftinapp.merchant;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -51,6 +52,8 @@ public class SignUpActivity extends AppCompatActivity {
 
     private Spinner spInterest;
 
+    public AlertDialog.Builder builder;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +75,8 @@ public class SignUpActivity extends AppCompatActivity {
 
         etFirstname = findViewById(R.id.et_signup_firstname);
         etLastname = findViewById(R.id.et_signup_lastname);
+
+        builder = new AlertDialog.Builder(this);
 
         emailValidator = new EmailValidator();
 
@@ -173,16 +178,25 @@ public class SignUpActivity extends AppCompatActivity {
                                         userPojo.firstName = etFirstname.getText().toString();
                                         userPojo.lastName = etLastname.getText().toString();
                                         userPojo.giftingId = username;
+                                        userPojo.token = "empty";
                                         db.collection("users").document(username).set(userPojo)
                                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task1) {
                                                         if(task1.isSuccessful()){
-                                                            Toast.makeText(getApplicationContext(),"You have been temporarily registered",Toast.LENGTH_SHORT).show();
+                                                            //Toast.makeText(getApplicationContext(),"You have been temporarily registered",Toast.LENGTH_SHORT).show();
+                                                            builder.setMessage("You have been temporarily registered and can now login, " +
+                                                                    "but might not enjoy all benefits from giftinApp until you verify your account from your mail")
+                                                                    .setCancelable(true)
+                                                                    .setPositiveButton("OK", (dialog, id) -> {
+                                                                    });
+                                                            AlertDialog alert = builder.create();
+                                                            alert.show();
                                                         }
                                                     }
                                                 });
-                                        Toast.makeText(getApplicationContext(),"check your email for verification link",Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                                        startActivity(intent);
                                     }
                                 });
                     }
