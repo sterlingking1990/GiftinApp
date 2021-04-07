@@ -168,123 +168,18 @@ public class LoginActivity extends AppCompatActivity {
         if(selectedCustomer){
             //check if the user has signed up as a business but not yet verified as a business, then toast that
             // this account was signed up as a business, please select to login as business
-            checkVerificationMode(username);
-
-        }
-        if(selectedBusiness){
-
             progressDialogUtil.startDialog("logging you in...");
             mAuth.signInWithEmailAndPassword(username,password)
                     .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
-                                db.collection("merchants").document(username).get()
+                                db.collection("users").document(username).get()
                                         .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                             @Override
                                             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                                 if(task.isSuccessful()){
-                                                   // if(FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()){
-                                                        DocumentSnapshot documentSnapshot = task.getResult();
-                                                        if(documentSnapshot.exists()){
-                                                            updateUsersMessagingToken(username);
-                                                            progressDialogUtil.stopDialog();
-                                                            sessionManager.saveEmailAndUserMode(username, "business");
-                                                            Intent intent = new Intent(getApplicationContext(), MerchantActivity.class);
-                                                            startActivity(intent);
-                                                        }
-                                                        else{
-                                                            //Toast.makeText(getApplicationContext(),"This account might not exist as a business or is not yet a verified business by giftinApp",Toast.LENGTH_LONG).show();
-                                                            builder.setMessage("This account is not yet a verified business account by giftinApp." +
-                                                                    "If you have signed up as a business, please contact giftinApp on +2348060456301 for quick verification. " +
-                                                                    "You will however be taken to the customer environment until you get verified.")
-                                                                    .setCancelable(true)
-                                                                    .setPositiveButton("OK", (dialog, id) -> {
-                                                                    });
-                                                            AlertDialog alert = builder.create();
-                                                            alert.show();
-                                                            updateUsersMessagingToken(username);
-                                                            progressDialogUtil.stopDialog();
-                                                            sessionManager.saveEmailAndUserMode(username, "customer");
-                                                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                                            startActivity(intent);
-                                                        }
-                                                    }
-                                                   // else{
-                                                       // Toast.makeText(getApplicationContext(),"You should verify your email address before login",Toast.LENGTH_LONG).show();
-                                                      //  btnSendVerificationEmail.setVisibility(View.VISIBLE);
-                                                      //  progressDialogUtil.stopDialog();
-                                                   // }
-                                                //}
-                                            }
-                                        });
-                            }
-                            else{
-                                Toast.makeText(getApplicationContext(),"Could not log in, email or password might not exist",Toast.LENGTH_LONG).show();
-                                progressDialogUtil.stopDialog();
-                            }
-                        }
-                    });
-        }
-    }
-
-    private void checkVerificationMode(String username) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
-        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                .setPersistenceEnabled(true)
-                .build();
-        db.setFirestoreSettings(settings);
-
-        db.collection("users").document(username).get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if(task.isSuccessful()){
-                            DocumentSnapshot signUpSelected = task.getResult();
-                            String verificationModeSelected = (String) signUpSelected.get("verification_status");
-                            String interestSelected = (String) signUpSelected.get("interest");
-                            if(verificationModeSelected.equals("not_verified") && interestSelected.equals("As Business")){
-                                Toast.makeText(getApplicationContext(),"you signed up as business, please select to login as business",Toast.LENGTH_LONG).show();
-                            }
-                            else{
-                                continueLoginAsCustomer();
-                            }
-                        }
-                    }
-                });
-
-    }
-
-    private void continueLoginAsCustomer(){
-
-        String username = etSignInEmail.getText().toString();
-        String password = etSignInPassword.getText().toString();
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
-        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                .setPersistenceEnabled(true)
-                .build();
-        db.setFirestoreSettings(settings);
-
-        progressDialogUtil.startDialog("logging you in...");
-
-        mAuth.signInWithEmailAndPassword(username,password)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            db.collection("users").document(username).get()
-                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                            if(task.isSuccessful()){
-                                               // if(FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()){
+                                                    // if(FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()){
                                                     DocumentSnapshot documentSnapshot = task.getResult();
                                                     if(documentSnapshot.exists() && documentSnapshot.get("login_mode").toString().equals("customer".trim())){
                                                         if(documentSnapshot.getId().equals("giftinappinc@gmail.com".trim())){
@@ -313,19 +208,121 @@ public class LoginActivity extends AppCompatActivity {
                                                     }
                                                 }
                                                 //else{
-                                                 //   Toast.makeText(getApplicationContext(),"You should verify your email address before login",Toast.LENGTH_LONG).show();
-                                                 //   btnSendVerificationEmail.setVisibility(View.VISIBLE);
-                                                 //   progressDialogUtil.stopDialog();
-                                               // }
-                                            //}
-                                        }
-                                    });
+                                                //   Toast.makeText(getApplicationContext(),"You should verify your email address before login",Toast.LENGTH_LONG).show();
+                                                //   btnSendVerificationEmail.setVisibility(View.VISIBLE);
+                                                //   progressDialogUtil.stopDialog();
+                                                // }
+                                                //}
+                                            }
+                                        });
+                            }
+                            else{
+                                Toast.makeText(getApplicationContext(),"Could not sign in: Details entered might be incorrect",Toast.LENGTH_LONG).show();
+                                progressDialogUtil.stopDialog();
+                            }
                         }
-                        else{
-                            Toast.makeText(getApplicationContext(),"Could not sign in: Details entered might be incorrect",Toast.LENGTH_LONG).show();
-                            progressDialogUtil.stopDialog();
+                    });
+
+        }
+        if(selectedBusiness){
+
+            progressDialogUtil.startDialog("logging you in...");
+            mAuth.signInWithEmailAndPassword(username,password)
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()){
+                                db.collection("merchants").document(username).get()
+                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                if(task.isSuccessful()){
+                                                   // if(FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()){
+                                                        DocumentSnapshot documentSnapshot = task.getResult();
+                                                        if(documentSnapshot.exists()){
+                                                            updateUsersMessagingToken(username);
+                                                            progressDialogUtil.stopDialog();
+                                                            sessionManager.saveEmailAndUserMode(username, "business");
+                                                            Intent intent = new Intent(getApplicationContext(), MerchantActivity.class);
+                                                            startActivity(intent);
+                                                        }
+                                                        else{
+                                                            //Toast.makeText(getApplicationContext(),"This account might not exist as a business or is not yet a verified business by giftinApp",Toast.LENGTH_LONG).show();
+                                                            builder.setMessage("This account is not a verified business account by giftinApp." +
+                                                                    "If you have signed up as a business, please contact giftinApp on +2348060456301 for quick verification.")
+                                                                    .setCancelable(false)
+                                                                    .setPositiveButton("OK", (dialog, id) -> {
+                                                                    });
+                                                            AlertDialog alert = builder.create();
+                                                            alert.show();
+                                                            progressDialogUtil.stopDialog();
+                                                        }
+                                                    }
+                                                   // else{
+                                                       // Toast.makeText(getApplicationContext(),"You should verify your email address before login",Toast.LENGTH_LONG).show();
+                                                      //  btnSendVerificationEmail.setVisibility(View.VISIBLE);
+                                                      //  progressDialogUtil.stopDialog();
+                                                   // }
+                                                //}
+                                            }
+                                        });
+                            }
+                            else{
+                                Toast.makeText(getApplicationContext(),"Could not log in, email or password might not exist",Toast.LENGTH_LONG).show();
+                                progressDialogUtil.stopDialog();
+                            }
                         }
-                    }
-                });
+                    });
+        }
     }
+//
+//    private void checkVerificationMode(String username) {
+//        Toast.makeText(this,"you are here",Toast.LENGTH_LONG).show();
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        // [END get_firestore_instance]
+//
+//        // [START set_firestore_settings]
+//        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+//                .setPersistenceEnabled(true)
+//                .build();
+//        db.setFirestoreSettings(settings);
+//
+//        db.collection("users").document(username).get()
+//                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                        if(task.isSuccessful()){
+//                            DocumentSnapshot signUpSelected = task.getResult();
+//                            String verificationModeSelected = (String) signUpSelected.get("verification_status");
+//                            String interestSelected = (String) signUpSelected.get("interest");
+//                            if(verificationModeSelected.equals("not_verified") && interestSelected.equals("As Business")){
+//                                Toast.makeText(getApplicationContext(),"you signed up as business, please select to login as business",Toast.LENGTH_LONG).show();
+//                            }
+//                            else{
+//                                continueLoginAsCustomer();
+//                            }
+//                        }
+//                    }
+//                });
+//
+//    }
+//
+//    private void continueLoginAsCustomer(){
+//
+//        String username = etSignInEmail.getText().toString();
+//        String password = etSignInPassword.getText().toString();
+//
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        // [END get_firestore_instance]
+//
+//        // [START set_firestore_settings]
+//        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+//                .setPersistenceEnabled(true)
+//                .build();
+//        db.setFirestoreSettings(settings);
+//
+//        progressDialogUtil.startDialog("logging you in...");
+//
+//
+//    }
 }

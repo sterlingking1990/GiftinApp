@@ -32,6 +32,7 @@ import com.giftinapp.merchant.utility.SessionManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.common.collect.Lists;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -379,23 +380,33 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
         db.setFirestoreSettings(settings);
         itemAnim.playAnimation();
         GiftList giftList = new GiftList();
-        giftList.gift_name=itemId.gift_name;
-        giftList.gift_cost=itemId.gift_cost;
-        giftList.gift_url=itemId.gift_url;
+        giftList.gift_name = itemId.gift_name;
+        giftList.gift_cost = itemId.gift_cost;
+        giftList.gift_url = itemId.gift_url;
 
-        db.collection("users").document(Objects.requireNonNull(sessionManager.getEmail())).collection("gift_carts")
-                .document(giftList.gift_name).set(giftList).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    Toast.makeText(requireContext(),"Added " + itemId.gift_name + " To gift cart",Toast.LENGTH_SHORT).show();
-                    itemAnim.setVisibility(View.GONE);
+        //check if user has been verified
+
+        if (FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()) {
+
+            db.collection("users").document(Objects.requireNonNull(sessionManager.getEmail())).collection("gift_carts")
+                    .document(giftList.gift_name).set(giftList).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(requireContext(), "Added " + itemId.gift_name + " To gift cart", Toast.LENGTH_SHORT).show();
+                        itemAnim.setVisibility(View.GONE);
+                    }
                 }
-            }
-        });
-
-
-
+            });
+        } else {
+            builder.setMessage("Your account need to be verified before adding gifts to carts. Please check your email to verifiy your account")
+                    .setCancelable(false)
+                    .setPositiveButton("OK", (dialog, id) -> {
+                        FirebaseAuth.getInstance().getCurrentUser().sendEmailVerification();
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 
 

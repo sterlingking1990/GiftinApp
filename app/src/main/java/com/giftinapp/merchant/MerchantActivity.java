@@ -389,6 +389,10 @@ public class MerchantActivity extends AppCompatActivity {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+            mAuth.signOut();
+            sessionManager.clearData();
+            startActivity(new Intent(MerchantActivity.this,SignUpActivity.class));
+            finish();
         }
     }
 

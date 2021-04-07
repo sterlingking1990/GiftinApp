@@ -88,14 +88,17 @@ public class SignUpActivity extends AppCompatActivity {
             if(etFirstname.getText().toString().isEmpty() || etLastname.getText().toString().isEmpty()){
                 Toast.makeText(getApplicationContext(),"first name and last name must be provided",Toast.LENGTH_LONG).show();
             }
-            if(emailValidator.validateEmail(etEmail.getText().toString()) &&
-                    PasswordValidator.Validator.validPassword(etPassword.getText().toString())){
+            if(emailValidator.validateEmail(etEmail.getText().toString())){
+                if(PasswordValidator.Validator.validPassword(etPassword.getText().toString())){
                     signUpUser(etEmail.getText().toString(),etPassword.getText().toString());
+                }
+                else{
+                    Toast.makeText(getApplicationContext(),"password should be more than 6 characters",Toast.LENGTH_LONG).show();
+                }
             }
-            else {
-                Toast.makeText(getApplicationContext(),"email and password must be entered correctly",Toast.LENGTH_SHORT).show();
+            else{
+                Toast.makeText(getApplicationContext(),"email empty or invalid",Toast.LENGTH_LONG).show();
             }
-
         });
 
         btnSignInTrigger.setOnClickListener(v -> {

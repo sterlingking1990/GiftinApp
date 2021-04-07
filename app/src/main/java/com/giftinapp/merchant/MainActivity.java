@@ -228,8 +228,12 @@ public class MainActivity extends AppCompatActivity {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            finish();
             super.onBackPressed();
+            mauth.signOut();
+            sessionManager.clearData();
+            storySession.clearData();
+            startActivity(new Intent(MainActivity.this,SignUpActivity.class));
+            finish();
         }
     }
 

@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
@@ -25,7 +26,6 @@ import com.squareup.picasso.Picasso
 import com.synnapps.carouselview.CarouselView
 import com.synnapps.carouselview.ViewListener
 import java.util.*
-import kotlin.system.exitProcess
 
 
 class GiftinAppAuthorityActivity : AppCompatActivity() {
@@ -313,7 +313,16 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
         drawer!!.close()
     }
 
-
-
+    override fun onBackPressed() {
+        if (drawer!!.isDrawerOpen(GravityCompat.START)) {
+            drawer!!.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+            mAuth.signOut()
+            sessionManager.clearData()
+            startActivity(Intent(this, SignUpActivity::class.java))
+            finish()
+        }
+    }
 
 }
