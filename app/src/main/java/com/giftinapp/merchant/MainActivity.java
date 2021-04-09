@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected SparseArray<ReportsViewHolder> holderList = new SparseArray<>();
 
-    public Long totalGiftCoin =null;
+    public Long totalGiftCoin = null;
 
     public Long latestAmountRedeemed =null;
 
@@ -353,8 +353,13 @@ public class MainActivity extends AppCompatActivity {
         db.collection("users").document("giftinappinc@gmail.com").collection("customers_redeemed").document(sessionManager.getEmail()).get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        DocumentSnapshot documentSnapshot = task.getResult();
-                        latestAmountRedeemed = (long) documentSnapshot.get("gift_coin");
+                        try {
+                            DocumentSnapshot documentSnapshot = task.getResult();
+                            latestAmountRedeemed = (long) documentSnapshot.get("gift_coin");
+                        }
+                        catch (Exception e){
+                            latestAmountRedeemed = 0L;
+                        }
                         }
                     else{
                         latestAmountRedeemed=0L;

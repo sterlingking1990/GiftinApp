@@ -107,7 +107,8 @@ public class MerchantInfoUpdate extends Fragment {
         tvGiftorId.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                builder.setMessage("its easy for those you gift to tell others about you with your giftor Id")
+                builder.setMessage("This appears in the email sent when you gift your customer. " +
+                        "Make sure you select an option known generally by your customers")
                         .setCancelable(true)
                         .setPositiveButton("OK", (dialog, id) -> {
 
@@ -124,7 +125,7 @@ public class MerchantInfoUpdate extends Fragment {
 
     }
 
-    private void updateUserInfo(String facebook, String instagram, String whatsapp, String address,String giftorId) {
+    private void updateUserInfo(String facebook, String instagram, String whatsapp, String address,String selectedGiftorId) {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
@@ -141,7 +142,7 @@ public class MerchantInfoUpdate extends Fragment {
         String instagramInput = instagram.isEmpty()?"not provided":instagram;
         String whatsAppInput=whatsapp.isEmpty()?"not provided":whatsapp;
         String addressInput=address.isEmpty()?"not provided":address;
-        String giftorIdInput = giftorId.isEmpty()?email:giftorId;
+        String giftorIdInput = selectedGiftorId.isEmpty()?email:selectedGiftorId;
 
         MerchantInfoUpdatePojo merchantInfoUpdatePojo=new MerchantInfoUpdatePojo();
         merchantInfoUpdatePojo.facebook=facebookInput;
@@ -180,8 +181,7 @@ public class MerchantInfoUpdate extends Fragment {
                             etInstagram.setText(documentSnapshot.get("instagram").toString());
                             etWhatsApp.setText(documentSnapshot.get("whatsapp").toString());
                             etAddress.setText(documentSnapshot.get("address").toString());
-                            tvGiftorId.setText(documentSnapshot.get("giftorId").toString());
-                            String giftorText = "Giftor Id" + "<b><p>" +  "* " + sessionManager.getGiftorId() + "</p></b> ";
+                            String giftorText = "Giftor Id" + "<b><p>" +  "* " + documentSnapshot.get("giftorId").toString() + "</p></b> ";
                             tvGiftorId.setText(Html.fromHtml(giftorText));
 
                         }

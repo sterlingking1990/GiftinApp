@@ -102,28 +102,33 @@ public class GiftingMerchantFragment extends Fragment implements GiftingMerchant
                                                                    @Override
                                                                    public void onComplete(@NonNull Task<QuerySnapshot> task1) {
                                                                        if (task1.isSuccessful()) {
-                                                                           ArrayList<String> giftedCustomersEmail = new ArrayList<>();
-                                                                           for (QueryDocumentSnapshot eachCustomer : Objects.requireNonNull(task1.getResult())) {
-                                                                               RewardPojo rewardPojo = eachCustomer.toObject(RewardPojo.class);
-                                                                               giftedCustomersEmail.add(rewardPojo.email);
+                                                                           try {
+                                                                               ArrayList<String> giftedCustomersEmail = new ArrayList<>();
+                                                                               for (QueryDocumentSnapshot eachCustomer : Objects.requireNonNull(task1.getResult())) {
+                                                                                   RewardPojo rewardPojo = eachCustomer.toObject(RewardPojo.class);
+                                                                                   giftedCustomersEmail.add(rewardPojo.email);
+                                                                               }
+
+
+                                                                               GiftingMerchantViewPojo giftingMerchantViewPojo = new GiftingMerchantViewPojo();
+                                                                               giftingMerchantViewPojo.giftingMerchantId = document.getId();
+                                                                               if (giftedCustomersEmail.size() == 0) {
+                                                                                   giftingMerchantViewPojo.numberOfCustomerGifted = 0;
+                                                                               } else {
+                                                                                   giftingMerchantViewPojo.numberOfCustomerGifted = giftedCustomersEmail.size();
+                                                                               }
+                                                                               giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo;
+
+                                                                               giftingMerchantViewPojos.add(giftingMerchantViewPojo);
+
+                                                                               giftingMerchantAdapter.setGiftingMerchantList(giftingMerchantViewPojos);
+                                                                               rvGiftingMerchant.setLayoutManager(layoutManager);
+                                                                               rvGiftingMerchant.setAdapter(giftingMerchantAdapter);
+                                                                               giftingMerchantAdapter.notifyDataSetChanged();
                                                                            }
+                                                                           catch (Exception ignored){
 
-
-                                                                           GiftingMerchantViewPojo giftingMerchantViewPojo = new GiftingMerchantViewPojo();
-                                                                           giftingMerchantViewPojo.giftingMerchantId = document.getId();
-                                                                           if (giftedCustomersEmail.size() == 0) {
-                                                                               giftingMerchantViewPojo.numberOfCustomerGifted = 0;
-                                                                           } else {
-                                                                               giftingMerchantViewPojo.numberOfCustomerGifted = giftedCustomersEmail.size();
                                                                            }
-                                                                           giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo;
-
-                                                                           giftingMerchantViewPojos.add(giftingMerchantViewPojo);
-
-                                                                           giftingMerchantAdapter.setGiftingMerchantList(giftingMerchantViewPojos);
-                                                                           rvGiftingMerchant.setLayoutManager(layoutManager);
-                                                                           rvGiftingMerchant.setAdapter(giftingMerchantAdapter);
-                                                                           giftingMerchantAdapter.notifyDataSetChanged();
                                                                        }
                                                                    }
                                                                });

@@ -228,7 +228,7 @@ class CustomerRewardStories : Fragment() {
                    // }
                 //}
         //get the list of viewers and then update it with the viewers record
-        db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document(storyId)
+        //db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document(storyId)
 
 
 

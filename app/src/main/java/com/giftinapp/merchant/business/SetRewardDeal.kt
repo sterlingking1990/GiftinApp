@@ -1,6 +1,7 @@
 package com.giftinapp.merchant.business
 
 import android.app.Activity.RESULT_OK
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -14,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
 import androidx.fragment.app.Fragment
@@ -22,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.merchant.R
 import com.giftinapp.merchant.model.MerchantStoryListPojo
 import com.giftinapp.merchant.utility.SessionManager
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.storage.FirebaseStorage
@@ -56,6 +59,8 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
     private lateinit var sessionManager: SessionManager
 
+    var builder: AlertDialog.Builder? = null
+
     var photoFile: File? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -87,6 +92,8 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         uploadedStoryAdapter = UploadedRewardStoryListAdapter(this)
 
         uploadedStoryRecyclerView.adapter = uploadedStoryAdapter
+
+        builder = AlertDialog.Builder(requireContext())
 
         sessionManager = SessionManager(requireContext())
 
@@ -193,36 +200,44 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 .build()
         db.firestoreSettings = settings
 
+        if(FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
 
-        db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").get()
-                .addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        val listOfStats = ArrayList<MerchantStoryListPojo>()
-                        for (eachStatus in it.result!!) {
-                            val merchantStoryListPojo = MerchantStoryListPojo()
-                            merchantStoryListPojo.merchantStatusImageLink = eachStatus.getString("merchantStatusImageLink")
-                            merchantStoryListPojo.storyTag = eachStatus.getString("storyTag")
-                            merchantStoryListPojo.seen = eachStatus.getBoolean("seen")
-                            merchantStoryListPojo.merchantStatusId = eachStatus.id
-                            listOfStats.add(merchantStoryListPojo)
-                        }
-                        if (listOfStats.size > 0) {
-                            Toast.makeText(requireContext(),"list of items ${sessionManager.getEmail().toString()}",Toast.LENGTH_SHORT).show()
-                            pgUploading.visibility = View.GONE
-                            uploadedStoryAdapter.setUploadedStoryList(listOfStats)
-                            uploadedStoryRecyclerView.layoutManager = uploadedStoryRecyclerViewLayoutManager
-                            uploadedStoryRecyclerView.adapter = uploadedStoryAdapter
-                            uploadedStoryAdapter.notifyDataSetChanged()
+            db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").get()
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            val listOfStats = ArrayList<MerchantStoryListPojo>()
+                            for (eachStatus in it.result!!) {
+                                val merchantStoryListPojo = MerchantStoryListPojo()
+                                merchantStoryListPojo.merchantStatusImageLink = eachStatus.getString("merchantStatusImageLink")
+                                merchantStoryListPojo.storyTag = eachStatus.getString("storyTag")
+                                merchantStoryListPojo.seen = eachStatus.getBoolean("seen")
+                                merchantStoryListPojo.merchantStatusId = eachStatus.id
+                                listOfStats.add(merchantStoryListPojo)
+                            }
+                            if (listOfStats.size > 0) {
+                                pgUploading.visibility = View.GONE
+                                uploadedStoryAdapter.setUploadedStoryList(listOfStats)
+                                uploadedStoryRecyclerView.layoutManager = uploadedStoryRecyclerViewLayoutManager
+                                uploadedStoryRecyclerView.adapter = uploadedStoryAdapter
+                                uploadedStoryAdapter.notifyDataSetChanged()
+                            } else {
+                                Toast.makeText(requireContext(), "no published reward story", Toast.LENGTH_SHORT).show()
+                                pgUploading.visibility = View.GONE
+                            }
+
                         } else {
                             Toast.makeText(requireContext(), "no published reward story", Toast.LENGTH_SHORT).show()
                             pgUploading.visibility = View.GONE
                         }
-
-                    } else {
-                        Toast.makeText(requireContext(), "no published reward story", Toast.LENGTH_SHORT).show()
-                        pgUploading.visibility = View.GONE
                     }
-                }
+        }
+        else{
+            builder!!.setMessage("You need to verify your account to view reward stories you have added, please check your mail to verify your account")
+                    .setCancelable(false)
+                    .setPositiveButton("OK") { dialog: DialogInterface?, id: Int -> FirebaseAuth.getInstance().currentUser!!.sendEmailVerification() }
+            val alert = builder!!.create()
+            alert.show()
+        }
     }
 
     private fun uploadUriAndStoryTagToFireStore() {
@@ -271,27 +286,35 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 .build()
         db.firestoreSettings = settings
 
-        //delete gift from cart
-        sessionManager.getEmail()?.let {
-            db.collection("merchants").document(it).collection("statuslist").document(id)
-                    .delete()
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            //delete from firebase storage
-                            val photoRef: StorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(link)
-                            photoRef.delete().addOnSuccessListener { // Fil // e deleted successfully
+        if(FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
+            //delete gift from cart
+            sessionManager.getEmail()?.let {
+                db.collection("merchants").document(it).collection("statuslist").document(id)
+                        .delete()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                //delete from firebase storage
+                                val photoRef: StorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(link)
+                                photoRef.delete().addOnSuccessListener { // Fil // e deleted successfully
 
-                                uploadedStoryAdapter.clear(positionId)
-                                uploadedStoryAdapter.notifyDataSetChanged()
+                                    uploadedStoryAdapter.clear(positionId)
+                                    uploadedStoryAdapter.notifyDataSetChanged()
 
-                                Toast.makeText(requireContext(), "You have successfully removed reward story", Toast.LENGTH_SHORT).show()
-                            }.addOnFailureListener { // Uh-oh, an error occurred!
-                                Toast.makeText(requireContext(), "Could not delete, try again later", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(requireContext(), "You have successfully removed reward story", Toast.LENGTH_SHORT).show()
+                                }.addOnFailureListener { // Uh-oh, an error occurred!
+                                    Toast.makeText(requireContext(), "Could not delete, try again later", Toast.LENGTH_SHORT).show()
+                                }
+
+                                pgUploading.visibility = View.GONE
                             }
-
-                            pgUploading.visibility = View.GONE
                         }
-                    }
+            }
+        }else{
+            builder!!.setMessage("You need to verify your account to delete added stories, please check your mail to verify your account")
+                    .setCancelable(false)
+                    .setPositiveButton("OK") { dialog: DialogInterface?, id: Int -> FirebaseAuth.getInstance().currentUser!!.sendEmailVerification() }
+            val alert = builder!!.create()
+            alert.show()
         }
 
     }

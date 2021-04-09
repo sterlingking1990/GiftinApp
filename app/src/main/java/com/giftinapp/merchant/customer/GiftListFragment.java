@@ -355,7 +355,6 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
     @Override
     public void onGiftClick(@NotNull GiftList itemId, @NotNull LottieAnimationView itemAnim) {
 
-
         addToGiftCart(itemId,itemAnim);
 
 
@@ -370,6 +369,7 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
     }
 
     private void addToGiftCart(GiftList itemId, LottieAnimationView itemAnim) {
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
 
@@ -399,7 +399,7 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
                 }
             });
         } else {
-            builder.setMessage("Your account need to be verified before adding gifts to carts. Please check your email to verifiy your account")
+            builder.setMessage("Your account need to be verified before adding gifts to carts. Please check your email to verify your account")
                     .setCancelable(false)
                     .setPositiveButton("OK", (dialog, id) -> {
                         FirebaseAuth.getInstance().getCurrentUser().sendEmailVerification();

@@ -150,6 +150,7 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void signUpUser(String username, String password) {
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
 
@@ -190,16 +191,16 @@ public class SignUpActivity extends AppCompatActivity {
                                                             //Toast.makeText(getApplicationContext(),"You have been temporarily registered",Toast.LENGTH_SHORT).show();
                                                             builder.setMessage("You have been temporarily registered and can now login, " +
                                                                     "but might not enjoy all benefits from giftinApp until you verify your account from your mail")
-                                                                    .setCancelable(true)
+                                                                    .setCancelable(false)
                                                                     .setPositiveButton("OK", (dialog, id) -> {
+                                                                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                                                                        startActivity(intent);
                                                                     });
                                                             AlertDialog alert = builder.create();
                                                             alert.show();
                                                         }
                                                     }
                                                 });
-                                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                                        startActivity(intent);
                                     }
                                 });
                     }

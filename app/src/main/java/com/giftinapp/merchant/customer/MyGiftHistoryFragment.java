@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -91,8 +92,8 @@ public class MyGiftHistoryFragment extends Fragment implements GiftHistoryAdapte
                                     builder.setMessage("You have no gifting history yet, don't worry!, you will be taking to list of merchants that rewards for every product you buy!")
                                             .setCancelable(false)
                                             .setPositiveButton("OK", (dialog, id) -> {
-                                                //take user to rewarding merchants
-                                                //openFragment(new GiftingMerchantFragment());
+                                               // take user to rewarding merchants
+                                                openFragment(new GiftingMerchantFragment());
                                             });
                                     AlertDialog alert = builder.create();
                                     alert.show();
@@ -101,13 +102,13 @@ public class MyGiftHistoryFragment extends Fragment implements GiftHistoryAdapte
                 });
     }
 
-//    public void openFragment(Fragment fragment) {
-//        FragmentManager fm = getFragmentManager();
-//        fm.beginTransaction()
-//                .replace(R.id.fr_game, fragment)
-//                .addToBackStack(null)
-//                .commit();
-//    }
+    public void openFragment(Fragment fragment) {
+        FragmentManager fm = getFragmentManager();
+        fm.beginTransaction()
+                .replace(R.id.fr_game, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
 
     @Override
     public void openMerchantFacebookDetail(@NotNull String facebookHandle) {

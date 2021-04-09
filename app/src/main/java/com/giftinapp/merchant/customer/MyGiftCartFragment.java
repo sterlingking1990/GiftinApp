@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -26,6 +27,7 @@ import com.giftinapp.merchant.model.SendGiftPojo;
 import com.giftinapp.merchant.utility.SessionManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
@@ -43,6 +45,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
     private View myGiftCartView;
     private String imageLink;
     private ImageView imgGiftDetail;
+    private TextView tvNoGift;
     public ArrayList<MyCartPojo> listTop;
     public Integer amountOfGiftRedeemable;
 
@@ -52,6 +55,8 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
     public Long totalRewardAmount;
 
     public ProgressBar pgLoading;
+
+
 
     //here, we fetch the gifts from firebase and then we display on my gift cart
 
@@ -86,6 +91,8 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
 
         pgLoading = view.findViewById(R.id.pgLoadingForGiftInCart);
 
+        tvNoGift = view.findViewById(R.id.tvNoGift);
+
         builder = new AlertDialog.Builder(requireContext());
 
         displayGiftCart();
@@ -104,93 +111,106 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
         db.setFirestoreSettings(settings);
 
 
-        //first we get the total amount the user has been rewarded
-        db.collection("users").document(sessionManager.getEmail()).collection("rewards")
-                .get()
-                .addOnCompleteListener(task -> {
-                    //on success of getting the total amount, we now want to display the users
-                    //gifts and the track based on the total amount vs the cost of each gift
-                    if (task.isSuccessful()) {
-                        totalRewardAmount = 0L;
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            MyTotalReward totalReward = document.toObject(MyTotalReward.class);
-                            MyTotalReward giftCost = new MyTotalReward();
-                            giftCost.gift_coin = totalReward.gift_coin;
-                            totalRewardAmount += giftCost.gift_coin;
-                        }
+        if(FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()) {
+            //first we get the total amount the user has been rewarded
+            db.collection("users").document(sessionManager.getEmail()).collection("rewards")
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        //on success of getting the total amount, we now want to display the users
+                        //gifts and the track based on the total amount vs the cost of each gift
+                        if (task.isSuccessful()) {
+                            totalRewardAmount = 0L;
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                MyTotalReward totalReward = document.toObject(MyTotalReward.class);
+                                MyTotalReward giftCost = new MyTotalReward();
+                                giftCost.gift_coin = totalReward.gift_coin;
+                                totalRewardAmount += giftCost.gift_coin;
+                            }
 
 
-                        if (totalRewardAmount > 1 ) {
-                            db.collection("users").document(sessionManager.getEmail()).collection("gift_carts")
-                                    .get()
-                                    .addOnCompleteListener(task1 -> {
-                                        if (task1.isSuccessful()) {
-                                            listTop = new ArrayList<>();
-                                            amountOfGiftRedeemable = 0;
-                                            for (QueryDocumentSnapshot document : task1.getResult()) {
-                                                MyGiftCartPojo listings = document.toObject(MyGiftCartPojo.class);
-                                                MyCartPojo list = new MyCartPojo();
-                                                list.gift_url = listings.gift_url;
-                                                list.gift_name = listings.gift_name;
-                                                list.gift_cost=listings.gift_cost;
+                            if (totalRewardAmount > 1) {
+                                db.collection("users").document(sessionManager.getEmail()).collection("gift_carts")
+                                        .get()
+                                        .addOnCompleteListener(task1 -> {
+                                            if (task1.isSuccessful()) {
+                                                listTop = new ArrayList<>();
+                                                amountOfGiftRedeemable = 0;
+                                                for (QueryDocumentSnapshot document : task1.getResult()) {
+                                                    MyGiftCartPojo listings = document.toObject(MyGiftCartPojo.class);
+                                                    MyCartPojo list = new MyCartPojo();
+                                                    list.gift_url = listings.gift_url;
+                                                    list.gift_name = listings.gift_name;
+                                                    list.gift_cost = listings.gift_cost;
 
-                                                double track= listings.gift_cost < totalRewardAmount ? 100 : ((totalRewardAmount * 0.1)/(listings.gift_cost*0.1)) * 100;
+                                                    double track = listings.gift_cost < totalRewardAmount ? 100 : ((totalRewardAmount * 0.1) / (listings.gift_cost * 0.1)) * 100;
 
-                                                list.gift_track= (int) track;
-                                                list.redeemable= track == 100;
-                                                if(list.redeemable){
-                                                    amountOfGiftRedeemable+=1;
+                                                    list.gift_track = (int) track;
+                                                    list.redeemable = track == 100;
+                                                    if (list.redeemable) {
+                                                        amountOfGiftRedeemable += 1;
+                                                    }
+                                                    listTop.add(list);
+
                                                 }
-                                                listTop.add(list);
-
-                                            }
-                                            myGiftCartAdapter.setMyGiftsList(listTop, requireContext());
-                                            rvMyGiftCart.setAdapter(myGiftCartAdapter);
-                                            builder.setMessage("you can tap on a gift to remove it from the gift cart.")
-                                                    .setCancelable(true)
-                                                    .setPositiveButton("OK", (dialog, id) -> {
-                                                    });
-                                            AlertDialog alert = builder.create();
-                                            alert.show();
-
-                                            builder.setMessage("You have "+ amountOfGiftRedeemable + " Gifts redeemable, click send icon on the gift to send to GiftinApp Company for redeeming.")
-                                                    .setCancelable(true)
-                                                    .setPositiveButton("OK", (dialog, id) -> {
-                                                    });
-                                            AlertDialog alert2 = builder.create();
-                                            alert2.show();
-
-                                            if (listTop.size()==0){
-                                                builder.setMessage("You have not added gifts on your carts yet, please add gifts to carts to see how close you are to meeting your gift goal")
-                                                        .setCancelable(false)
+                                                myGiftCartAdapter.setMyGiftsList(listTop, requireContext());
+                                                rvMyGiftCart.setAdapter(myGiftCartAdapter);
+                                                builder.setMessage("you can tap on a gift to remove it from the gift cart.")
+                                                        .setCancelable(true)
                                                         .setPositiveButton("OK", (dialog, id) -> {
-                                                            //take user to list of rewarding merchants
-                                                            openFragment(new GiftListFragment());
                                                         });
-                                                AlertDialog alert3 = builder.create();
-                                                alert3.show();
+                                                AlertDialog alert = builder.create();
+                                                alert.show();
+
+                                                builder.setMessage("You have " + amountOfGiftRedeemable + " Gifts redeemable, click send icon on the gift to send to GiftinApp Company for redeeming.")
+                                                        .setCancelable(true)
+                                                        .setPositiveButton("OK", (dialog, id) -> {
+                                                        });
+                                                AlertDialog alert2 = builder.create();
+                                                alert2.show();
+
+                                                if (listTop.size() == 0) {
+                                                    builder.setMessage("You have not added gifts on your carts yet, please add gifts to carts to see how close you are to meeting your gift goal")
+                                                            .setCancelable(false)
+                                                            .setPositiveButton("OK", (dialog, id) -> {
+                                                                //take user to list of rewarding merchants
+                                                                openFragment(new GiftListFragment());
+                                                            });
+                                                    AlertDialog alert3 = builder.create();
+                                                    alert3.show();
+                                                }
+
+                                                pgLoading.setVisibility(View.GONE);
                                             }
+                                        });
 
-                                            pgLoading.setVisibility(View.GONE);
-                                        }
-                                    });
+                            } else {
+                                builder.setMessage("You have no rewards yet, please buy products from rewarding merchants to receive gifts. You will be taken to list of " +
+                                        "rewarding merchants to buy from")
+                                        .setCancelable(false)
+                                        .setPositiveButton("OK", (dialog, id) -> {
+                                            //rem-take user to list of rewarding merchants
+                                            openFragment(new GiftingMerchantFragment());
+                                        });
+                                AlertDialog alert4 = builder.create();
+                                alert4.show();
 
-                        } else {
-                            builder.setMessage("You have no rewards yet, please buy products from rewarding merchants to receive gifts. You will be taken to list of " +
-                                    "rewarding merchants to buy from")
-                                    .setCancelable(false)
-                                    .setPositiveButton("OK", (dialog, id) -> {
-                                        //rem-take user to list of rewarding merchants
-                                        openFragment(new GiftingMerchantFragment());
-                                    });
-                            AlertDialog alert4 = builder.create();
-                            alert4.show();
+                                pgLoading.setVisibility(View.GONE);
+                            }
 
-                            pgLoading.setVisibility(View.GONE);
                         }
-
-                    }
-                });
+                    });
+        }
+        else{
+            builder.setMessage("You need to be a verified user in other to view gifts on carts, send gifts for redeeming and much more, please check your mail for verification")
+                    .setCancelable(false)
+                    .setPositiveButton( "Ok", (dialog2, id2) -> {
+                        FirebaseAuth.getInstance().getCurrentUser().sendEmailVerification();
+                        pgLoading.setVisibility(View.GONE);
+                        tvNoGift.setVisibility(View.VISIBLE);
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 
     public void openFragment(Fragment fragment) {
@@ -214,6 +234,17 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
         builder.setMessage("Are you sure you want to remove this gift from cart?")
                 .setCancelable(false)
                 .setPositiveButton("Yes", (dialog, id) -> {
+                    //check if user if verified
+                    if(!FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()) {
+                        builder.setMessage("You need to be a verified user in other to delete a gift from the gift carts, please check your mail for verification")
+                                .setCancelable(false)
+                                .setPositiveButton( "Ok", (dialog2, id2) -> {
+                                 FirebaseAuth.getInstance().getCurrentUser().sendEmailVerification();
+                                });
+                        AlertDialog alert = builder.create();
+                        alert.show();
+                    }
+                    else{
                     //delete gift from cart
                     db.collection("users").document(sessionManager.getEmail()).collection("gift_carts")
                             .document(itemId.gift_name).delete();
@@ -229,12 +260,13 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                 }
                             });
                     displayGiftCart();
-                })
+                }})
                 .setNegativeButton("No",((dialog, which) -> {
 
                 }));
         AlertDialog alert5 = builder.create();
         alert5.show();
+
     }
 
     @Override

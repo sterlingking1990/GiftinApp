@@ -24,6 +24,7 @@ import com.giftinapp.merchant.R;
 import com.giftinapp.merchant.utility.SessionManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
@@ -81,11 +82,22 @@ public class SettingsFragment extends Fragment {
 
         fetchInfoOnStart();
         btnUpdateInfo.setOnClickListener(v->{
-            updateUserInfo(etFacebook.getText().toString(),etInstagram.getText().toString(),etWhatsApp.getText().toString());
+            if(FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()) {
+                updateUserInfo(etFacebook.getText().toString(), etInstagram.getText().toString(), etWhatsApp.getText().toString());
+            }
+            else{
+                builder.setMessage("You need to verify your account before updating your info, please check your mail to verify your account")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", (dialog, id) -> {
+                            FirebaseAuth.getInstance().getCurrentUser().sendEmailVerification();
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
         });
 
         tvGiftingId.setOnClickListener(v -> {
-            builder.setMessage("its easy for people gifting you to recall and use while gifting you")
+            builder.setMessage("This is used by your favourite business as an Id when gifting you. Please choose options that businesses can relate with easily")
                     .setCancelable(true)
                     .setPositiveButton("OK", (dialog, id) -> {
 

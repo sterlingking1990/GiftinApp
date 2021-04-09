@@ -69,18 +69,23 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 val shimmerDrawable = ShimmerDrawable()
                 shimmerDrawable.setShimmer(shimmer)
 
-                Picasso.get().load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink).placeholder(shimmerDrawable).into(frontImage)
+                try {
+                    Picasso.get().load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink).placeholder(shimmerDrawable).into(frontImage)
 
-                //getNumberOfViewersForStatus(merchantStories[position].storyOwner)
+                    //getNumberOfViewersForStatus(merchantStories[position].storyOwner)
 
-                merchantName.text = if (isHasStoryHeader && merchantStories[position].merchantId == sessionManager.getEmail()) (Html.fromHtml("<b>My Reward Deal</b>")) else merchantStories[position].merchantId
-                circularStatusView.setPortionsCount(merchantStories[position].merchantStoryList.size)
+                    merchantName.text = if (isHasStoryHeader && merchantStories[position].merchantId == sessionManager.getEmail()) (Html.fromHtml("<b>My Reward Deal</b>")) else merchantStories[position].merchantId
+                    circularStatusView.setPortionsCount(merchantStories[position].merchantStoryList.size)
 
-                frontImage.setOnClickListener {
-                    storyClickable.onStoryClicked(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, merchantStories, position, merchantStories[position].storyOwner)
+                    frontImage.setOnClickListener {
+                        storyClickable.onStoryClicked(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, merchantStories, position, merchantStories[position].storyOwner)
+                    }
+
+                    checkIfStatusSeen(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, context, circularStatusView, merchantStories[position].storyOwner)
                 }
+                catch (e:Exception){
 
-                checkIfStatusSeen(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, context, circularStatusView, merchantStories[position].storyOwner)
+                }
             }
     }
 
