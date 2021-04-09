@@ -46,6 +46,7 @@ public class GiftACustomerFragment extends Fragment {
     private EditText etCustomerFanRewardCoin;
     private List list;
     private ArrayAdapter arrayAdapter;
+    private Button btnRewardCustomerFan;
 
 
     public SessionManager sessionManager;
@@ -81,7 +82,7 @@ public class GiftACustomerFragment extends Fragment {
 
         lvCustomerFanToRewardList=view.findViewById(R.id.lv_customer_fan_to_reward_list);
         Button btnAddCustomerFanToList = view.findViewById(R.id.btn_add_customer_fan_to_list);
-        Button btnRewardCustomerFan = view.findViewById(R.id.btn_reward_customer_fan);
+        btnRewardCustomerFan = view.findViewById(R.id.btn_reward_customer_fan);
         etCustomerFanEmailToReward=view.findViewById(R.id.et_customer_fan_email_to_gift);
         etCustomerFanRewardCoin=view.findViewById(R.id.et_customer_fan_reward_amount);
 
@@ -98,6 +99,8 @@ public class GiftACustomerFragment extends Fragment {
             }
         });
 
+        btnRewardCustomerFan.setEnabled(false);
+        btnRewardCustomerFan.setBackgroundColor(getResources().getColor(R.color.gray_scale));
 
         btnRewardCustomerFan.setOnClickListener(new View.OnClickListener(){
 
@@ -113,10 +116,12 @@ public class GiftACustomerFragment extends Fragment {
         lvCustomerFanToRewardList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
                         arrayAdapter.remove(list.get(position));
                         arrayAdapter.notifyDataSetChanged();
-                        Toast.makeText(requireContext(),"Deleted successfully",Toast.LENGTH_SHORT).show();
+                        if(list.size()==0){
+                            btnRewardCustomerFan.setEnabled(false);
+                            btnRewardCustomerFan.setBackgroundColor(getResources().getColor(R.color.gray_scale));
+                        }
                         return false;
             }
         });
@@ -401,6 +406,9 @@ public class GiftACustomerFragment extends Fragment {
 
                                                                 list.add(customerFanToGiftPojo.toString());
                                                                 arrayAdapter.notifyDataSetChanged();
+                                                                btnRewardCustomerFan.setEnabled(true);
+                                                                btnRewardCustomerFan.setBackgroundColor(getResources().getColor(R.color.tabColor));
+
                                                             } else {
                                                                 Toast.makeText(requireContext(), "Email does not exist, please re-verify", Toast.LENGTH_SHORT).show();
                                                             }

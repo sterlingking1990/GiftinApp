@@ -72,6 +72,7 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 try {
                     Picasso.get().load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink).placeholder(shimmerDrawable).into(frontImage)
 
+
                     //getNumberOfViewersForStatus(merchantStories[position].storyOwner)
 
                     merchantName.text = if (isHasStoryHeader && merchantStories[position].merchantId == sessionManager.getEmail()) (Html.fromHtml("<b>My Reward Deal</b>")) else merchantStories[position].merchantId

@@ -181,7 +181,7 @@ public class MerchantInfoUpdate extends Fragment {
                             etInstagram.setText(documentSnapshot.get("instagram").toString());
                             etWhatsApp.setText(documentSnapshot.get("whatsapp").toString());
                             etAddress.setText(documentSnapshot.get("address").toString());
-                            String giftorText = "Giftor Id" + "<b><p>" +  "* " + documentSnapshot.get("giftorId").toString() + "</p></b> ";
+                            String giftorText = documentSnapshot.get("giftorId") != null ? "Giftor Id" + "<b><p>" +  "* " + documentSnapshot.get("giftorId").toString() + "</p></b> " : "Giftor Id" + "<b><p>" +  "* " + documentSnapshot.getId() + "</p></b> ";
                             tvGiftorId.setText(Html.fromHtml(giftorText));
 
                         }

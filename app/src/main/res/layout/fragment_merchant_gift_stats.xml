@@ -21,6 +21,19 @@
         <!--            android:layout_height=""-->
     </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:id="@+id/tvNoCustomerGifted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You have not been verified \n and there are no Customers gifted yet"
+        android:lines="2"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:textAlignment="center"/>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"

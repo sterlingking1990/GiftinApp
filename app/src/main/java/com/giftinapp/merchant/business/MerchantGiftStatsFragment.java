@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.giftinapp.merchant.model.GiftHistoryPojo;
 import com.giftinapp.merchant.model.MerchantGiftStatsIdPojo;
@@ -30,6 +31,7 @@ public class MerchantGiftStatsFragment extends Fragment {
     private RecyclerView rvMerchantGiftStats;
     private RecyclerView.LayoutManager layoutManager;
     private View merchantGiftStatsView;
+    private TextView txNoCustomerGifted;
 
     public SessionManager sessionManager;
 
@@ -52,6 +54,8 @@ public class MerchantGiftStatsFragment extends Fragment {
         sessionManager = new SessionManager(requireContext());
 
         builder = new AlertDialog.Builder(requireContext());
+
+        txNoCustomerGifted = view.findViewById(R.id.tvNoCustomerGifted);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
@@ -110,6 +114,7 @@ public class MerchantGiftStatsFragment extends Fragment {
             builder.setMessage("You need to verify your account before viewing statistics of customers you gifted, please check your mail to verify your account")
                     .setCancelable(false)
                     .setPositiveButton("OK", (dialog, id) -> {
+                        txNoCustomerGifted.setVisibility(view.getVisibility());
                         FirebaseAuth.getInstance().getCurrentUser().sendEmailVerification();
                     });
             AlertDialog alert = builder.create();

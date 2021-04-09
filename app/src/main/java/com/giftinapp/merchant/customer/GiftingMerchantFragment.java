@@ -111,7 +111,7 @@ public class GiftingMerchantFragment extends Fragment implements GiftingMerchant
 
 
                                                                                GiftingMerchantViewPojo giftingMerchantViewPojo = new GiftingMerchantViewPojo();
-                                                                               giftingMerchantViewPojo.giftingMerchantId = document.getId();
+                                                                               giftingMerchantViewPojo.giftingMerchantId = document.getString("giftorId") != null ? document.getString("giftorId") : document.getId();
                                                                                if (giftedCustomersEmail.size() == 0) {
                                                                                    giftingMerchantViewPojo.numberOfCustomerGifted = 0;
                                                                                } else {

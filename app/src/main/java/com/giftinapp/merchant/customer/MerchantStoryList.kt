@@ -15,17 +15,17 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.merchant.R
+import com.giftinapp.merchant.business.SetRewardDeal
+import com.giftinapp.merchant.business.WalletInfo
 import com.giftinapp.merchant.model.MerchantStoryListPojo
 import com.giftinapp.merchant.model.MerchantStoryPojo
 import com.giftinapp.merchant.model.StoryHeaderPojo
 import com.giftinapp.merchant.utility.SessionManager
 import com.giftinapp.merchant.utility.StorySession
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.QuerySnapshot
 import java.io.Serializable
-import java.lang.Exception
 
 class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
     lateinit var merchantStoryListAdapter:MerchantStoryListAdapter
@@ -145,25 +145,32 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
 
                                                         }
 
-                                                        if(merchantStoryListPojos.size>0) {
+                                                        if (merchantStoryListPojos.size > 0) {
+                                                            //this means business has more stories
                                                             val merchantStoryPojo = MerchantStoryPojo()
-                                                            merchantStoryPojo.merchantId = if(eachRes.getString("giftorId")!=null)eachRes.getString("giftorId") else  eachRes.id
+                                                            merchantStoryPojo.merchantId = if (eachRes.getString("giftorId") != null) eachRes.getString("giftorId") else eachRes.id
                                                             merchantStoryPojo.storyOwner = eachRes.id
                                                             merchantStoryPojo.merchantStoryList = merchantStoryListPojos
                                                             merchantStoryPojos.add(merchantStoryPojo)
+                                                        } else {
+                                                            if (eachRes.id == sessionManager.getEmail()) {
+                                                                showMessage(true)
+                                                                return@addOnCompleteListener
+                                                            }
                                                         }
 
                                                         if (merchantStoryPojos.size > 0) {
+
                                                             if (eachRes.id == sessionManager.getEmail()) {
+
                                                                 isStoryHasHeader = true
                                                             }
                                                             pgLoading.visibility = View.GONE
                                                             merchantStoryListAdapter.setMerchantStatus(merchantStoryPojos, requireContext(), isStoryHasHeader)
                                                             merchantStoryListRecyclerView.adapter = merchantStoryListAdapter
                                                         }
-                                                    }
-                                                    catch (e:Exception){
-                                                        Log.d("NO STATUS","Can't find record for no status")
+                                                    } catch (e: Exception) {
+                                                        Log.d("NO STATUS", "Can't find record for no status")
                                                     }
                                                 }
 
@@ -198,5 +205,31 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                     ?.replace(fragmentType, fragment)
                     ?.addToBackStack(null)
                     ?.commit()
+    }
+
+    fun showMessage(isDisplay: Boolean) {
+
+        if(isDisplay) {
+            builder!!.setMessage("When you publish your reward status as a business, it will be displayed here also. Do you want to Publish your reward status now so you can begin engaging customers for more buy?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes") { dialogInterface: DialogInterface, i: Int ->
+                        openFragment(SetRewardDeal())
+                        dialogInterface.dismiss()
+                    }
+                    .setNegativeButton("Later") { _: DialogInterface, _ ->
+                    }
+            val alert = builder!!.create()
+            alert.show()
+        }
+
+    }
+
+
+    fun openFragment(fragment: Fragment?) {
+        val fm = fragmentManager
+        fm!!.beginTransaction()
+                .replace(R.id.fr_layout_merchant, fragment!!)
+                .addToBackStack(null)
+                .commit()
     }
 }

@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.merchant.R
 import com.giftinapp.merchant.model.MerchantStoryListPojo
 import com.giftinapp.merchant.utility.SessionManager
+import com.giftinapp.merchant.utility.gone
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -234,7 +235,11 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         else{
             builder!!.setMessage("You need to verify your account to view reward stories you have added, please check your mail to verify your account")
                     .setCancelable(false)
-                    .setPositiveButton("OK") { dialog: DialogInterface?, id: Int -> FirebaseAuth.getInstance().currentUser!!.sendEmailVerification() }
+                    .setPositiveButton("OK") {
+                        dialog: DialogInterface?, id: Int ->
+                        FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
+                        pgUploading.visibility=View.GONE
+                    }
             val alert = builder!!.create()
             alert.show()
         }
@@ -253,21 +258,34 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 .build()
         db.firestoreSettings = settings
 
+        if(FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
 
-        val merchantStoryListPojo = MerchantStoryListPojo()
-        merchantStoryListPojo.seen = false
-        merchantStoryListPojo.storyTag = imageText.text.toString()
-        merchantStoryListPojo.merchantStatusId = null
-        merchantStoryListPojo.merchantStatusImageLink = tvDownloadUri.text.toString()
-        merchantStoryListPojo.viewers = arrayListOf()
+            val merchantStoryListPojo = MerchantStoryListPojo()
+            merchantStoryListPojo.seen = false
+            merchantStoryListPojo.storyTag = imageText.text.toString()
+            merchantStoryListPojo.merchantStatusId = null
+            merchantStoryListPojo.merchantStatusImageLink = tvDownloadUri.text.toString()
+            merchantStoryListPojo.viewers = arrayListOf()
 
-        db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document().set(merchantStoryListPojo)
-                .addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        Toast.makeText(requireContext(), "published successfully", Toast.LENGTH_SHORT).show()
-                        fetchUploadedStatsOnLoad()
+            db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document().set(merchantStoryListPojo)
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            Toast.makeText(requireContext(), "published successfully", Toast.LENGTH_SHORT).show()
+                            fetchUploadedStatsOnLoad()
+                        }
                     }
-                }
+        }
+        else{
+            builder!!.setMessage("You need to verify your account to publish reward stories, please check your mail to verify your account")
+                    .setCancelable(false)
+                    .setPositiveButton("OK") {
+                        dialog: DialogInterface?, id: Int ->
+                        FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
+                        pgUploading.visibility=View.GONE
+                    }
+            val alert = builder!!.create()
+            alert.show()
+        }
 
 
     }

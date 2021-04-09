@@ -317,11 +317,16 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
         if (drawer!!.isDrawerOpen(GravityCompat.START)) {
             drawer!!.closeDrawer(GravityCompat.START)
         } else {
-            super.onBackPressed()
-            mAuth.signOut()
-            sessionManager.clearData()
-            startActivity(Intent(this, SignUpActivity::class.java))
-            finish()
+
+            try {
+                super.onBackPressed()
+            }
+            catch (e:Exception) {
+                mAuth.signOut()
+                sessionManager.clearData()
+                startActivity(Intent(this, SignUpActivity::class.java))
+                finish()
+            }
         }
     }
 
