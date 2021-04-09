@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="com.giftinapp.merchant.MyGiftCartFragment">
+    tools:context="com.giftinapp.merchant.customer.MyGiftCartFragment">
 
     <ProgressBar
         android:id="@+id/pgLoadingForGiftInCart"
@@ -15,6 +15,20 @@
         android:indeterminateTint="#D5A43A"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvNoGift"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        style="@style/TextAppearance.AppCompat.Headline"
+        android:textAlignment="center"
+        android:visibility="gone"
+        android:text="No Gifts added to carts for tracking"/>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_mygiftpage_recycler"

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/whitesmoke"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <RelativeLayout
+        android:id="@+id/image_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/img_FrontImage"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:layout_centerInParent="true"
+            android:padding="6dp"
+            android:src="@mipmap/ic_launcher" />
+
+        <com.devlomi.circularstatusview.CircularStatusView
+            android:id="@+id/circular_StatusView"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:layout_centerInParent="true"
+            app:portion_color="@color/colorAccent"
+            app:portion_spacing="4dp"
+            app:portion_width="4dp"
+            app:portions_count="8" />
+
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/merchantIdTitle"
+        android:layout_width="250dp"
+        android:textAlignment="center"
+        android:layout_height="match_parent"
+        android:layout_marginTop="24dp"
+        android:lines="2"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:text="My Reward Deals"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/image_layout"
+        app:layout_constraintTop_toTopOf="@+id/image_layout" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="#e1e1e1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/image_layout" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

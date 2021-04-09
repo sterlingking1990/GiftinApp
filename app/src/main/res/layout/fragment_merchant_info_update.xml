@@ -1,10 +1,10 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginTop="50dp"
-    tools:context="com.giftinapp.merchant.MerchantInfoUpdate">
+    tools:context="com.giftinapp.merchant.business.MerchantInfoUpdate">
 
     <!-- Nested Scroll view -->
     <androidx.core.widget.NestedScrollView
@@ -104,13 +104,46 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Enter Biz Address"
-                    android:imeOptions="actionDone"
+                    android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1"
                     android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
         </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <LinearLayout
+            android:id="@+id/ll_signup_activity_interest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:weightSum="2"
+            app:layout_constraintBottom_toTopOf="@id/ll_signup_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ll_signup_activity_email_address">
+
+            <TextView
+                android:id="@+id/tv_giftor_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="GiftorId"
+                android:textSize="16sp"
+                app:drawableEndCompat="@drawable/ic_info" />
+
+            <Spinner
+                android:id="@+id/sp_giftor_id"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:spinnerMode="dropdown" />
+        </LinearLayout>
 
 
         <Button

@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:737567532677:android:3d6734dd4335deb57bebec",
         "android_client_info": {
-          "package_name": "com.example.merchant"
+          "package_name": "com.giftinapp.merchant"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "737567532677-49f5mpqnnffl5at2ieejatpa6nb6pq5k.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.merchant",
+            "package_name": "com.giftinapp.merchant",
             "certificate_hash": "feaa930a01c1c1a4814d0bd6336899d4acce062f"
           }
         },
