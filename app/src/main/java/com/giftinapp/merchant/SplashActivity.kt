@@ -3,6 +3,7 @@ package com.giftinapp.merchant
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.Window
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +20,6 @@ class SplashActivity : AppCompatActivity() {
         Handler().postDelayed(Runnable {
             startActivity(myintent)
             finish()
-        }, 3000)
+        }, 1000)
     }
 }

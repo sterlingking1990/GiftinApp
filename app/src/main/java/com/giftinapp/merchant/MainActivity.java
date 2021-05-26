@@ -1,6 +1,7 @@
 package com.giftinapp.merchant;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -393,7 +394,5 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(Intent.createChooser(intent, "Share GiftinApp With"));
                 });
     }
-
-
 
 }

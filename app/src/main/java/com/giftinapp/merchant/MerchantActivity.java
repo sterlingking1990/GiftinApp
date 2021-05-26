@@ -35,6 +35,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.appcheck.FirebaseAppCheck;
+import com.google.firebase.appcheck.safetynet.SafetyNetAppCheckProviderFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -71,6 +74,12 @@ public class MerchantActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_merchant);
+
+        FirebaseApp.initializeApp(this);
+
+        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
+
+        firebaseAppCheck.installAppCheckProviderFactory(SafetyNetAppCheckProviderFactory.getInstance());
 
         sessionManager = new SessionManager(getApplicationContext());
 
@@ -404,6 +413,9 @@ public class MerchantActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         carouselViewMerchant.setVisibility(View.GONE);
+        if(data!=null){
+            Log.d("Data",data.toString());
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 }

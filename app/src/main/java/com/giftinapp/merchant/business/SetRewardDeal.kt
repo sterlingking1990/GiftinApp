@@ -6,8 +6,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -24,7 +26,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.merchant.R
 import com.giftinapp.merchant.model.MerchantStoryListPojo
 import com.giftinapp.merchant.utility.SessionManager
-import com.giftinapp.merchant.utility.gone
+import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.safetynet.SafetyNetAppCheckProviderFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -34,6 +38,7 @@ import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -60,6 +65,10 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
     private lateinit var sessionManager: SessionManager
 
+    private var tempFileFromSource: File? = null
+
+    private var tempUriFromSource: Uri? = null
+
     var builder: AlertDialog.Builder? = null
 
     var photoFile: File? = null
@@ -74,6 +83,8 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+
         storage = FirebaseStorage.getInstance()
 
         imageContainer = view.findViewById(R.id.viewImage)
@@ -235,8 +246,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         else{
             builder!!.setMessage("You need to verify your account to view reward stories you have added, please check your mail to verify your account")
                     .setCancelable(false)
-                    .setPositiveButton("OK") {
-                        dialog: DialogInterface?, id: Int ->
+                    .setPositiveButton("OK") { dialog: DialogInterface?, id: Int ->
                         FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
                         pgUploading.visibility=View.GONE
                     }
@@ -278,8 +288,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         else{
             builder!!.setMessage("You need to verify your account to publish reward stories, please check your mail to verify your account")
                     .setCancelable(false)
-                    .setPositiveButton("OK") {
-                        dialog: DialogInterface?, id: Int ->
+                    .setPositiveButton("OK") { dialog: DialogInterface?, id: Int ->
                         FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
                         pgUploading.visibility=View.GONE
                     }
@@ -358,10 +367,22 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
 
     private fun chooseImageGallery() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
+        if (tempFileFromSource == null) {
+            try {
+                tempFileFromSource = File.createTempFile("choose", "png", requireContext().externalCacheDir);
+                tempUriFromSource = Uri.fromFile(tempFileFromSource);
+            } catch (e: IOException) {
+                e.printStackTrace();
+            }
+        }
         val fragment:Fragment = this
+        /*MediaStore.Images.Media.EXTERNAL_CONTENT_URI*/
+
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "image/*";
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUriFromSource)
         fragment.startActivityForResult(intent, IMAGE_CHOOSE)
+
     }
 
     override fun onRequestPermissionsResult(
