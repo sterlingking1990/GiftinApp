@@ -7,7 +7,7 @@
 
     <activity
         android:id="@+id/mainActivity"
-        android:name="com.giftinapp.merchant.MainActivity"
+        android:name="com.giftinapp.business.MainActivity"
         android:label="activity_main"
         tools:layout="@layout/activity_main" />
 </navigation>

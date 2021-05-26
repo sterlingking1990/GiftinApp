@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.giftinapp.merchant.LoginActivity">
+    tools:context="com.giftinapp.business.LoginActivity">
 
     <LinearLayout
         android:id="@+id/ll_login_activity_email_address"

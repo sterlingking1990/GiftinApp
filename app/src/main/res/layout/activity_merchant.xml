@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:background="@drawable/recyclerviewgradient"
     android:layout_height="match_parent"
-    tools:context="com.giftinapp.merchant.MerchantActivity">
+    tools:context="com.giftinapp.business.MerchantActivity">
 
 
     <com.synnapps.carouselview.CarouselView

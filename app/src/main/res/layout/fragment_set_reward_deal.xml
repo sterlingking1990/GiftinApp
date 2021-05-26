@@ -8,7 +8,7 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:orientation="vertical"
-        tools:context="com.giftinapp.merchant.customer.SetRewardDEAL">
+        tools:context="com.giftinapp.business.customer.SetRewardDEAL">
 
 
             <FrameLayout
