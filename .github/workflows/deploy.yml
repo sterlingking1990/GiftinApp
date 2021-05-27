@@ -31,7 +31,7 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: service_account.json
-          packageName: com.project.wikndapp
+          packageName: com.giftinapp.business
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: internal
           whatsNewDirectory: whatsNewDirectory/
