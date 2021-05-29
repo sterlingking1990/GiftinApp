@@ -23,6 +23,7 @@ jobs:
 
   apk:
     name: Begin Generate APK
+    needs: test
     runs-on: Ubuntu Latest
     
     steps:
