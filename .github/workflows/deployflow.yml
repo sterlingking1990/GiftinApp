@@ -79,10 +79,10 @@ jobs:
           
       - name: Run UI Test with Firebase Test Lab
         run: gcloud firebase test android run
-        --type=instrumentation
-        --app=app-debug/app-debug.apk
-        --test=app-debug-androidTest/app-debug-androidTest.apk
-        --device=model=flame,version=30
+        --type instrumentation
+        --app app-debug/app-debug.apk
+        --test app-debug-androidTest/app-debug-androidTest.apk
+        --device model=flame,version=30
       
     
   distribute:
