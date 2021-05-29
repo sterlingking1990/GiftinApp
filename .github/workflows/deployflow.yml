@@ -24,7 +24,7 @@ jobs:
   apk:
     name: Begin Generate APK
     needs: test
-    runs-on: Ubuntu Latest
+    runs-on: ubuntu Latest
     
     steps:
       - uses: actions/checkout@v2
