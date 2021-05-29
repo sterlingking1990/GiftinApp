@@ -4,17 +4,108 @@ on:
     branches: [main]
 
 jobs:
-  test-and-distribute:
+  test:
+    name: Begin Unit test
     runs-on: ubuntu-latest
     steps:
+      - name: Check out to virtual environment
       - uses: actions/checkout@v2
+      
       - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
           java-version: 11
+          
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
+      
+      - name: Run Unit Test
+        run: ./gradlew testDebug 
+        
+  
+      
+  apk:
+    name: Begin Generate APK
+    runs-on: Ubuntu Latest
+    
+    steps:
+      - name: Checkout to virtual environment
+      - uses: actions/checkout@v2
+      
+      - name: Setup JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+          
+      - name: Assemble Debug APK
+        run: ./gradlew assembleDebug
+      
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          
+      - name: Assemble Test Debug APK
+        run: ./gradlew assembleDebugAndroidTest
+        
+      - name: Upload Test Debug APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: app-debug-androidTest
+          path: app/build/outputs/apk/debug/app-debug-androidTest.apk
+          
+  firebase:
+    name: Preparing to Run UI Test with Firebase Test Lab
+    needs: apk
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout to virtual environment
+      - uses: actions/checkout@v2
+      
+      - name: Download Debug APK
+        uses: actions/download-artifact@v1
+        with:
+          name: app-debug
+          
+      - name: Download TestDebug APK
+        uses: actions/download-artifact@v1
+        with:
+          name: app-debug-androidTest
+      
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
+          service_account_key: ${{ secrets.PROJECT_SERVICE_ACCOUNT_PRIVATE_KEY }}
+          export_default_credentials: true
+          
+      - name: Run UI Test with Firebase Test Lab
+        run: gcloud firebase test android run --type instrumentation --app app-debug/app-debug.apk --test app-debug-androidTest/app-debug-androidTest.apk --device model=flame, version=30
+      
+    
+  distribute:
+    needs: firebase
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      
+      - name: Version Bump
+        uses: chkfung/android-version-action@v1.1
+        with:
+          gradlePath: app/build.gradle
+          versionCode: ${{ github.run_number }}
+      
       - name: Assemble Release Bundle
         run: |
           ./gradlew bundleRelease
+          
       - name: Sign Release
         uses: r0adkll/sign-android-release@v1
         with:
