@@ -22,7 +22,7 @@ jobs:
         run: ./gradlew testDebug 
 
   apk:
-    name: Begin Generate APK
+    name: Generate APK
     needs: test
     runs-on: ubuntu Latest
     
@@ -53,7 +53,7 @@ jobs:
           path: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
           
   firebase:
-    name: Preparing to Run UI Test with Firebase Test Lab
+    name: Run UI Test with Firebase Test Lab
     needs: apk
     runs-on: ubuntu-latest
     
@@ -82,6 +82,7 @@ jobs:
       
     
   distribute:
+    name: Publish to PlayStore
     needs: firebase
     runs-on: ubuntu-latest
     steps:
