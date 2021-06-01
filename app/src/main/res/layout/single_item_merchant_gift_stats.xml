@@ -43,6 +43,7 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="56dp"
                 android:text="2000"
+                android:textColor="@color/tabColor"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 

@@ -34,7 +34,7 @@ class MerchantGiftStatsAdapter:RecyclerView.Adapter<MerchantGiftStatsAdapter.Vie
             var tvMerchantGiftStatsPlace = findViewById<TextView>(R.id.tv_merchant_gift_history_place)
 
             tvMerchantGiftStatsCustomerName.text = merchantGiftHistoryList[position].customerId
-            tvMerchantGiftStatsGiftCoin.text = merchantGiftHistoryList[position].giftHistoryPojo.gift_coin.toString()
+            tvMerchantGiftStatsGiftCoin.text = String.format(resources.getString(R.string.naira),merchantGiftHistoryList[position].giftHistoryPojo.gift_coin.toString())
             tvMerchantGiftStatsHistoryDate.text = merchantGiftHistoryList[position].giftHistoryPojo.updated_on
             tvMerchantGiftStatsPlace.text = merchantGiftHistoryList[position].giftHistoryPojo.location
 

@@ -9,6 +9,7 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.facebook.shimmer.Shimmer
@@ -68,7 +69,8 @@ class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Ad
             shimmerDrawable.setShimmer(shimmer)
 
             giftImage.setOnClickListener {
-                giftItemClickable.displayMoreGiftDetail(giftList[position])
+                //giftItemClickable.displayMoreGiftDetail(giftList[position])
+                giftItemClickable.displayMoreGiftDetail(giftList[position],giftCaption)
             }
 
             fbIcon.setOnClickListener {
@@ -89,7 +91,7 @@ class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Ad
             giftCaption.text=giftList[position].gift_name
             giftCost.text= giftList[position].gift_cost.toString()
 
-            checkIfItemInCart(giftList[position], addToCart, context)
+            checkIfItemInCart(giftList[position], giftCaption, context)
 
 
         }
@@ -101,15 +103,14 @@ class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Ad
     }
 
     interface GiftItemClickable{
-        fun onGiftClick(itemId: GiftList, itemAnim:LottieAnimationView)
-        fun displayMoreGiftDetail(gift: GiftList)
+        fun displayMoreGiftDetail(gift: GiftList, giftCaption: TextView)
         fun displayFacebookInfo(gift: GiftList)
         fun displayWhatsAppInfo(gift: GiftList)
         fun displayIgInfo(gift: GiftList)
     }
 
 
-    private fun checkIfItemInCart(giftList: GiftList, addToCart: LottieAnimationView, context: Context) {
+    private fun checkIfItemInCart(giftList: GiftList, giftCaption: TextView, context: Context) {
 
         //send the gift to giftin company for redeeming
         val sessionManager: SessionManager = SessionManager(context)
@@ -140,13 +141,15 @@ class GiftlistAdapter(var giftItemClickable: GiftItemClickable): RecyclerView.Ad
                                 }
                             }
                             if(isSentForRedeeming){
-                                addToCart.visibility= View.GONE
+                                giftCaption.setTextColor(ContextCompat.getColor(context,R.color.tabColor))
+                                //addToCart.visibility= View.GONE
                             }
                             else{
-                                addToCart.visibility= View.VISIBLE
-                                addToCart.setOnClickListener {
-                                    giftItemClickable.onGiftClick(giftList,addToCart)
-                                }
+                                giftCaption.setTextColor(ContextCompat.getColor(context,R.color.black))
+                                //addToCart.visibility= View.VISIBLE
+                                //addToCart.setOnClickListener {
+                                  //  giftItemClickable.onGiftClick(giftList,addToCart)
+                               // }
                             }
                         }
                     }

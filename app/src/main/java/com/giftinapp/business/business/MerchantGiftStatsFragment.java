@@ -25,12 +25,12 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MerchantGiftStatsFragment extends Fragment {
     private MerchantGiftStatsAdapter merchantGiftStatsAdapter;
     private RecyclerView rvMerchantGiftStats;
     private RecyclerView.LayoutManager layoutManager;
-    private View merchantGiftStatsView;
     private TextView txNoCustomerGifted;
 
     public SessionManager sessionManager;
@@ -41,11 +41,13 @@ public class MerchantGiftStatsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+
+
+        // Inflate the layout for this fragment
+        View merchantGiftStatsView = inflater.inflate(R.layout.fragment_merchant_gift_stats, container, false);
         merchantGiftStatsAdapter=new MerchantGiftStatsAdapter();
         layoutManager=new LinearLayoutManager(requireContext(),RecyclerView.VERTICAL,false);
 
-        // Inflate the layout for this fragment
-        merchantGiftStatsView=inflater.inflate(R.layout.fragment_merchant_gift_stats, container, false);
         return merchantGiftStatsView;
     }
 
@@ -66,12 +68,12 @@ public class MerchantGiftStatsFragment extends Fragment {
                 .build();
         db.setFirestoreSettings(settings);
         if (FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()) {
-            db.collection("merchants").document(sessionManager.getEmail()).collection("reward_statistics").document("customers").collection("customer_details").get()
+            db.collection("merchants").document(Objects.requireNonNull(sessionManager.getEmail())).collection("reward_statistics").document("customers").collection("customer_details").get()
                     .addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             //now we would get the document id and then the data for the document
                             ArrayList<MerchantGiftStatsIdPojo> merchantGiftStatsIdPojos = new ArrayList<>();
-                            for (QueryDocumentSnapshot document : task1.getResult()) {
+                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task1.getResult())) {
                                 //get the data for the document id, map to class then reset it on the class gift history id pojo to
                                 //include the document id and the data
                                 GiftHistoryPojo giftHistoryPojo = document.toObject(GiftHistoryPojo.class);
