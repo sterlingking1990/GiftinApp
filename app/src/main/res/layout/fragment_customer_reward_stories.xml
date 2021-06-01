@@ -27,8 +27,18 @@
         android:id="@+id/ll_status"
         android:layout_below="@id/ll_progress_bar"
         android:layout_width="match_parent"
+        android:layout_above="@id/imgChatWithBusiness"
         android:background="#000000"
         android:layout_height="match_parent"/>
+
+    <ImageView
+        android:id="@+id/imgChatWithBusiness"
+        android:layout_width="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_chat_with_business"/>
 
 
 

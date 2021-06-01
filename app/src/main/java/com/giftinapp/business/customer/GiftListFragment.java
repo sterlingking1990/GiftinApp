@@ -449,7 +449,7 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
     public void displayMoreGiftDetail(@NotNull GiftList gift, TextView giftCaption) {
         if(giftCaption.getTextColors().getDefaultColor() != ContextCompat.getColor(requireContext(),R.color.tabColor)) {
             builder.setMessage(gift.gift_name + '\n' + '\n' + "track this gift?")
-                    .setCancelable(false)
+                    .setCancelable(true)
                     .setNegativeButton("NO",(dialog, which) -> {
 
                     })

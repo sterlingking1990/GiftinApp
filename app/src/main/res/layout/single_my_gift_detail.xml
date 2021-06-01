@@ -25,12 +25,13 @@
             <TextView
                 android:id="@+id/tv_mygift_singleitem_caption"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="Play Station 4"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
                 android:ellipsize="end"
+                android:gravity="center"
                 android:maxLines="1"
                 android:scrollHorizontally="true"
+                android:text="Play Station 4"
                 android:textSize="20sp"
                 android:textStyle="bold">
 
@@ -43,8 +44,8 @@
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/fbRedeemMyGift"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
+                    android:layout_width="146dp"
+                    android:layout_height="117dp"
                     android:layout_gravity="right|bottom"
                     android:elevation="2dp"
                     android:focusable="true"
@@ -55,12 +56,12 @@
                     app:lottie_loop="false"
                     app:lottie_speed="2" />
 
-            <ImageView
-                android:id="@+id/iv_mygift_singleitem_image"
-                android:layout_width="wrap_content"
-                android:layout_height="171dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ps4" />
+                <ImageView
+                    android:id="@+id/iv_mygift_singleitem_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="173dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ps4" />
             </FrameLayout>
 
             <FrameLayout
@@ -71,8 +72,8 @@
                     android:id="@+id/pg_mygift_singleitem_progressBar"
                     style="@android:style/Widget.ProgressBar.Horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:progress="50"
+                    android:layout_height="35dp"
+                    android:progress="100"
                     android:textAlignment="center" />
 
                 <TextView
