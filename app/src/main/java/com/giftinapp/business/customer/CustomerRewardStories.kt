@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -17,6 +18,10 @@ import com.giftinapp.business.R
 import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.MerchantStoryPojo
 import com.giftinapp.business.utility.*
+import com.google.android.gms.ads.*
+import com.google.android.gms.ads.rewarded.RewardItem
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import io.reactivex.Observable
@@ -45,6 +50,11 @@ class CustomerRewardStories : Fragment() {
     var hasHeader:Boolean =false
 
     lateinit var sessionManager:SessionManager
+
+    private var mRewardedAd: RewardedAd? = null
+
+    private var currentSlide:Boolean? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -65,6 +75,10 @@ class CustomerRewardStories : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        MobileAds.initialize(requireContext())
+
+        loadAd()
+
         ll_status = view.findViewById(R.id.ll_status)
         ll_progress_bar = view.findViewById(R.id.ll_progress_bar)
 
@@ -81,6 +95,21 @@ class CustomerRewardStories : Fragment() {
 
     }
 
+    private fun loadAd(){
+        var adRequest = AdRequest.Builder().build()
+        RewardedAd.load(requireContext(),"ca-app-pub-3940256099942544/5224354917", adRequest, object : RewardedAdLoadCallback() {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d("CustomerRewardStoriesAd", adError?.message)
+                mRewardedAd = null
+            }
+
+            override fun onAdLoaded(rewardedAd: RewardedAd) {
+                Log.d("CustomerRewardStoriesAd", "Ad was loaded.")
+                mRewardedAd = rewardedAd
+            }
+        })
+    }
+
     private fun setImageStatusData() {
         imagesList?.forEach { imageUrl ->
             val imageView: ImageView = ImageView(requireContext())
@@ -91,7 +120,7 @@ class CustomerRewardStories : Fragment() {
             imageView.gone()
             imageUrl.merchantStatusImageLink?.let { imageView.loadImage(it) }
             ll_status.addView(imageView)
-
+            loadAd()
             imageView.performClick()
         }
     }
@@ -154,6 +183,27 @@ class CustomerRewardStories : Fragment() {
             runOnUiThread {
                 if(currentStoryPos!! < (allStories?.size?.minus(1)!!)) {
                     updateStoryAsViewed(mCurrentIndex) //if the story gets to the end, just mark as seen
+                    currentSlide = true
+                    displayAd(currentSlide!!)
+
+                }
+                else {
+                    updateStoryAsViewed(mCurrentIndex) //if the story gets to the end, just mark as seen
+                    //implement admob here before disposing
+                    currentSlide = false
+                    displayAd(currentSlide!!)
+
+                }
+            }
+
+            }
+    }
+
+    private fun displayAd(currentSlide:Boolean) {
+        mRewardedAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                Log.d("CustomerRewardStoriesAd", "Ad was dismissed.")
+                if(currentSlide) {
                     currentStoryPos = currentStoryPos!! +1
                     imagesList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList
 
@@ -172,16 +222,37 @@ class CustomerRewardStories : Fragment() {
                     setProgressData()
                     startViewing()
                 }
-                else {
-                    updateStoryAsViewed(mCurrentIndex) //if the story gets to the end, just mark as seen
+                else{
+                    //last slide in the reward stories list
                     mDisposable?.dispose()
                     mDisposable = null
                     val fragmentToMoveTo: Fragment = MerchantStoryList::class.java.newInstance()
                     openFragment(fragmentToMoveTo)
                 }
-            }
 
             }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
+                Log.d("CustomerRewardStoriesAd", "Ad failed to show.")
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                Log.d("CustomerRewardStoriesAd", "Ad showed fullscreen content.")
+                // Called when ad is dismissed.
+                // Don't set the ad reference to null to avoid showing the ad a second time.
+                mRewardedAd = null
+            }
+        }
+
+        if (mRewardedAd != null) {
+            mRewardedAd?.show(requireActivity(), OnUserEarnedRewardListener() {
+                var rewardAmount = it.amount
+                var rewardType = it.type
+                Log.d("CustomerRewardStoriesAd", "User earned the reward. $rewardAmount")
+            })
+        } else {
+            Log.d("CustomerRewardStoriesAd", "The rewarded ad wasn't ready yet.")
+        }
     }
 
     private fun updateStoryAsViewed(mCurrentIndex: Int) {
