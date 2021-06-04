@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,6 +22,7 @@ import android.view.animation.LayoutAnimationController;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -41,6 +43,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -351,23 +354,8 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
                 });
     }
 
-    @Override
-    public void onGiftClick(@NotNull GiftList itemId, @NotNull LottieAnimationView itemAnim) {
 
-        addToGiftCart(itemId,itemAnim);
-
-
-//        GiftDetailWithMerchant fragment = new GiftDetailWithMerchant();
-//        Bundle bundle = new Bundle();
-//        bundle.putString("sk",itemId.getGiftImage());
-//        fragment.setArguments(bundle);
-//        getFragmentManager().beginTransaction()
-//                .replace(R.id.fr_game, fragment )
-//                .commit();
-
-    }
-
-    private void addToGiftCart(GiftList itemId, LottieAnimationView itemAnim) {
+    private void addToGiftCart(GiftList itemId, TextView giftCaption) {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
@@ -377,7 +365,7 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
                 .setPersistenceEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
-        itemAnim.playAnimation();
+      //  itemAnim.playAnimation();
         GiftList giftList = new GiftList();
         giftList.gift_name = itemId.gift_name;
         giftList.gift_cost = itemId.gift_cost;
@@ -385,7 +373,7 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
 
         //check if user has been verified
 
-        if (FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()) {
+        if (Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).isEmailVerified()) {
 
             db.collection("users").document(Objects.requireNonNull(sessionManager.getEmail())).collection("gift_carts")
                     .document(giftList.gift_name).set(giftList).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -393,7 +381,8 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
                         Toast.makeText(requireContext(), "Added " + itemId.gift_name + " To gift cart", Toast.LENGTH_SHORT).show();
-                        itemAnim.setVisibility(View.GONE);
+                        giftCaption.setTextColor(ContextCompat.getColor(requireContext(),R.color.tabColor));
+                        //itemAnim.setVisibility(View.GONE);
                     }
                 }
             });
@@ -401,6 +390,7 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
             builder.setMessage("Your account need to be verified before adding gifts to carts. Please check your email to verify your account")
                     .setCancelable(false)
                     .setPositiveButton("OK", (dialog, id) -> {
+                        giftCaption.setTextColor(ContextCompat.getColor(requireContext(),R.color.black));
                         FirebaseAuth.getInstance().getCurrentUser().sendEmailVerification();
                     });
             AlertDialog alert = builder.create();
@@ -456,14 +446,30 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
 
 
     @Override
-    public void displayMoreGiftDetail(@NotNull GiftList gift) {
-        builder.setMessage(gift.gift_name)
-                .setCancelable(true)
-                .setPositiveButton("OK", (dialog, id) -> {
+    public void displayMoreGiftDetail(@NotNull GiftList gift, TextView giftCaption) {
+        if(giftCaption.getTextColors().getDefaultColor() != ContextCompat.getColor(requireContext(),R.color.tabColor)) {
+            builder.setMessage(gift.gift_name + '\n' + '\n' + "track this gift?")
+                    .setCancelable(true)
+                    .setNegativeButton("NO",(dialog, which) -> {
 
-                });
-        AlertDialog alert = builder.create();
-        alert.show();
+                    })
+                    .setPositiveButton("YES", (dialog, id) -> {
+                        addToGiftCart(gift, giftCaption);
+                    });
+
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+        else{
+            builder.setMessage(gift.gift_name)
+                    .setCancelable(true)
+                    .setPositiveButton("OK", (dialog, id) -> {
+
+                    });
+
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 
     @Override

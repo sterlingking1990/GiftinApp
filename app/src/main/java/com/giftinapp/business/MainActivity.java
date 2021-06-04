@@ -229,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             try {
                 super.onBackPressed();
+                startActivity(new Intent(MainActivity.this,MainActivity.class));
             }
             catch (Exception e){
                 mauth.signOut();

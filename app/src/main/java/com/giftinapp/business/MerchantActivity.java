@@ -397,6 +397,7 @@ public class MerchantActivity extends AppCompatActivity {
         } else {
             try {
                 super.onBackPressed();
+                startActivity(new Intent(MerchantActivity.this, MerchantActivity.class));
             }
             catch (Exception e) {
                 mAuth.signOut();
