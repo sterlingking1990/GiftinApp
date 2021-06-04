@@ -320,6 +320,7 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
 
             try {
                 super.onBackPressed()
+                startActivity(Intent(this, GiftinAppAuthorityActivity::class.java))
             }
             catch (e:Exception) {
                 mAuth.signOut()

@@ -42,7 +42,6 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
     private MyGiftCartAdapter myGiftCartAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private RecyclerView rvMyGiftCart;
-    private View myGiftCartView;
     private String imageLink;
     private ImageView imgGiftDetail;
     private TextView tvNoGift;
@@ -55,6 +54,8 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
     public Long totalRewardAmount;
 
     public ProgressBar pgLoading;
+
+    private Integer infoDisplayedOnStart;
 
 
 
@@ -74,7 +75,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        myGiftCartView=inflater.inflate(R.layout.fragment_my_gift_cart, container, false);
+        View myGiftCartView = inflater.inflate(R.layout.fragment_my_gift_cart, container, false);
 
         layoutManager=new GridLayoutManager(requireContext(),2);
         myGiftCartAdapter = new MyGiftCartAdapter(MyGiftCartFragment.this);
@@ -96,6 +97,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
         builder = new AlertDialog.Builder(requireContext());
 
         displayGiftCart();
+        infoDisplayedOnStart = 1;
 
     }
 
@@ -111,16 +113,16 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
         db.setFirestoreSettings(settings);
 
 
-        if(FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()) {
+        if(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).isEmailVerified()) {
             //first we get the total amount the user has been rewarded
-            db.collection("users").document(sessionManager.getEmail()).collection("rewards")
+            db.collection("users").document(Objects.requireNonNull(sessionManager.getEmail())).collection("rewards")
                     .get()
                     .addOnCompleteListener(task -> {
                         //on success of getting the total amount, we now want to display the users
                         //gifts and the track based on the total amount vs the cost of each gift
                         if (task.isSuccessful()) {
                             totalRewardAmount = 0L;
-                            for (QueryDocumentSnapshot document : task.getResult()) {
+                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                                 MyTotalReward totalReward = document.toObject(MyTotalReward.class);
                                 MyTotalReward giftCost = new MyTotalReward();
                                 giftCost.gift_coin = totalReward.gift_coin;
@@ -135,7 +137,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                             if (task1.isSuccessful()) {
                                                 listTop = new ArrayList<>();
                                                 amountOfGiftRedeemable = 0;
-                                                for (QueryDocumentSnapshot document : task1.getResult()) {
+                                                for (QueryDocumentSnapshot document : Objects.requireNonNull(task1.getResult())) {
                                                     MyGiftCartPojo listings = document.toObject(MyGiftCartPojo.class);
                                                     MyCartPojo list = new MyCartPojo();
                                                     list.gift_url = listings.gift_url;
@@ -154,19 +156,22 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                                 }
                                                 myGiftCartAdapter.setMyGiftsList(listTop, requireContext());
                                                 rvMyGiftCart.setAdapter(myGiftCartAdapter);
-                                                builder.setMessage("you can tap on a gift to remove it from the gift cart.")
-                                                        .setCancelable(true)
-                                                        .setPositiveButton("OK", (dialog, id) -> {
-                                                        });
-                                                AlertDialog alert = builder.create();
-                                                alert.show();
 
-                                                builder.setMessage("You have " + amountOfGiftRedeemable + " Gifts redeemable, click send icon on the gift to send to GiftinApp Company for redeeming.")
-                                                        .setCancelable(true)
-                                                        .setPositiveButton("OK", (dialog, id) -> {
-                                                        });
-                                                AlertDialog alert2 = builder.create();
-                                                alert2.show();
+                                                if(infoDisplayedOnStart == 1) {
+                                                    builder.setMessage("you can tap on a gift to remove it from the gift cart.")
+                                                            .setCancelable(true)
+                                                            .setPositiveButton("OK", (dialog, id) -> {
+                                                            });
+                                                    AlertDialog alert = builder.create();
+                                                    alert.show();
+
+                                                    builder.setMessage("You have " + amountOfGiftRedeemable + " Gifts redeemable, click send icon on the gift to send to GiftinApp Company for redeeming.")
+                                                            .setCancelable(true)
+                                                            .setPositiveButton("OK", (dialog, id) -> {
+                                                            });
+                                                    AlertDialog alert2 = builder.create();
+                                                    alert2.show();
+                                                }
 
                                                 if (listTop.size() == 0) {
                                                     builder.setMessage("You have not added gifts on your carts yet, please add gifts to carts to see how close you are to meeting your gift goal")
@@ -215,6 +220,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
 
     public void openFragment(Fragment fragment) {
         FragmentManager fm = getFragmentManager();
+        assert fm != null;
         fm.beginTransaction()
                 .replace(R.id.fr_game, fragment)
                 .addToBackStack(null)
@@ -235,7 +241,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                 .setCancelable(false)
                 .setPositiveButton("Yes", (dialog, id) -> {
                     //check if user if verified
-                    if(!FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()) {
+                    if(!Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).isEmailVerified()) {
                         builder.setMessage("You need to be a verified user in other to delete a gift from the gift carts, please check your mail for verification")
                                 .setCancelable(false)
                                 .setPositiveButton( "Ok", (dialog2, id2) -> {
@@ -246,7 +252,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                     }
                     else{
                     //delete gift from cart
-                    db.collection("users").document(sessionManager.getEmail()).collection("gift_carts")
+                    db.collection("users").document(Objects.requireNonNull(sessionManager.getEmail())).collection("gift_carts")
                             .document(itemId.gift_name).delete();
 
                     //remove from redeemable if it exists there
@@ -259,6 +265,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                     }
                                 }
                             });
+                    infoDisplayedOnStart = 0;
                     displayGiftCart();
                 }})
                 .setNegativeButton("No",((dialog, which) -> {
@@ -283,10 +290,12 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
         db.setFirestoreSettings(settings);
 
         //check if this user already added this gift to redeemable
+        assert emailOfGiftOwner != null;
         db.collection("redeemable_gifts").document(emailOfGiftOwner).collection("gift_lists").document(giftToRedeem.gift_name).get()
                 .addOnCompleteListener(task -> {
                     if(task.isSuccessful()) {
                         DocumentSnapshot documentSnapshot = task.getResult();
+                        assert documentSnapshot != null;
                         if (documentSnapshot.exists()) {
                             Toast.makeText(requireContext(), "your gift have already been accepted for redeeming, please be patient as we are preparing your treat. Thank you", Toast.LENGTH_LONG).show();
                         } else {
@@ -295,6 +304,7 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
                                     .addOnCompleteListener(task12 -> {
                                         if(task12.isSuccessful()){
                                             DocumentSnapshot userInfo = task12.getResult();
+                                            assert userInfo != null;
                                             if(userInfo.exists()){
                                                 if(Objects.requireNonNull(userInfo.get("facebook")).toString().equalsIgnoreCase("not provided") &&
                                                         Objects.requireNonNull(userInfo.get("whatsapp")).toString().equalsIgnoreCase("not provided") &&

@@ -17,6 +17,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Merchant">
 
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-8310656376115666~1292179338"/>
+
         <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,9 +1,13 @@
 package com.giftinapp.business.customer
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -17,12 +21,17 @@ import com.giftinapp.business.R
 import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.MerchantStoryPojo
 import com.giftinapp.business.utility.*
+import com.google.android.gms.ads.*
+import com.google.android.gms.ads.rewarded.RewardItem
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -33,6 +42,7 @@ class CustomerRewardStories : Fragment() {
     var allStories:ArrayList<MerchantStoryPojo>?=null
     var currentStoryPos:Int? = 0
     var storyOwner:String? = null
+    var statusTag:String? = null
 
     lateinit var ll_status:FrameLayout;
     lateinit var ll_progress_bar:LinearLayout;
@@ -45,6 +55,13 @@ class CustomerRewardStories : Fragment() {
     var hasHeader:Boolean =false
 
     lateinit var sessionManager:SessionManager
+
+    lateinit var imgChatWithBusiness:ImageView
+
+    var currentSlide: Boolean?=null
+
+    var mRewardedAd:RewardedAd?=null
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -64,13 +81,24 @@ class CustomerRewardStories : Fragment() {
         return inflater.inflate(R.layout.fragment_customer_reward_stories, container, false)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         ll_status = view.findViewById(R.id.ll_status)
         ll_progress_bar = view.findViewById(R.id.ll_progress_bar)
 
         tvRewardStoryTag = view.findViewById(R.id.tvRewardStatusTag)
 
-        view.setOnTouchListener(onTouchListener)
+        imgChatWithBusiness = view.findViewById(R.id.imgChatWithBusiness)
+
+
+
+        ll_status.setOnTouchListener(onTouchListener)
+
+        imgChatWithBusiness.setOnClickListener {
+            //check if the storyowner has phone number activated if he doesnt, route chat to us so we help the user contact the business
+            //or tell the user to check later
+            openChat()
+        }
 
         sessionManager = SessionManager(requireContext())
 
@@ -79,6 +107,68 @@ class CustomerRewardStories : Fragment() {
         startViewing()
         setProgressData()
 
+    }
+
+
+    private fun openChat() {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+        db.collection("merchants").document(storyOwner.toString()).get()
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        val result = it.result
+                        val phone = result?.getString("whatsapp")
+                        if (phone.isNullOrEmpty()) {
+                            //open our whatsapp instead
+                            try {
+                                val msg = "let's talk about *$statusTag* advertised on giftinApp"
+                                val url = "https://api.whatsapp.com/send?phone=${"+2348060456301" + "&text=" + URLEncoder.encode(msg, "UTF-8")}"
+                                val i = Intent(Intent.ACTION_VIEW)
+                                i.data = Uri.parse(url)
+                                startActivity(i)
+                            } catch (e: Exception) {
+                                Toast.makeText(requireContext(), "Please Install WhatsApp to continue chat", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            //open their whatsapp
+                            try {
+                                val msg = "let's talk about *$statusTag* advertised on giftinApp"
+                                val url = "https://api.whatsapp.com/send?phone=${"+234$phone" + "&text=" + URLEncoder.encode(msg, "UTF-8")}"
+                                val i = Intent(Intent.ACTION_VIEW)
+                                i.data = Uri.parse(url)
+                                startActivity(i)
+                            } catch (e: Exception) {
+                                Toast.makeText(requireContext(), "Please Install WhatsApp to continue chat", Toast.LENGTH_SHORT).show()
+                            }
+
+                        }
+                    }
+                }
+    }
+
+    private fun loadAd(){
+        var adRequest = AdRequest.Builder().build()
+        RewardedAd.load(requireContext(),"ca-app-pub-3940256099942544/5224354917", adRequest, object : RewardedAdLoadCallback() {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d("CustomerRewardStoriesAd", adError?.message)
+                mRewardedAd = null
+            }
+
+            override fun onAdLoaded(rewardedAd: RewardedAd) {
+                Log.d("CustomerRewardStoriesAd", "Ad was loaded.")
+                mRewardedAd = rewardedAd
+            }
+        })
     }
 
     private fun setImageStatusData() {
@@ -91,34 +181,34 @@ class CustomerRewardStories : Fragment() {
             imageView.gone()
             imageUrl.merchantStatusImageLink?.let { imageView.loadImage(it) }
             ll_status.addView(imageView)
-
+            loadAd()
             imageView.performClick()
         }
     }
 
-        private fun setProgressData() {
-            ll_progress_bar.weightSum = imagesList?.size!!.toFloat()
-            imagesList?.forEachIndexed { index, progressData ->
-                val progressBar: ProgressBar = ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal) //horizontal progress bar
+    private fun setProgressData() {
+        ll_progress_bar.weightSum = imagesList?.size!!.toFloat()
+        imagesList?.forEachIndexed { index, progressData ->
+            val progressBar: ProgressBar = ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal) //horizontal progress bar
 
-                val params = LinearLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT, 1.0f)
-                params.height = requireContext().convertDpToPixel(8f).toInt()
-                params.marginEnd = requireContext().convertDpToPixel(10f).toInt()
+            val params = LinearLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT, 1.0f)
+            params.height = requireContext().convertDpToPixel(8f).toInt()
+            params.marginEnd = requireContext().convertDpToPixel(10f).toInt()
 
-                progressBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.tabColor))
+            progressBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.tabColor))
 
-                progressBar.layoutParams = params
-                progressBar.max = 40 // max progress i am using is 40 for
-                //each progress bar you can modify it
-                progressBar.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.whitesmoke))
+            progressBar.layoutParams = params
+            progressBar.max = 40 // max progress i am using is 40 for
+            //each progress bar you can modify it
+            progressBar.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.whitesmoke))
 
-                progressBar.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
-                progressBar.progress = 0 //initial progress
-                ll_progress_bar.addView(progressBar)
-            }
+            progressBar.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
+            progressBar.progress = 0 //initial progress
+            ll_progress_bar.addView(progressBar)
         }
+    }
 
     private fun emitStatusProgress() {
         mDisposable = Observable.intervalRange(mCurrentProgress, 40 - mCurrentProgress, 0, 100, TimeUnit.MILLISECONDS)
@@ -149,11 +239,32 @@ class CustomerRewardStories : Fragment() {
             }
             if (mCurrentIndex != imagesList?.size!! - 1)
                 emitStatusProgress()
-            } else {
+        } else {
 
             runOnUiThread {
                 if(currentStoryPos!! < (allStories?.size?.minus(1)!!)) {
                     updateStoryAsViewed(mCurrentIndex) //if the story gets to the end, just mark as seen
+                    currentSlide = true
+                    displayAd(currentSlide!!)
+
+                }
+                else {
+                    updateStoryAsViewed(mCurrentIndex) //if the story gets to the end, just mark as seen
+                    //implement admob here before disposing
+                    currentSlide = false
+                    displayAd(currentSlide!!)
+
+                }
+            }
+
+        }
+    }
+
+    private fun displayAd(currentSlide:Boolean) {
+        mRewardedAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                Log.d("CustomerRewardStoriesAd", "Ad was dismissed.")
+                if(currentSlide) {
                     currentStoryPos = currentStoryPos!! +1
                     imagesList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList
 
@@ -172,21 +283,42 @@ class CustomerRewardStories : Fragment() {
                     setProgressData()
                     startViewing()
                 }
-                else {
-                    updateStoryAsViewed(mCurrentIndex) //if the story gets to the end, just mark as seen
+                else{
+                    //last slide in the reward stories list
                     mDisposable?.dispose()
                     mDisposable = null
                     val fragmentToMoveTo: Fragment = MerchantStoryList::class.java.newInstance()
                     openFragment(fragmentToMoveTo)
                 }
-            }
 
             }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
+                Log.d("CustomerRewardStoriesAd", "Ad failed to show.")
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                Log.d("CustomerRewardStoriesAd", "Ad showed fullscreen content.")
+                // Called when ad is dismissed.
+                // Don't set the ad reference to null to avoid showing the ad a second time.
+                mRewardedAd = null
+            }
+        }
+
+        if (mRewardedAd != null) {
+            mRewardedAd?.show(requireActivity(), OnUserEarnedRewardListener() {
+                var rewardAmount = it.amount
+                var rewardType = it.type
+                Log.d("CustomerRewardStoriesAd", "User earned the reward. $rewardAmount")
+            })
+        } else {
+            Log.d("CustomerRewardStoriesAd", "The rewarded ad wasn't ready yet.")
+        }
     }
 
     private fun updateStoryAsViewed(mCurrentIndex: Int) {
 
-        
+
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
 
@@ -216,17 +348,17 @@ class CustomerRewardStories : Fragment() {
 
         //here i need to keep track of whether current status have reache the story size -1 then i will increment the number of view of the stauts right in the document of story owner
         //first i have to get the number of view, if null then it will be set to 1, else incremented by 1 if only the person viewing it is not the owner of the story i.e sessionManager.email
-                //is not equal to the story owner
+        //is not equal to the story owner
 
 
 
         //db.collection("users").document(sessionManager.getEmail().toString()).collection("statusowners").document(storyOwner.toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
 
-                //.addOnCompleteListener {
-                // if(it.isSuccessful){
+        //.addOnCompleteListener {
+        // if(it.isSuccessful){
         db.collection("statusowners").document(storyOwner.toString()).collection("viewers").document(sessionManager.getEmail().toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
-                   // }
-                //}
+        // }
+        //}
         //get the list of viewers and then update it with the viewers record
         //db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document(storyId)
 
@@ -239,6 +371,7 @@ class CustomerRewardStories : Fragment() {
         runOnUiThread {
             (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = progress.toInt()
             tvRewardStoryTag.text = imagesList?.get(mCurrentIndex)?.storyTag
+            statusTag = imagesList?.get(mCurrentIndex)?.storyTag
         }
     }
 
