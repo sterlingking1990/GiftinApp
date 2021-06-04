@@ -1,8 +1,11 @@
 package com.giftinapp.business.customer
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -23,6 +26,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -33,6 +37,7 @@ class CustomerRewardStories : Fragment() {
     var allStories:ArrayList<MerchantStoryPojo>?=null
     var currentStoryPos:Int? = 0
     var storyOwner:String? = null
+    var statusTag:String? = null
 
     lateinit var ll_status:FrameLayout;
     lateinit var ll_progress_bar:LinearLayout;
@@ -45,6 +50,9 @@ class CustomerRewardStories : Fragment() {
     var hasHeader:Boolean =false
 
     lateinit var sessionManager:SessionManager
+
+    lateinit var imgChatWithBusiness:ImageView
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -64,13 +72,24 @@ class CustomerRewardStories : Fragment() {
         return inflater.inflate(R.layout.fragment_customer_reward_stories, container, false)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         ll_status = view.findViewById(R.id.ll_status)
         ll_progress_bar = view.findViewById(R.id.ll_progress_bar)
 
         tvRewardStoryTag = view.findViewById(R.id.tvRewardStatusTag)
 
-        view.setOnTouchListener(onTouchListener)
+        imgChatWithBusiness = view.findViewById(R.id.imgChatWithBusiness)
+
+
+
+        ll_status.setOnTouchListener(onTouchListener)
+
+        imgChatWithBusiness.setOnClickListener {
+            //check if the storyowner has phone number activated if he doesnt, route chat to us so we help the user contact the business
+            //or tell the user to check later
+            openChat()
+        }
 
         sessionManager = SessionManager(requireContext())
 
@@ -79,6 +98,55 @@ class CustomerRewardStories : Fragment() {
         startViewing()
         setProgressData()
 
+    }
+
+    private fun openChat() {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+        db.collection("merchants").document(storyOwner.toString()).get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful){
+                        val result = it.result
+                        val phone = result?.getString("whatsapp")
+                        if(phone.isNullOrEmpty()){
+                            //open our whatsapp instead
+                                try {
+                                    val msg = "let's talk about *$statusTag* advertised on giftinApp"
+                                    val url = "https://api.whatsapp.com/send?phone=${"+2348060456301" + "&text=" + URLEncoder.encode(msg, "UTF-8")}"
+                                    val i = Intent(Intent.ACTION_VIEW)
+                                    i.data = Uri.parse(url)
+                                    startActivity(i)
+                                }
+                                catch (e:Exception){
+                                    Toast.makeText(requireContext(),"Please Install WhatsApp to continue chat",Toast.LENGTH_SHORT).show()
+                                }
+                        }
+                        else{
+                            //open their whatsapp
+                                try {
+                                    val msg = "let's talk about *$statusTag* advertised on giftinApp"
+                                    val url = "https://api.whatsapp.com/send?phone=${"+234$phone" + "&text=" + URLEncoder.encode(msg, "UTF-8")}"
+                                    val i = Intent(Intent.ACTION_VIEW)
+                                    i.data = Uri.parse(url)
+                                    startActivity(i)
+                                }
+                                catch (e:Exception){
+                                    Toast.makeText(requireContext(),"Please Install WhatsApp to continue chat",Toast.LENGTH_SHORT).show()
+                                }
+
+                        }
+                    }
+                }
     }
 
     private fun setImageStatusData() {
@@ -239,6 +307,7 @@ class CustomerRewardStories : Fragment() {
         runOnUiThread {
             (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = progress.toInt()
             tvRewardStoryTag.text = imagesList?.get(mCurrentIndex)?.storyTag
+            statusTag = imagesList?.get(mCurrentIndex)?.storyTag
         }
     }
 
@@ -248,27 +317,27 @@ class CustomerRewardStories : Fragment() {
     }
 
     private val onTouchListener = View.OnTouchListener { v, event ->
-        v.performClick()
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                startTime = System.currentTimeMillis()
-                pauseStatus()
-                return@OnTouchListener true
-            }
-            MotionEvent.ACTION_UP -> {
-                if (System.currentTimeMillis() - startTime > 2000) {
-                    resumeStatus()
-                } else {
-                    onSingleTapClicked(event.x)
+            v.performClick()
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    startTime = System.currentTimeMillis()
+                    pauseStatus()
+                    return@OnTouchListener true
                 }
-                startTime = 0
-                return@OnTouchListener true
+                MotionEvent.ACTION_UP -> {
+                    if (System.currentTimeMillis() - startTime > 2000) {
+                        resumeStatus()
+                    } else {
+                        onSingleTapClicked(event.x)
+                    }
+                    startTime = 0
+                    return@OnTouchListener true
+                }
+                MotionEvent.ACTION_BUTTON_RELEASE -> {
+                    resumeStatus()
+                    return@OnTouchListener true
+                }
             }
-            MotionEvent.ACTION_BUTTON_RELEASE -> {
-                resumeStatus()
-                return@OnTouchListener true
-            }
-        }
         false
     }
 
@@ -335,5 +404,6 @@ class CustomerRewardStories : Fragment() {
                 ?.addToBackStack(null)
                 ?.commit()
     }
+
 
 }
