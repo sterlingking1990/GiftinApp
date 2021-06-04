@@ -56,11 +56,11 @@ class CustomerRewardStories : Fragment() {
 
     lateinit var sessionManager:SessionManager
 
-    private var mRewardedAd: RewardedAd? = null
-
-    private var currentSlide:Boolean? = null
-  
     lateinit var imgChatWithBusiness:ImageView
+
+    var currentSlide: Boolean?=null
+
+    var mRewardedAd:RewardedAd?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -83,10 +83,6 @@ class CustomerRewardStories : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        MobileAds.initialize(requireContext())
-
-        loadAd()
-
         ll_status = view.findViewById(R.id.ll_status)
         ll_progress_bar = view.findViewById(R.id.ll_progress_bar)
 
@@ -114,20 +110,6 @@ class CustomerRewardStories : Fragment() {
     }
 
 
-    private fun loadAd(){
-        var adRequest = AdRequest.Builder().build()
-        RewardedAd.load(requireContext(),"ca-app-pub-3940256099942544/5224354917", adRequest, object : RewardedAdLoadCallback() {
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                Log.d("CustomerRewardStoriesAd", adError?.message)
-                mRewardedAd = null
-            }
-
-            override fun onAdLoaded(rewardedAd: RewardedAd) {
-                Log.d("CustomerRewardStoriesAd", "Ad was loaded.")
-                mRewardedAd = rewardedAd
-            }
-        })
-        
     private fun openChat() {
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
@@ -143,38 +125,50 @@ class CustomerRewardStories : Fragment() {
 
         db.collection("merchants").document(storyOwner.toString()).get()
                 .addOnCompleteListener {
-                    if(it.isSuccessful){
+                    if (it.isSuccessful) {
                         val result = it.result
                         val phone = result?.getString("whatsapp")
-                        if(phone.isNullOrEmpty()){
+                        if (phone.isNullOrEmpty()) {
                             //open our whatsapp instead
-                                try {
-                                    val msg = "let's talk about *$statusTag* advertised on giftinApp"
-                                    val url = "https://api.whatsapp.com/send?phone=${"+2348060456301" + "&text=" + URLEncoder.encode(msg, "UTF-8")}"
-                                    val i = Intent(Intent.ACTION_VIEW)
-                                    i.data = Uri.parse(url)
-                                    startActivity(i)
-                                }
-                                catch (e:Exception){
-                                    Toast.makeText(requireContext(),"Please Install WhatsApp to continue chat",Toast.LENGTH_SHORT).show()
-                                }
-                        }
-                        else{
+                            try {
+                                val msg = "let's talk about *$statusTag* advertised on giftinApp"
+                                val url = "https://api.whatsapp.com/send?phone=${"+2348060456301" + "&text=" + URLEncoder.encode(msg, "UTF-8")}"
+                                val i = Intent(Intent.ACTION_VIEW)
+                                i.data = Uri.parse(url)
+                                startActivity(i)
+                            } catch (e: Exception) {
+                                Toast.makeText(requireContext(), "Please Install WhatsApp to continue chat", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
                             //open their whatsapp
-                                try {
-                                    val msg = "let's talk about *$statusTag* advertised on giftinApp"
-                                    val url = "https://api.whatsapp.com/send?phone=${"+234$phone" + "&text=" + URLEncoder.encode(msg, "UTF-8")}"
-                                    val i = Intent(Intent.ACTION_VIEW)
-                                    i.data = Uri.parse(url)
-                                    startActivity(i)
-                                }
-                                catch (e:Exception){
-                                    Toast.makeText(requireContext(),"Please Install WhatsApp to continue chat",Toast.LENGTH_SHORT).show()
-                                }
+                            try {
+                                val msg = "let's talk about *$statusTag* advertised on giftinApp"
+                                val url = "https://api.whatsapp.com/send?phone=${"+234$phone" + "&text=" + URLEncoder.encode(msg, "UTF-8")}"
+                                val i = Intent(Intent.ACTION_VIEW)
+                                i.data = Uri.parse(url)
+                                startActivity(i)
+                            } catch (e: Exception) {
+                                Toast.makeText(requireContext(), "Please Install WhatsApp to continue chat", Toast.LENGTH_SHORT).show()
+                            }
 
                         }
                     }
                 }
+    }
+
+    private fun loadAd(){
+        var adRequest = AdRequest.Builder().build()
+        RewardedAd.load(requireContext(),"ca-app-pub-3940256099942544/5224354917", adRequest, object : RewardedAdLoadCallback() {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d("CustomerRewardStoriesAd", adError?.message)
+                mRewardedAd = null
+            }
+
+            override fun onAdLoaded(rewardedAd: RewardedAd) {
+                Log.d("CustomerRewardStoriesAd", "Ad was loaded.")
+                mRewardedAd = rewardedAd
+            }
+        })
     }
 
     private fun setImageStatusData() {
@@ -192,29 +186,29 @@ class CustomerRewardStories : Fragment() {
         }
     }
 
-        private fun setProgressData() {
-            ll_progress_bar.weightSum = imagesList?.size!!.toFloat()
-            imagesList?.forEachIndexed { index, progressData ->
-                val progressBar: ProgressBar = ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal) //horizontal progress bar
+    private fun setProgressData() {
+        ll_progress_bar.weightSum = imagesList?.size!!.toFloat()
+        imagesList?.forEachIndexed { index, progressData ->
+            val progressBar: ProgressBar = ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal) //horizontal progress bar
 
-                val params = LinearLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT, 1.0f)
-                params.height = requireContext().convertDpToPixel(8f).toInt()
-                params.marginEnd = requireContext().convertDpToPixel(10f).toInt()
+            val params = LinearLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT, 1.0f)
+            params.height = requireContext().convertDpToPixel(8f).toInt()
+            params.marginEnd = requireContext().convertDpToPixel(10f).toInt()
 
-                progressBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.tabColor))
+            progressBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.tabColor))
 
-                progressBar.layoutParams = params
-                progressBar.max = 40 // max progress i am using is 40 for
-                //each progress bar you can modify it
-                progressBar.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.whitesmoke))
+            progressBar.layoutParams = params
+            progressBar.max = 40 // max progress i am using is 40 for
+            //each progress bar you can modify it
+            progressBar.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.whitesmoke))
 
-                progressBar.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
-                progressBar.progress = 0 //initial progress
-                ll_progress_bar.addView(progressBar)
-            }
+            progressBar.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
+            progressBar.progress = 0 //initial progress
+            ll_progress_bar.addView(progressBar)
         }
+    }
 
     private fun emitStatusProgress() {
         mDisposable = Observable.intervalRange(mCurrentProgress, 40 - mCurrentProgress, 0, 100, TimeUnit.MILLISECONDS)
@@ -245,7 +239,7 @@ class CustomerRewardStories : Fragment() {
             }
             if (mCurrentIndex != imagesList?.size!! - 1)
                 emitStatusProgress()
-            } else {
+        } else {
 
             runOnUiThread {
                 if(currentStoryPos!! < (allStories?.size?.minus(1)!!)) {
@@ -263,7 +257,7 @@ class CustomerRewardStories : Fragment() {
                 }
             }
 
-            }
+        }
     }
 
     private fun displayAd(currentSlide:Boolean) {
@@ -324,7 +318,7 @@ class CustomerRewardStories : Fragment() {
 
     private fun updateStoryAsViewed(mCurrentIndex: Int) {
 
-        
+
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
 
@@ -354,17 +348,17 @@ class CustomerRewardStories : Fragment() {
 
         //here i need to keep track of whether current status have reache the story size -1 then i will increment the number of view of the stauts right in the document of story owner
         //first i have to get the number of view, if null then it will be set to 1, else incremented by 1 if only the person viewing it is not the owner of the story i.e sessionManager.email
-                //is not equal to the story owner
+        //is not equal to the story owner
 
 
 
         //db.collection("users").document(sessionManager.getEmail().toString()).collection("statusowners").document(storyOwner.toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
 
-                //.addOnCompleteListener {
-                // if(it.isSuccessful){
+        //.addOnCompleteListener {
+        // if(it.isSuccessful){
         db.collection("statusowners").document(storyOwner.toString()).collection("viewers").document(sessionManager.getEmail().toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
-                   // }
-                //}
+        // }
+        //}
         //get the list of viewers and then update it with the viewers record
         //db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document(storyId)
 
@@ -387,27 +381,27 @@ class CustomerRewardStories : Fragment() {
     }
 
     private val onTouchListener = View.OnTouchListener { v, event ->
-            v.performClick()
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    startTime = System.currentTimeMillis()
-                    pauseStatus()
-                    return@OnTouchListener true
-                }
-                MotionEvent.ACTION_UP -> {
-                    if (System.currentTimeMillis() - startTime > 2000) {
-                        resumeStatus()
-                    } else {
-                        onSingleTapClicked(event.x)
-                    }
-                    startTime = 0
-                    return@OnTouchListener true
-                }
-                MotionEvent.ACTION_BUTTON_RELEASE -> {
-                    resumeStatus()
-                    return@OnTouchListener true
-                }
+        v.performClick()
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                startTime = System.currentTimeMillis()
+                pauseStatus()
+                return@OnTouchListener true
             }
+            MotionEvent.ACTION_UP -> {
+                if (System.currentTimeMillis() - startTime > 2000) {
+                    resumeStatus()
+                } else {
+                    onSingleTapClicked(event.x)
+                }
+                startTime = 0
+                return@OnTouchListener true
+            }
+            MotionEvent.ACTION_BUTTON_RELEASE -> {
+                resumeStatus()
+                return@OnTouchListener true
+            }
+        }
         false
     }
 
@@ -474,6 +468,5 @@ class CustomerRewardStories : Fragment() {
                 ?.addToBackStack(null)
                 ?.commit()
     }
-
 
 }
