@@ -55,4 +55,6 @@
     <string name="navigation_drawer_close">close</string>
     <string name="default_notification_channel_id">GIFTINAPPMESSAGING</string>
     <string name="msg_token_fmt">Token is $s</string>
+
+    <string name="naira">#%1$s</string>
 </resources>
