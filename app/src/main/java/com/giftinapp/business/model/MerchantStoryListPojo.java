@@ -12,6 +12,7 @@ import java.util.ArrayList;
     public String storyTag = null;
     public Boolean seen = false;
     public ArrayList<String> viewers;
+    public StatusReachAndWorthPojo statusReachAndWorthPojo = null;
 
     public MerchantStoryListPojo(){}
 }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -18,13 +19,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.giftinapp.business.R
-import com.giftinapp.business.model.MerchantStoryListPojo
-import com.giftinapp.business.model.MerchantStoryPojo
+import com.giftinapp.business.model.*
 import com.giftinapp.business.utility.*
 import com.google.android.gms.ads.*
-import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import io.reactivex.Observable
@@ -62,6 +64,16 @@ class CustomerRewardStories : Fragment() {
 
     var mRewardedAd:RewardedAd?=null
 
+    lateinit var adUnit:String
+
+    lateinit var tvNumberOfViewers:TextView
+    var numberOfStatusView:Int? =null
+
+    var storyWorth:Int = 0
+    var numberOfViewsTarget:Int = 0
+
+    var numberOfTimeUserGotRewardOnABrandStatus:Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -90,6 +102,8 @@ class CustomerRewardStories : Fragment() {
 
         imgChatWithBusiness = view.findViewById(R.id.imgChatWithBusiness)
 
+        tvNumberOfViewers = view.findViewById(R.id.tvNumberOfViewers)
+
 
 
         ll_status.setOnTouchListener(onTouchListener)
@@ -106,7 +120,6 @@ class CustomerRewardStories : Fragment() {
         setImageStatusData()
         startViewing()
         setProgressData()
-
     }
 
 
@@ -157,21 +170,48 @@ class CustomerRewardStories : Fragment() {
     }
 
     private fun loadAd(){
-        var adRequest = AdRequest.Builder().build()
-        RewardedAd.load(requireContext(),"ca-app-pub-3940256099942544/5224354917", adRequest, object : RewardedAdLoadCallback() {
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                Log.d("CustomerRewardStoriesAd", adError?.message)
-                mRewardedAd = null
-            }
+        //make call to get adunit for the story owner
 
-            override fun onAdLoaded(rewardedAd: RewardedAd) {
-                Log.d("CustomerRewardStoriesAd", "Ad was loaded.")
-                mRewardedAd = rewardedAd
-            }
-        })
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+        storyOwner?.let { db.collection("adkeys").document(it).get()
+                .addOnCompleteListener { it2->
+                    if(it2.isSuccessful){
+                        val result = it2.result
+                        adUnit = result?.getString("ad_unit") ?: "ca-app-pub-3940256099942544/5224354917"
+                        Log.d("AdUnit", adUnit.toString())
+
+                        //load the ad
+                        val adRequest = AdRequest.Builder().build()
+
+                        RewardedAd.load(requireContext(), adUnit, adRequest, object : RewardedAdLoadCallback() {
+                            override fun onAdFailedToLoad(adError: LoadAdError) {
+                                Log.d("CustomerRewardStoriesAd", adError.message)
+                                mRewardedAd = null
+                            }
+
+                            override fun onAdLoaded(rewardedAd: RewardedAd) {
+                                Log.d("CustomerRewardStoriesAd", "Ad was loaded.")
+                                mRewardedAd = rewardedAd
+                            }
+                        })
+                    }
+                }
+        }
     }
 
     private fun setImageStatusData() {
+        loadAd()
         imagesList?.forEach { imageUrl ->
             val imageView: ImageView = ImageView(requireContext())
             imageView.layoutParams = ViewGroup.LayoutParams(
@@ -180,10 +220,66 @@ class CustomerRewardStories : Fragment() {
             )
             imageView.gone()
             imageUrl.merchantStatusImageLink?.let { imageView.loadImage(it) }
+            getStatusWorthAndNumberOfViewsFor(imageUrl.merchantStatusId)
             ll_status.addView(imageView)
-            loadAd()
+            //get the number of views for this current frame story
             imageView.performClick()
         }
+    }
+
+    private fun getStatusWorthAndNumberOfViewsFor(merchantStatusId: String?) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+        db.collection("merchants").document(storyOwner.toString()).collection("statuslist").document(merchantStatusId.toString()).get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful) {
+                        val results = it.result
+                        if (results?.get("statusReachAndWorthPojo") != null) {
+                            val data: Map<String, Int> = results.get("statusReachAndWorthPojo") as Map<String, Int>
+                            for ((key2, value2) in data) {
+                                if (key2 == "status_worth") {
+                                    storyWorth = value2
+                                    Log.d("story_worth", storyWorth.toString())
+                                }
+                                if (key2 == "status_reach") {
+                                    numberOfViewsTarget = value2
+                                }
+                            }
+                        }
+                    }
+                }
+    }
+
+    private fun getNumberOfViews(merchantStatusId: String) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+        db.collection("statusview").document(merchantStatusId).collection("viewers").get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful){
+                        val result = it.result
+                        numberOfStatusView = result?.size()?:0
+                    }
+                }
     }
 
     private fun setProgressData() {
@@ -240,13 +336,11 @@ class CustomerRewardStories : Fragment() {
             if (mCurrentIndex != imagesList?.size!! - 1)
                 emitStatusProgress()
         } else {
-
             runOnUiThread {
                 if(currentStoryPos!! < (allStories?.size?.minus(1)!!)) {
                     updateStoryAsViewed(mCurrentIndex) //if the story gets to the end, just mark as seen
                     currentSlide = true
                     displayAd(currentSlide!!)
-
                 }
                 else {
                     updateStoryAsViewed(mCurrentIndex) //if the story gets to the end, just mark as seen
@@ -260,7 +354,7 @@ class CustomerRewardStories : Fragment() {
         }
     }
 
-    private fun displayAd(currentSlide:Boolean) {
+    private fun displayAd(currentSlide: Boolean) {
         mRewardedAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 Log.d("CustomerRewardStoriesAd", "Ad was dismissed.")
@@ -306,14 +400,137 @@ class CustomerRewardStories : Fragment() {
         }
 
         if (mRewardedAd != null) {
-            mRewardedAd?.show(requireActivity(), OnUserEarnedRewardListener() {
-                var rewardAmount = it.amount
+            mRewardedAd?.show(requireActivity()) {
+                val rewardAmount = it.amount
                 var rewardType = it.type
+
+                //check if the user have seen this ad before and don't reward him again
+                //rewardUserOrNotBasedOnStatusWorthAndReach(storyId)
                 Log.d("CustomerRewardStoriesAd", "User earned the reward. $rewardAmount")
-            })
+            }
         } else {
             Log.d("CustomerRewardStoriesAd", "The rewarded ad wasn't ready yet.")
         }
+    }
+
+    private fun rewardUserOrNotBasedOnSameAdView(rewardAmount: Int) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+            sessionManager.getEmail()?.let { db.collection("adviews").document(it).collection("statusowner").document(storyOwner.toString()).get()
+                    .addOnCompleteListener { it2->
+                        if(it2.isSuccessful){
+                            val result = it2.result
+                            val adUnitViewed =result?.getString("ad_unit")
+                            if(adUnitViewed == adUnit){
+                                //dont reward the user
+                            }
+                            else{
+                                //the adunit viewed earlier is different from what is showing now
+                                //reward the user and update the ad_unit_viewed
+                                //updateUserAdUnitViewed(rewardAmount)
+                            }
+
+                        }
+
+            }
+        }
+    }
+
+    private fun updateUserAdUnitViewed(rewardAmount: Int) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+
+        //just to store empty string
+        val sendGiftPojo = SendGiftPojo("empty string")
+
+        //store ad unit viewed in pojo
+        val adUnitViewedPojo = AdUnitViewedPojo(adUnit)
+        //means this user has his details updated...now send this to redeemable gifts
+        //means this user has his details updated...now send this to redeemable gifts
+        db.collection("adviews").document(sessionManager.getEmail().toString()).set(sendGiftPojo)
+                .addOnCompleteListener(OnCompleteListener { task1: Task<Void?> ->
+                    if (task1.isSuccessful) {
+
+                        db.collection("adviews").document(sessionManager.getEmail().toString()).collection("statusowner").document(storyOwner.toString()).set(adUnitViewedPojo)
+                                .addOnCompleteListener(OnCompleteListener { task2: Task<Void?> ->
+                                    if (task2.isSuccessful) {
+                                        //reward the user now
+                                        //updateUserGiftinBonus(rewardAmount)
+                                    }
+                                })
+                    }
+                })
+    }
+
+    private fun updateUserGiftinBonus(rewardAmount: Int) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+
+            //check if this referrer has something in her GiftinAppBonus so we update it
+            db.collection("users").document(sessionManager.getEmail().toString()).collection("rewards").document("GiftinAppBonus").get()
+                    .addOnCompleteListener(OnCompleteListener { task2: Task<DocumentSnapshot?> ->
+                        if (task2.isSuccessful) {
+                            val referrerDoc = task2.result
+                            if (referrerDoc!!.exists()) {
+                                val bonusFromDb = referrerDoc["gift_coin"] as Long
+                                val totalBonus = bonusFromDb + rewardAmount
+                                db.collection("users").document(sessionManager.getEmail().toString()).collection("rewards").document("GiftinAppBonus").update("gift_coin", totalBonus, "isRedeemed", false)
+                                playCongratulationsMusic()
+                                storyWorth = 0
+
+                            } else {
+                                //does not have so we create it newly
+
+                                //reward the referrer
+                                val rewardPojo = RewardPojo()
+                                rewardPojo.email = "GiftinAppBonus"
+                                rewardPojo.referrer = ""
+                                rewardPojo.firstName = ""
+                                rewardPojo.gift_coin = rewardAmount.toLong()
+                                //recreate it
+                                db.collection("users").document(sessionManager.getEmail().toString()).collection("rewards").document("GiftinAppBonus").set(rewardPojo)
+                                playCongratulationsMusic()
+                                storyWorth = 0
+                            }
+                        }
+
+                        //logic to handle when user does not have a giftinBonus
+                    })
+    }
+
+    private fun playCongratulationsMusic() {
+        val mp: MediaPlayer = MediaPlayer.create(requireContext(), R.raw.coin_collect)
+        mp.start()
     }
 
     private fun updateStoryAsViewed(mCurrentIndex: Int) {
@@ -357,6 +574,10 @@ class CustomerRewardStories : Fragment() {
         //.addOnCompleteListener {
         // if(it.isSuccessful){
         db.collection("statusowners").document(storyOwner.toString()).collection("viewers").document(sessionManager.getEmail().toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
+
+        checkIfUserHasSeenThis(storyId)
+
+
         // }
         //}
         //get the list of viewers and then update it with the viewers record
@@ -366,11 +587,104 @@ class CustomerRewardStories : Fragment() {
 
     }
 
+    private fun checkIfUserHasSeenThis(storyId: String) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+        sessionManager.getEmail()?.let { db.collection("statusview").document(storyId).collection("viewers").document(sessionManager.getEmail().toString()).get()
+                .addOnCompleteListener { it2->
+                    if(it2.isSuccessful) {
+                        val result = it2.result
+                        if (result?.exists() == true) {
+                            Log.d("AlreadySeen",storyId)
+                        }
+                        else {
+                                Log.d("AmRunningHere",storyId)
+                                updateStatusViewersRecord(storyId)
+                            }
+                    }
+
+                }
+        }
+    }
+
+    private fun updateStatusViewersRecord(storyId: String) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+        //just to store empty string
+        val sendGiftPojo = SendGiftPojo("empty string")
+
+
+        val statusViewRecordPojo = StatusViewRecordPojo(null, sessionManager.getEmail().toString(), storyOwner.toString(), storyId)
+        //means this user has his details updated...now send this to redeemable gifts
+        //means this user has his details updated...now send this to redeemable gifts
+        db.collection("statusview").document(storyId).set(sendGiftPojo)
+                .addOnCompleteListener(OnCompleteListener { task1: Task<Void?> ->
+                    if (task1.isSuccessful) {
+                        db.collection("statusview").document(storyId).collection("viewers").document(sessionManager.getEmail().toString()).set(statusViewRecordPojo)
+
+                        rewardUserOrNotBasedOnStatusWorthAndReach(storyId)
+                    }
+                })
+    }
+
+    private fun rewardUserOrNotBasedOnStatusWorthAndReach(storyId: String) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        db.firestoreSettings = settings
+
+        //get the total number of views for the current storyid and then decide based on worth and number of views for that story wether to
+        //reward the session user or not
+
+        db.collection("statusview").document(storyId).collection("viewers").get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful){
+                        val result = it.result
+                        if (result != null) {
+                            val totalViewers = result.documents
+                            if(numberOfViewsTarget > totalViewers.size){
+                                updateUserGiftinBonus(storyWorth)
+                                //play animation sound
+                            }
+                        }
+                    }
+                }
+    }
+
     private fun updateProgress(progress: Long) {
         mCurrentProgress = progress
         runOnUiThread {
             (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = progress.toInt()
             tvRewardStoryTag.text = imagesList?.get(mCurrentIndex)?.storyTag
+            getNumberOfViews(imagesList?.get(mCurrentIndex)?.merchantStatusId.toString())
+            tvNumberOfViewers.text = numberOfStatusView.toString()
             statusTag = imagesList?.get(mCurrentIndex)?.storyTag
         }
     }

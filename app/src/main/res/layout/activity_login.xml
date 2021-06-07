@@ -26,7 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/input_background"
-                android:hint="Enter Email"
+                android:hint="@string/enter_email"
                 android:imeOptions="actionNext"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
@@ -57,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/input_background"
-                android:hint="Enter Password"
+                android:hint="@string/enter_password"
                 android:inputType="textPassword"
                 android:maxLines="1"
                 android:textSize="16sp" />
@@ -69,6 +69,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/ll_login_as"
         android:orientation="horizontal"
+        android:padding="5dp"
+        android:weightSum="1"
         android:gravity="center_horizontal|center_vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -76,25 +78,27 @@
         >
         <RadioGroup
             android:id="@+id/radioLoginType"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:orientation="horizontal"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_centerHorizontal="true"
+            android:layout_weight="1"
+            android:weightSum="2"
             android:layout_height="wrap_content" >
 
             <com.google.android.material.radiobutton.MaterialRadioButton
                 android:id="@+id/radioCustomer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:buttonTint="@color/secondColorType"
                 android:checked="true"
-                android:text="login as customer" />
+                android:text="@string/login_as_customer" />
 
             <com.google.android.material.radiobutton.MaterialRadioButton
                 android:id="@+id/radioMerchant"
                 android:layout_width="match_parent"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="login as business" />
+                android:text="@string/login_as_business" />
 
 
         </RadioGroup>
@@ -120,7 +124,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:padding="10dp"
-            android:text="Login"
+            android:text="@string/login"
             android:elevation="2dp"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -136,7 +140,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:padding="10dp"
-            android:text="reset password"
+            android:text="@string/reset_password"
             android:textColor="@color/secondColorType"
             android:textColorLink="@color/teal_200"
             android:textSize="18sp" />
@@ -161,7 +165,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTintMode="src_atop"
-            android:text="resend verfication email"
+            android:text="@string/resend_verfication_email"
             android:textSize="12sp" />
     </LinearLayout>
 

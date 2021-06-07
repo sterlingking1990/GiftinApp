@@ -25,7 +25,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
 import com.giftinapp.business.model.MerchantStoryListPojo
+import com.giftinapp.business.model.StatusReachAndWorthPojo
 import com.giftinapp.business.utility.SessionManager
+import com.google.android.material.slider.Slider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -70,6 +72,16 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
     var photoFile: File? = null
 
+    private lateinit var statusWorthSlider:Slider
+    private lateinit var numberOfViewSlider:Slider
+
+    private lateinit var tvStatusWorth:TextView
+    private lateinit var tvNumberOfReach:TextView
+
+    var totalStatusWorthAndReachProduct:Long = 0L
+
+    var merchantWallet:Long = 0L
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -96,6 +108,10 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
         uploadedStoryRecyclerView = view.findViewById(R.id.rv_uploaded_stories)
 
+        statusWorthSlider = view.findViewById(R.id.statusWorthIndicator)
+
+        numberOfViewSlider = view.findViewById(R.id.numberOfReachindicator)
+
         uploadedStoryRecyclerViewLayoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
 
         uploadedStoryAdapter = UploadedRewardStoryListAdapter(this)
@@ -112,6 +128,9 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
         pgUploading.visibility = View.GONE
 
+        tvStatusWorth = view.findViewById(R.id.tvStatusWorth)
+        tvNumberOfReach = view.findViewById(R.id.tvNumberOfReach)
+
         uploadButton.setOnClickListener {
             uploadRewardMeme()
         }
@@ -122,6 +141,47 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
         fetchUploadedStatsOnLoad()
 
+        handleStatusWorthSlider()
+        handleNumberOfViewSlider()
+
+        tvStatusWorth.text = resources.getString(R.string.status_worth, statusWorthSlider.value.toString())
+
+        statusWorthSlider.addOnChangeListener { slider, value, fromUser ->
+            tvStatusWorth.text = resources.getString(R.string.status_worth, value.toString())
+        }
+
+        tvNumberOfReach.text = resources.getString(R.string.number_of_reach, numberOfViewSlider.value.toString())
+
+        numberOfViewSlider.addOnChangeListener { slider, value, fromUser ->
+            tvNumberOfReach.text = resources.getString(R.string.number_of_reach, value.toString())
+        }
+
+
+
+    }
+
+    private fun handleStatusWorthSlider(){
+        statusWorthSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: Slider) {
+                // Responds to when slider's touch event is being started
+            }
+
+            override fun onStopTrackingTouch(slider: Slider) {
+                // Responds to when slider's touch event is being stopped
+            }
+        })
+    }
+
+    private fun handleNumberOfViewSlider(){
+        numberOfViewSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: Slider) {
+                // Responds to when slider's touch event is being started
+            }
+
+            override fun onStopTrackingTouch(slider: Slider) {
+                // Responds to when slider's touch event is being stopped
+            }
+        })
     }
 
     private val imageEditTextWatcher = object : TextWatcher {
@@ -139,6 +199,8 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
 
     fun uploadRewardMeme() {
+
+        //check if the user has money in his wallet worth more than or e
         val bitmap = Bitmap.createBitmap(imageContainer.width, imageContainer.height, Bitmap.Config.ARGB_8888);
         val canvas = Canvas(bitmap)
 
@@ -191,11 +253,14 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 // Handle failures
                 // ...
                 Toast.makeText(requireContext(), "Could not get uri of image, please try uploading again", Toast.LENGTH_LONG).show()
+                pgUploading.visibility = View.GONE
             }
         }
     }
 
     private fun fetchUploadedStatsOnLoad() {
+        checkWalletBalanceAgainstProposedAdCost()
+
         pgUploading.visibility = View.VISIBLE
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
@@ -221,9 +286,34 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                                 merchantStoryListPojo.storyTag = eachStatus.getString("storyTag")
                                 merchantStoryListPojo.seen = eachStatus.getBoolean("seen")
                                 merchantStoryListPojo.merchantStatusId = eachStatus.id
+
+                                val map: Map<String, Any> = eachStatus.data
+                                var statusWorth = 0
+                                var statusReach = 0
+
+                                for ((key, value) in map) {
+                                    if (key == "statusReachAndWorthPojo") {
+                                       val data:Map<String, Int> = value as Map<String, Int>
+                                       for((key2, value2) in data) {
+                                           if(key2 =="status_worth"){
+                                               statusWorth = value2
+                                           }
+                                           if(key2 == "status_reach"){
+                                               statusReach = value2
+                                           }
+
+                                           totalStatusWorthAndReachProduct += (statusWorth * statusReach)
+                                           merchantStoryListPojo.statusReachAndWorthPojo = StatusReachAndWorthPojo(statusWorth, statusReach)
+                                       }
+
+                                    }
+                                }
+
                                 listOfStats.add(merchantStoryListPojo)
+
                             }
                             if (listOfStats.size > 0) {
+
                                 pgUploading.visibility = View.GONE
                                 uploadedStoryAdapter.setUploadedStoryList(listOfStats)
                                 uploadedStoryRecyclerView.layoutManager = uploadedStoryRecyclerViewLayoutManager
@@ -250,9 +340,69 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
             val alert = builder!!.create()
             alert.show()
         }
+
+
     }
 
     private fun uploadUriAndStoryTagToFireStore() {
+        //check if wallet balance is higher than proposed advert cost( status_worth*num_of_reach for all status )
+
+        if (merchantWallet > totalStatusWorthAndReachProduct) {
+            val db = FirebaseFirestore.getInstance()
+            // [END get_firestore_instance]
+
+            // [START set_firestore_settings]
+            // [END get_firestore_instance]
+
+            // [START set_firestore_settings]
+            val settings = FirebaseFirestoreSettings.Builder()
+                    .setPersistenceEnabled(true)
+                    .build()
+            db.firestoreSettings = settings
+
+            if (FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
+
+                val merchantStoryListPojo = MerchantStoryListPojo()
+                merchantStoryListPojo.seen = false
+                merchantStoryListPojo.storyTag = imageText.text.toString()
+                merchantStoryListPojo.merchantStatusId = null
+                merchantStoryListPojo.merchantStatusImageLink = tvDownloadUri.text.toString()
+                merchantStoryListPojo.statusReachAndWorthPojo = StatusReachAndWorthPojo(statusWorthSlider.value.toInt(), numberOfViewSlider.value.toInt())
+                merchantStoryListPojo.viewers = arrayListOf()
+
+                db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document().set(merchantStoryListPojo)
+                        .addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                Toast.makeText(requireContext(), "published successfully", Toast.LENGTH_SHORT).show()
+                                fetchUploadedStatsOnLoad()
+                            }
+                        }
+            } else {
+                builder!!.setMessage("You need to verify your account to publish reward stories, please check your mail to verify your account")
+                        .setCancelable(false)
+                        .setPositiveButton("OK") { dialog: DialogInterface?, id: Int ->
+                            FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
+                            pgUploading.visibility = View.GONE
+                        }
+                val alert = builder!!.create()
+                alert.show()
+            }
+
+
+        }
+        else{
+            builder!!.setMessage("Your wallet balance is lower than your status ad budget, you need to fund your wallet")
+                    .setCancelable(true)
+                    .setPositiveButton("OK") { _: DialogInterface?, _: Int ->
+                        FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
+                        pgUploading.visibility = View.GONE
+                    }
+            val alert = builder!!.create()
+            alert.show()
+        }
+    }
+
+    private fun checkWalletBalanceAgainstProposedAdCost(){
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
 
@@ -265,34 +415,16 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 .build()
         db.firestoreSettings = settings
 
-        if(FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
+        //get wallet balance
+        db.collection("merchants").document(sessionManager.getEmail().toString()).collection("reward_wallet").document("deposit").get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful){
+                        val result = it.result
 
-            val merchantStoryListPojo = MerchantStoryListPojo()
-            merchantStoryListPojo.seen = false
-            merchantStoryListPojo.storyTag = imageText.text.toString()
-            merchantStoryListPojo.merchantStatusId = null
-            merchantStoryListPojo.merchantStatusImageLink = tvDownloadUri.text.toString()
-            merchantStoryListPojo.viewers = arrayListOf()
+                        merchantWallet = (result?.get("merchant_wallet_amount") ?:0) as Long
 
-            db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document().set(merchantStoryListPojo)
-                    .addOnCompleteListener {
-                        if (it.isSuccessful) {
-                            Toast.makeText(requireContext(), "published successfully", Toast.LENGTH_SHORT).show()
-                            fetchUploadedStatsOnLoad()
-                        }
                     }
-        }
-        else{
-            builder!!.setMessage("You need to verify your account to publish reward stories, please check your mail to verify your account")
-                    .setCancelable(false)
-                    .setPositiveButton("OK") { dialog: DialogInterface?, id: Int ->
-                        FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
-                        pgUploading.visibility=View.GONE
-                    }
-            val alert = builder!!.create()
-            alert.show()
-        }
-
+                }
 
     }
 
@@ -343,9 +475,20 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
     }
 
-    override fun displayImage(url: String, tag: String) {
+    override fun displayImage(url: String, tag: String, status_worth: Int?, status_reach: Int?) {
         Picasso.get().load(url).into(imageContainer)
         imageText.text = tag
+        Log.d("statusWorth", status_worth.toString())
+        try {
+            statusWorthSlider.value = status_worth?.toFloat() ?: 2.0F
+            numberOfViewSlider.value = status_reach?.toFloat() ?: 50.0F
+
+            tvStatusWorth.text = if (status_worth!=null) resources.getString(R.string.status_worth, status_worth.toString()) else resources.getString(R.string.status_worth, "2")
+            tvNumberOfReach.text = if (status_reach!=null) resources.getString(R.string.number_of_reach, status_reach.toString()) else resources.getString(R.string.number_of_reach, "50")
+        }
+        catch (e: Exception){
+            Log.e("NoStatusWorthNReach", e.message.toString())
+        }
     }
 
 

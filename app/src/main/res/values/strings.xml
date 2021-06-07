@@ -57,4 +57,25 @@
     <string name="msg_token_fmt">Token is $s</string>
 
     <string name="naira">#%1$s</string>
+    <string name="enter_email">Enter Email</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="sign_up_mode">Sign up mode:</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="already_a_user">Already a user?</string>
+    <string name="sign_in">Sign In</string>
+    <string name="last_name">Last Name</string>
+    <string name="first_name">First Name</string>
+    <string name="login_as_customer">login as customer</string>
+    <string name="login_as_business">login as business</string>
+    <string name="login">Login</string>
+    <string name="reset_password">reset password</string>
+    <string name="resend_verfication_email">resend verfication email</string>
+    <string name="click_to_chat_with_business_owner">Click to chat with business owner</string>
+    <string name="_3">3</string>
+    <string name="publish_reward_deal">Publish Reward Deal</string>
+    <string name="status_worth">status worth(#%1$s)</string>
+    <string name="number_of_reach">number of reach(%1$s)</string>
+    <string name="influenca_name_and_status">%1$s\ninfluenca (%2$s)</string>
 </resources>
