@@ -73,12 +73,6 @@ public class MerchantActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_merchant);
 
-        FirebaseApp.initializeApp(this);
-
-        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
-
-        firebaseAppCheck.installAppCheckProviderFactory(SafetyNetAppCheckProviderFactory.getInstance());
-
         sessionManager = new SessionManager(getApplicationContext());
 
         drawer = findViewById(R.id.merchantNavDrawerLayout);

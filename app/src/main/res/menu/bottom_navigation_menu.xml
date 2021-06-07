@@ -15,7 +15,7 @@
         <item
             android:id="@+id/navigation_view_reward_deal"
             android:icon="@drawable/ic_view_reward_deal"
-            android:title="Explore Reward Deals"/>
+            android:title="Inflenca Deals"/>
 
         <item
             android:id="@+id/navigation_gifting_history"

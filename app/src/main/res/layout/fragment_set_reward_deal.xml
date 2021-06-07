@@ -112,11 +112,80 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_selectStatusViewWorth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintTop_toBottomOf="@id/ll_input_reward_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            >
+
+            <TextView
+                android:id="@+id/tvStatusWorth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.5"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="10dp"
+                android:text="@string/status_worth"
+                />
+            <com.google.android.material.slider.Slider
+                android:id="@+id/statusWorthIndicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="0.5"
+                android:value="2.0"
+                android:valueTo="100.0"
+                android:stepSize="2.0"
+                android:valueFrom="2.0"
+                android:backgroundTint="@color/tabColor"
+                android:elevation="10dp"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_selectNumberOfReach"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintTop_toBottomOf="@id/ll_selectStatusViewWorth"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            >
+
+            <TextView
+                android:id="@+id/tvNumberOfReach"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.5"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="10dp"
+                android:text="@string/number_of_reach"
+                />
+            <com.google.android.material.slider.Slider
+                android:id="@+id/numberOfReachindicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="0.5"
+                android:value="50"
+                android:valueTo="1000"
+                android:stepSize="50"
+                android:valueFrom="50"
+                android:backgroundTint="@color/tabColor"
+                android:elevation="10dp"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/ll_input_reward_hint"
+        app:layout_constraintTop_toBottomOf="@id/ll_selectStatusViewWorth"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         >
@@ -127,7 +196,7 @@
             android:layout_margin="10dp"
             android:imeOptions="actionDone"
             android:backgroundTint="@color/tabColor"
-            android:text="Publish Reward Deal"
+            android:text="@string/publish_reward_deal"
             android:elevation="10dp"/>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -171,8 +240,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
-
-
 
     </LinearLayout>
 </ScrollView>

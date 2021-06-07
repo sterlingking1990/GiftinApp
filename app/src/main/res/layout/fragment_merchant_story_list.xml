@@ -23,7 +23,7 @@
             android:cursorVisible="true"
             android:textCursorDrawable="@color/tabColor"
             style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-            android:hint="Search story"
+            android:hint="Search brand to view influenca deals"
             />
 
     </androidx.cardview.widget.CardView>

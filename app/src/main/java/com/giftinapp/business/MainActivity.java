@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         TextView navTextView = headerView.findViewById(R.id.nav_header_textView);
         ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
         Picasso.get().load(R.drawable.gift).into(navImageView);
-        navTextView.setText(Objects.requireNonNull(mauth.getCurrentUser()).getEmail());
+        navTextView.setText(getResources().getString(R.string.influenca_name_and_status,Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),"artic"));
 
         getTotalGiftCoin();
         getLatestAmountRedeemed();
