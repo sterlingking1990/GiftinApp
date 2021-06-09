@@ -18,12 +18,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
+import com.giftinapp.business.model.BannerPojo
+import com.giftinapp.business.model.CategoryPojo
 import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.StatusReachAndWorthPojo
 import com.giftinapp.business.utility.SessionManager
@@ -42,7 +45,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUploadedStory {
+class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUploadedStory, BannerAdapter.ClickableBanner {
 
     private lateinit var imageContainer: ImageView
     private lateinit var imageText: TextView
@@ -82,6 +85,19 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
     var merchantWallet:Long = 0L
 
+    private lateinit var chkUsePromotionalBanner:CheckBox
+
+    private lateinit var bannerRecycler: RecyclerView
+
+    private lateinit var bannerLayoutManager: RecyclerView.LayoutManager
+
+    private lateinit var bannerAdapter: BannerAdapter
+
+    private lateinit var imagesToLoadInBannerRecyclerView:MutableList<BannerPojo>
+
+    private lateinit var linearLayoutInputRewardHint: LinearLayoutCompat
+
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -116,6 +132,14 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
         uploadedStoryAdapter = UploadedRewardStoryListAdapter(this)
 
+        bannerRecycler = view.findViewById(R.id.rv_banner)
+
+        bannerLayoutManager = LinearLayoutManager(requireContext(),RecyclerView.HORIZONTAL,false)
+
+        bannerAdapter = BannerAdapter(this)
+
+        bannerRecycler.adapter = bannerAdapter
+
         uploadedStoryRecyclerView.adapter = uploadedStoryAdapter
 
         builder = AlertDialog.Builder(requireContext())
@@ -130,6 +154,8 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
         tvStatusWorth = view.findViewById(R.id.tvStatusWorth)
         tvNumberOfReach = view.findViewById(R.id.tvNumberOfReach)
+
+        linearLayoutInputRewardHint = view.findViewById(R.id.ll_input_reward_hint)
 
         uploadButton.setOnClickListener {
             uploadRewardMeme()
@@ -156,8 +182,57 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
             tvNumberOfReach.text = resources.getString(R.string.number_of_reach, value.toString())
         }
 
+        chkUsePromotionalBanner = view.findViewById(R.id.chkUsePromotionalBanner)
+
+        imagesToLoadInBannerRecyclerView = arrayListOf()
+        loadImagesToList()
+
+        chkUsePromotionalBanner.setOnCheckedChangeListener{btnView, isChecked ->
+            if(isChecked){
+                bannerRecycler.visibility = View.VISIBLE
+                linearLayoutInputRewardHint.visibility = View.GONE
+                updateImageContainerToPromotional()
+            }
+            else{
+                linearLayoutInputRewardHint.visibility = View.VISIBLE
+                resetDefaultViewWithOutPromotionalRecyclerView()
+            }
+
+        }
+
+    }
+
+    private fun loadImagesToList(){
 
 
+        val bannerUrl1 = BannerPojo("https://i.ibb.co/ZVcpMvS/open-for-promotions.png")
+
+       val bannerUrl2 = BannerPojo("https://i.ibb.co/jJcb56W/i-need-promotions-smile.png")
+
+        val bannerUrl3 = BannerPojo("https://i.ibb.co/LSzC6C2/influencer-promotions.png")
+
+        val bannerUrl4 = BannerPojo("https://i.ibb.co/RDmFQL1/i-need-promotions.png")
+
+        imagesToLoadInBannerRecyclerView.add(0,bannerUrl1)
+        imagesToLoadInBannerRecyclerView.add(1,bannerUrl2)
+        imagesToLoadInBannerRecyclerView.add(2,bannerUrl3)
+        imagesToLoadInBannerRecyclerView.add(3,bannerUrl4)
+
+    }
+
+    private fun updateImageContainerToPromotional(){
+
+
+        bannerAdapter.populateCategoryList(imagesToLoadInBannerRecyclerView)
+        bannerRecycler.layoutManager = bannerLayoutManager
+        bannerAdapter.notifyDataSetChanged()
+
+    }
+
+    private fun resetDefaultViewWithOutPromotionalRecyclerView(){
+        imageText.visibility = View.VISIBLE
+        imageContainer.setImageResource(R.drawable.giftpack)
+        bannerRecycler.visibility = View.GONE
     }
 
     private fun handleStatusWorthSlider(){
@@ -364,7 +439,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
                 val merchantStoryListPojo = MerchantStoryListPojo()
                 merchantStoryListPojo.seen = false
-                merchantStoryListPojo.storyTag = imageText.text.toString()
+                merchantStoryListPojo.storyTag = if(imageText.visibility == View.GONE) "promotional" else imageText.text.toString()
                 merchantStoryListPojo.merchantStatusId = null
                 merchantStoryListPojo.merchantStatusImageLink = tvDownloadUri.text.toString()
                 merchantStoryListPojo.statusReachAndWorthPojo = StatusReachAndWorthPojo(statusWorthSlider.value.toInt(), numberOfViewSlider.value.toInt())
@@ -475,9 +550,14 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
     }
 
-    override fun displayImage(url: String, tag: String, status_worth: Int?, status_reach: Int?) {
+    override fun displayImage(url: String, tag: String, status_worth: Int?, status_reach: Int?, status_id:String?) {
         Picasso.get().load(url).into(imageContainer)
-        imageText.text = tag
+        if(tag=="promotional") {
+            with(imageText){
+                visibility = View.GONE
+            }
+        } else  imageText.text = tag
+
         Log.d("statusWorth", status_worth.toString())
         try {
             statusWorthSlider.value = status_worth?.toFloat() ?: 2.0F
@@ -555,6 +635,12 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
     companion object {
         private val IMAGE_CHOOSE = 1000;
         private val PERMISSION_CODE = 1001;
+    }
+
+
+    override fun displayBanner(bannerUrl: String) {
+        Picasso.get().load(bannerUrl).into(imageContainer)
+        imageText.visibility = View.GONE
     }
 
 }

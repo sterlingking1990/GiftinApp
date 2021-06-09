@@ -25,5 +25,10 @@
         android:icon="@drawable/ic_view_reward_deal"
         android:title="View Influenca Deals"/>
 
+    <item
+        android:id="@+id/navigation_view_rate_influencer"
+        android:icon="@drawable/ic_rate_influencer"
+        android:title="Rate Influenca"/>
+
 
 </menu>

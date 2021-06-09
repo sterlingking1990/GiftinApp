@@ -77,6 +77,8 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
 
         etSearchStoryId = view.findViewById(R.id.etSearchStoryId)
 
+        sessionManager.setCurrentFragment("MerchantStoryList")
+
         etSearchStoryId.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 if (etSearchStoryId.length() < 1) {

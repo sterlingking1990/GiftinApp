@@ -100,7 +100,7 @@
                 android:id="@+id/et_reward_goal_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Make Reward deal a catch"
+                android:hint="Sell your product(update status)"
                 android:imeOptions="actionNext"
                 android:lineSpacingExtra="2dp"
                 android:maxLength="105"
@@ -181,28 +181,67 @@
                 android:elevation="10dp"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/ll_selectStatusViewWorth"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        >
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_save_reward_status_hint"
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_promotionalBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:imeOptions="actionDone"
-            android:backgroundTint="@color/tabColor"
-            android:text="@string/publish_reward_deal"
-            android:elevation="10dp"/>
-    </androidx.appcompat.widget.LinearLayoutCompat>
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintTop_toBottomOf="@id/ll_selectNumberOfReach"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            >
+
+            <CheckBox
+                android:id="@+id/chkUsePromotionalBanner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:buttonTint="@color/tabColor"
+                android:checked="false"
+                android:text="Use promotional banner"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_rvBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/ll_promotionalBanner"
+            android:orientation="horizontal">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_banner"
+                android:layout_margin="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_publish"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/ll_rvBanner"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            >
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save_reward_status_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:imeOptions="actionDone"
+                android:backgroundTint="@color/tabColor"
+                android:text="@string/publish_reward_deal"
+                android:elevation="10dp"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:layout_constraintTop_toBottomOf="@id/ll_publish"
             android:orientation="horizontal">
             <ProgressBar
                 android:id="@+id/pg_uploading"
@@ -228,6 +267,7 @@
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_rvStories"
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:orientation="horizontal">
@@ -240,6 +280,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
+
 
     </LinearLayout>
 </ScrollView>
