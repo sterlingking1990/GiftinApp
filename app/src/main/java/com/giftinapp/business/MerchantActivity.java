@@ -25,6 +25,7 @@ import com.giftinapp.business.business.GiftACustomerFragment;
 import com.giftinapp.business.business.GiftinAboutForMerchant;
 import com.giftinapp.business.business.MerchantGiftStatsFragment;
 import com.giftinapp.business.business.MerchantInfoUpdate;
+import com.giftinapp.business.business.RateInfluencerFragment;
 import com.giftinapp.business.business.SetRewardDeal;
 import com.giftinapp.business.business.WalletInfo;
 import com.giftinapp.business.customer.MerchantStoryList;
@@ -349,36 +350,40 @@ public class MerchantActivity extends AppCompatActivity {
 
 
     private void selectDrawerItem(MenuItem menuitem){
-        switch (menuitem.getItemId()) {
-            case R.id.navigation_gift_customer_fan:
-                carouselViewMerchant.setVisibility(View.GONE);
-                GiftACustomerFragment giftACustomer = new GiftACustomerFragment();
-                openFragment(giftACustomer);
-                break;
-            case R.id.navigation_wallet_info:
-                carouselViewMerchant.setVisibility(View.GONE);
-                WalletInfo walletInfo = new WalletInfo();
-                openFragment(walletInfo);
-               break;
-
-            case R.id.navigation_merchant_gift_stats:
-                carouselViewMerchant.setVisibility(View.GONE);
-                MerchantGiftStatsFragment merchantGiftStatsFragment = new MerchantGiftStatsFragment();
-                openFragment(merchantGiftStatsFragment);
-                break;
-            case R.id.navigation_set_reward_deal:
-                carouselViewMerchant.setVisibility(View.GONE);
-                SetRewardDeal setRewardDeal = new SetRewardDeal();
-                openFragment(setRewardDeal);
-                break;
-
-            case R.id.navigation_view_reward_deal:
-                carouselViewMerchant.setVisibility(View.GONE);
-                MerchantStoryList merchantStoryList = new MerchantStoryList();
-                openFragment(merchantStoryList);
-                break;
-
-
+        if(menuitem.getItemId()==R.id.navigation_gift_customer_fan){
+            carouselViewMerchant.setVisibility(View.GONE);
+            GiftACustomerFragment giftACustomer = new GiftACustomerFragment();
+            openFragment(giftACustomer);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_wallet_info){
+            carouselViewMerchant.setVisibility(View.GONE);
+            WalletInfo walletInfo = new WalletInfo();
+            openFragment(walletInfo);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_merchant_gift_stats) {
+            carouselViewMerchant.setVisibility(View.GONE);
+            MerchantGiftStatsFragment merchantGiftStatsFragment = new MerchantGiftStatsFragment();
+            openFragment(merchantGiftStatsFragment);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_set_reward_deal) {
+            carouselViewMerchant.setVisibility(View.GONE);
+            SetRewardDeal setRewardDeal = new SetRewardDeal();
+            openFragment(setRewardDeal);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_view_reward_deal) {
+            carouselViewMerchant.setVisibility(View.GONE);
+            MerchantStoryList merchantStoryList = new MerchantStoryList();
+            openFragment(merchantStoryList);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_view_reward_deal) {
+            carouselViewMerchant.setVisibility(View.GONE);
+            MerchantStoryList merchantStoryList = new MerchantStoryList();
+            openFragment(merchantStoryList);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_view_rate_influencer){
+            carouselViewMerchant.setVisibility(View.GONE);
+            RateInfluencerFragment rateInfluencerFragment = new RateInfluencerFragment();
+            openFragment(rateInfluencerFragment);
         }
         drawer.close();
     }
@@ -389,9 +394,16 @@ public class MerchantActivity extends AppCompatActivity {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+            Log.d("CustomerRewardStories",(sessionManager.getCurrentFragment()));
             try {
-                super.onBackPressed();
-                startActivity(new Intent(MerchantActivity.this, MerchantActivity.class));
+                if(sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")){
+                    super.onBackPressed();
+                }
+                else {
+                    super.onBackPressed();
+                    startActivity(new Intent(MerchantActivity.this, MerchantActivity.class));
+                }
+
             }
             catch (Exception e) {
                 mAuth.signOut();

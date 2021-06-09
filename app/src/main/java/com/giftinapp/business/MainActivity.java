@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,8 +31,11 @@ import com.giftinapp.business.customer.MerchantStoryList;
 import com.giftinapp.business.customer.MyGiftCartFragment;
 import com.giftinapp.business.customer.MyGiftHistoryFragment;
 import com.giftinapp.business.customer.SettingsFragment;
+import com.giftinapp.business.model.InfluencerRatingPojo;
 import com.giftinapp.business.utility.SessionManager;
 import com.giftinapp.business.utility.StorySession;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.dynamiclinks.DynamicLink;
@@ -40,6 +44,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ViewListener;
@@ -53,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     public SessionManager sessionManager;
     public StorySession storySession;
     public AlertDialog.Builder builder;
+    public TextView navTextView;
 
     protected CarouselView carouselView;
 
@@ -61,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
     public Long totalGiftCoin = null;
 
     public Long latestAmountRedeemed =null;
+
+    public Long totalRatingForAllStatus = null;
+
 
     FirebaseAuth mauth;
 
@@ -76,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         mauth = FirebaseAuth.getInstance();
         carouselView = findViewById(R.id.carouselView);
 
-        carouselView.setPageCount(2);
+        carouselView.setPageCount(3);
         carouselView.setViewListener(viewListener);
 
         carouselView.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -117,13 +126,18 @@ public class MainActivity extends AppCompatActivity {
         builder = new AlertDialog.Builder(getApplicationContext());
 
         View headerView = nv.getHeaderView(0);
-        TextView navTextView = headerView.findViewById(R.id.nav_header_textView);
+        navTextView = headerView.findViewById(R.id.nav_header_textView);
         ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
         Picasso.get().load(R.drawable.gift).into(navImageView);
         navTextView.setText(getResources().getString(R.string.influenca_name_and_status,Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),"artic"));
 
+        totalRatingForAllStatus=0L;
+
         getTotalGiftCoin();
         getLatestAmountRedeemed();
+        getInfluencerPoints();
+        computeInfluencerRankBasedOnActivity();
+
 
     }
 
@@ -158,6 +172,17 @@ public class MainActivity extends AppCompatActivity {
                 holderList.put(1, holder);
                 break;
             }
+
+            case 2: {
+                holder.reportName.setText("Influencer Point");
+                long influencerPoint= totalRatingForAllStatus==null ? 0L : totalRatingForAllStatus;
+                holder.reportValue.setText(String.valueOf(influencerPoint));
+                holder.reportIcon.setImageResource(R.drawable.influencer_point_icon);
+                holderList.put(2, holder);
+                break;
+            }
+
+
 
         }
 
@@ -213,6 +238,12 @@ public class MainActivity extends AppCompatActivity {
                 holderList.get(1).reportValue.setText(String.valueOf(latestAmount));
                 break;
             }
+
+            case 2: {
+                long influencerPoint= totalRatingForAllStatus==null ? 0L : totalRatingForAllStatus;
+                holderList.get(2).reportValue.setText(String.valueOf(influencerPoint));
+                break;
+            }
         }
     }
 
@@ -227,9 +258,16 @@ public class MainActivity extends AppCompatActivity {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+            Log.d("CustomerRewardStories",(sessionManager.getCurrentFragment()));
             try {
-                super.onBackPressed();
-                startActivity(new Intent(MainActivity.this,MainActivity.class));
+                if(sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")){
+                    super.onBackPressed();
+                }
+                else {
+                    super.onBackPressed();
+                    startActivity(new Intent(MainActivity.this,MainActivity.class));
+
+                }
             }
             catch (Exception e){
                 mauth.signOut();
@@ -369,6 +407,65 @@ public class MainActivity extends AppCompatActivity {
                         latestAmountRedeemed=0L;
                     }
                 });
+    }
+
+    private void getInfluencerPoints(){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("influenca_activity_track").document(sessionManager.getEmail()).collection("status_rating").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if(task.isSuccessful()){
+                            QuerySnapshot queryDocumentSnapshots = task.getResult();
+                            for (DocumentSnapshot eachDoc:queryDocumentSnapshots.getDocuments()){
+                                if(eachDoc.get("rating")!=null){
+                                    Log.d("rating",eachDoc.get("rating").toString());
+
+                                    totalRatingForAllStatus += (long) eachDoc.get("rating");
+                                }
+                            }
+
+                        }
+                    }
+                });
+    }
+
+    private void computeInfluencerRankBasedOnActivity(){
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("influenca_activity_track").document(sessionManager.getEmail()).get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()){
+                            DocumentSnapshot documentSnapshot = task.getResult();
+                            if(documentSnapshot.getBoolean("influencer_first_saw_a_brands_post")!=null) {
+                                Boolean influencerFirstSawPost = documentSnapshot.getBoolean("influencer_first_saw_a_brands_post");
+                                if(influencerFirstSawPost){
+                                    navTextView.setText(getResources().getString(R.string.influenca_name_and_status,Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),"pioneer"));
+                                }
+                            }
+
+                        }
+                    }
+                });
+
     }
 
 

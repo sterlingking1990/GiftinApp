@@ -28,4 +28,10 @@
         <item name="android:windowBackground">@drawable/ic_newsplash</item>
         <item name="android:statusBarColor">@color/black</item>
     </style>
+
+    <style name="RatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/grey_500</item>
+        <item name="colorControlActivated">@color/tabColor</item>
+    </style>
+
 </resources>

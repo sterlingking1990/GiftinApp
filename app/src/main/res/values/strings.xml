@@ -78,4 +78,5 @@
     <string name="status_worth">status worth(#%1$s)</string>
     <string name="number_of_reach">number of reach(%1$s)</string>
     <string name="influenca_name_and_status">%1$s\ninfluenca (%2$s)</string>
+    <string name="rate_influencer">Rate Influencer</string>
 </resources>

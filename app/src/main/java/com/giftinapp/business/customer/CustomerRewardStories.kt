@@ -118,6 +118,7 @@ class CustomerRewardStories : Fragment() {
 
         sessionManager = SessionManager(requireContext())
 
+        sessionManager.setCurrentFragment("CustomerRewardStoriesFragment")
 
         setImageStatusData()
         startViewing()

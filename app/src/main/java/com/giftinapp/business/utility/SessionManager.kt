@@ -26,6 +26,8 @@ class SessionManager(context: Context) {
 
         const val GIFTOR_ID = "giftor_id"
 
+        const val CURRENT_FRAGMENT = "current_fragment"
+
     }
 
     /**
@@ -56,6 +58,16 @@ class SessionManager(context: Context) {
         editor.putString(EMAIL,email)
         editor.putString(PAGE_NAVIGATION_FROM,pageSavedFrom)
         editor.apply()
+    }
+
+    fun setCurrentFragment(currentFragment:String){
+        val editor = prefs.edit()
+        editor.putString(CURRENT_FRAGMENT,currentFragment)
+        editor.apply()
+    }
+
+    fun getCurrentFragment():String? {
+        return prefs.getString(CURRENT_FRAGMENT,null)
     }
 
     fun getOTP(): String? {
