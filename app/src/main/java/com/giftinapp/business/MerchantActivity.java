@@ -94,7 +94,7 @@ public class MerchantActivity extends AppCompatActivity {
         View headerView = nv.getHeaderView(0);
         TextView navTextView = headerView.findViewById(R.id.nav_header_textView);
         ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
-        Picasso.get().load(R.drawable.gift).into(navImageView);
+//        Picasso.get().load(R.drawable.ic_brandible_icon).into(navImageView);
         navTextView.setText(Objects.requireNonNull(mAuth.getCurrentUser()).getEmail());
 
         carouselViewMerchant = findViewById(R.id.carouselView);
@@ -134,7 +134,7 @@ public class MerchantActivity extends AppCompatActivity {
 
             case 0: {
                 getNumberOfCustomersGifted();
-                holder.reportName.setText("Total Customers Gifted");
+                holder.reportName.setText("Total Influencers Rewarded");
                 holder.reportIcon.setImageResource(R.drawable.happycustomer);
                 long totalGiftCoinSum= numberOfCustomerGifted==null ? 0 : numberOfCustomerGifted;
                 holder.reportValue.setText(String.valueOf(totalGiftCoinSum));
@@ -153,7 +153,7 @@ public class MerchantActivity extends AppCompatActivity {
 
             case 1: {
                 getWalletBalance();
-                holder.reportName.setText("Gift Wallet Balance");
+                holder.reportName.setText("Wallet Balance");
                 holder.reportValue.setText(String.valueOf(totalWalletBalance));
                 holder.reportIcon.setImageResource(R.drawable.gift_coin_icon);
                 holderListMerchant.put(2, holder);
@@ -394,20 +394,19 @@ public class MerchantActivity extends AppCompatActivity {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            Log.d("CustomerRewardStories",(sessionManager.getCurrentFragment()));
             try {
                 if(sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")){
                     super.onBackPressed();
                 }
                 else {
-                    super.onBackPressed();
-                    startActivity(new Intent(MerchantActivity.this, MerchantActivity.class));
-                }
 
+                    startActivity(new Intent(MerchantActivity.this, MerchantActivity.class));
+                    super.onBackPressed();
+                }
             }
             catch (Exception e) {
-                mAuth.signOut();
-                sessionManager.clearData();
+                //mAuth.signOut();
+                //sessionManager.clearData();
                 startActivity(new Intent(MerchantActivity.this, SignUpActivity.class));
                 finish();
             }

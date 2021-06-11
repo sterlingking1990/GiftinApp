@@ -61,7 +61,6 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
     private RecyclerView rvGameList;
 
     private RecyclerView rvCategory;
-    private View giftmeListView;
 
     public SessionManager sessionManager;
 
@@ -86,7 +85,7 @@ public class GiftListFragment extends Fragment implements GiftlistAdapter.GiftIt
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        giftmeListView=inflater.inflate(R.layout.fragment_reward, container, false);
+        View giftmeListView = inflater.inflate(R.layout.fragment_reward, container, false);
 
 
         layoutManager=new GridLayoutManager(requireContext(),2);

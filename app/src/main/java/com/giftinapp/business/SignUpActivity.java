@@ -64,7 +64,7 @@ public class SignUpActivity extends AppCompatActivity {
         sessionManager = new SessionManager(getApplicationContext());
 
 
-        String[] loginMode = new String[]{"As Customer", "As Business"};
+        String[] loginMode = new String[]{"As Influencer", "As Brand"};
         ArrayAdapter<String> loginModeAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, loginMode);
         loginModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -188,7 +188,7 @@ public class SignUpActivity extends AppCompatActivity {
                                                         if(task1.isSuccessful()){
                                                             //Toast.makeText(getApplicationContext(),"You have been temporarily registered",Toast.LENGTH_SHORT).show();
                                                             builder.setMessage("You have been temporarily registered and can now login, " +
-                                                                    "but might not enjoy all benefits from giftinApp until you verify your account from your mail")
+                                                                    "but might not enjoy all benefits from Brandible until you verify your account from your mail")
                                                                     .setCancelable(false)
                                                                     .setPositiveButton("OK", (dialog, id) -> {
                                                                         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);

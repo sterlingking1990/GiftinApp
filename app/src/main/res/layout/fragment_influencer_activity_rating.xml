@@ -8,7 +8,7 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:orientation="vertical"
-        tools:context="com.giftinapp.business.customer.SetRewardDEAL">
+        tools:context=".customer.InfluencerActivityRatingFragment">
 
 
         <FrameLayout
@@ -57,37 +57,6 @@
 
         </FrameLayout>
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/ll_input_influencer_username"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/ll_take_photos"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:weightSum="1"
-            >
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_influencer_username"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Influencer Username or Email"
-                    android:imeOptions="actionNext"
-                    android:lineSpacingExtra="2dp"
-                    android:maxLength="105"
-                    android:layout_margin="10dp"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:textSize="16sp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/ll_rating"
@@ -96,76 +65,40 @@
             android:layout_gravity="center_horizontal"
             android:orientation="horizontal"
             android:weightSum="2"
+            android:layout_marginTop="20dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ll_input_influencer_username">
+            app:layout_constraintStart_toStartOf="parent">
 
             <RatingBar
-                android:id="@+id/rating"
+                android:id="@+id/ratingBar"
                 android:theme="@style/RatingBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:indeterminateTint="@color/tabColor"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="10dp"
-                android:isIndicator="true"
                 android:elevation="100dp"
                 android:numStars="5"
                 android:rating="3"
-                android:stepSize="0.1" />
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/ll_selectRating"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2"
-            app:layout_constraintTop_toBottomOf="@id/ll_selectStatusViewWorth"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            >
-
-            <TextView
-                android:id="@+id/tvSelectRating"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.5"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="10dp"
-                android:text="select rating"
-                />
-            <com.google.android.material.slider.Slider
-                android:id="@+id/numberOfRatingIndicator"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_weight="0.5"
-                android:value="1"
-                android:valueTo="5"
-                android:stepSize="1"
-                android:valueFrom="1"
-                android:backgroundTint="@color/tabColor"
-                android:elevation="10dp"/>
+                android:stepSize="1" />
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toBottomOf="@id/ll_rating"
             android:orientation="horizontal">
-
             <TextView
-                android:id="@+id/tv_download_uri"
-                android:layout_width="match_parent"
+                android:id="@+id/tv_ratedBy"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/ll_selectRating"
-                android:textAlignment="center"
-                android:text="Please select deal to rate influencer on"
-                style="@style/TextAppearance.AppCompat.Headline"/>
-
+                android:layout_margin="10dp"
+                android:textColor="@color/tabColor"
+                android:textSize="16sp"
+                />
         </androidx.appcompat.widget.LinearLayoutCompat>
+
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
@@ -183,10 +116,10 @@
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/ll_deals"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_uploaded_stories"
+                android:id="@+id/rv_influencerActivityRecyclerView"
                 android:layout_margin="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -195,26 +128,6 @@
                 app:layout_constraintBottom_toBottomOf="parent"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/ll_deals"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            >
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_save_rating"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@drawable/rectangle_shaped_button"
-                android:imeOptions="actionDone"
-                android:backgroundTint="@color/tabColor"
-                android:text="@string/rate_influencer"
-                android:elevation="10dp"/>
-        </androidx.appcompat.widget.LinearLayoutCompat>
 
     </LinearLayout>
 </ScrollView>

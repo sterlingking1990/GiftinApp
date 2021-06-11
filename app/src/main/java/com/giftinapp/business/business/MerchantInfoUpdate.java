@@ -106,8 +106,8 @@ public class MerchantInfoUpdate extends Fragment {
         tvGiftorId.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                builder.setMessage("This appears in the email sent when you gift your customer. " +
-                        "Make sure you select an option known generally by your customers")
+                builder.setMessage("This appears in the email sent when you reward influencer. " +
+                        "Make sure you select an option you are known by generally")
                         .setCancelable(true)
                         .setPositiveButton("OK", (dialog, id) -> {
 
@@ -180,7 +180,7 @@ public class MerchantInfoUpdate extends Fragment {
                             etInstagram.setText(documentSnapshot.get("instagram").toString());
                             etWhatsApp.setText(documentSnapshot.get("whatsapp").toString());
                             etAddress.setText(documentSnapshot.get("address").toString());
-                            String giftorText = documentSnapshot.get("giftorId") != null ? "Giftor Id" + "<b><p>" +  "* " + documentSnapshot.get("giftorId").toString() + "</p></b> " : "Giftor Id" + "<b><p>" +  "* " + documentSnapshot.getId() + "</p></b> ";
+                            String giftorText = documentSnapshot.get("giftorId") != null ? "brand Id" + "<b><p>" +  "* " + documentSnapshot.get("giftorId").toString() + "</p></b> " : "brand Id" + "<b><p>" +  "* " + documentSnapshot.getId() + "</p></b> ";
                             tvGiftorId.setText(Html.fromHtml(giftorText));
 
                         }

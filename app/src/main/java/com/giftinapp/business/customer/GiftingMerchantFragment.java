@@ -41,8 +41,6 @@ public class GiftingMerchantFragment extends Fragment implements GiftingMerchant
     private RecyclerView rvGiftingMerchant;
     private RecyclerView.LayoutManager layoutManager;
 
-    private View giftingMerchantView;
-
     public SessionManager sessionManager;
 
     public AlertDialog.Builder builder;
@@ -55,15 +53,16 @@ public class GiftingMerchantFragment extends Fragment implements GiftingMerchant
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        giftingMerchantAdapter=new GiftingMerchantAdapter(this);
-        layoutManager=new LinearLayoutManager(requireContext(),RecyclerView.VERTICAL,false);
+
         // Inflate the layout for this fragment
-        giftingMerchantView = inflater.inflate(R.layout.fragment_gifting_merchant, container, false);
-        return giftingMerchantView;
+        return inflater.inflate(R.layout.fragment_gifting_merchant, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        giftingMerchantAdapter=new GiftingMerchantAdapter(this);
+        layoutManager=new LinearLayoutManager(requireContext(),RecyclerView.VERTICAL,false);
+
         sessionManager = new SessionManager(requireContext());
 
         rvGiftingMerchant=view.findViewById(R.id.rv_gifting_merchant);

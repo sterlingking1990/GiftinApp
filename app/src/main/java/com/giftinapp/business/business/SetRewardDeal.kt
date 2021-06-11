@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
 import com.giftinapp.business.model.BannerPojo
-import com.giftinapp.business.model.CategoryPojo
 import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.StatusReachAndWorthPojo
 import com.giftinapp.business.utility.SessionManager
@@ -378,7 +377,10 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                                            }
 
                                            totalStatusWorthAndReachProduct += (statusWorth * statusReach)
-                                           merchantStoryListPojo.statusReachAndWorthPojo = StatusReachAndWorthPojo(statusWorth, statusReach)
+                                           val statusReachAndWorthPojo = StatusReachAndWorthPojo()
+                                           statusReachAndWorthPojo.status_reach = statusReach
+                                           statusReachAndWorthPojo.status_worth = statusWorth
+                                           merchantStoryListPojo.statusReachAndWorthPojo = statusReachAndWorthPojo
                                        }
 
                                     }
@@ -436,13 +438,17 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
             db.firestoreSettings = settings
 
             if (FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
+                val statusReachAndWorthPojo = StatusReachAndWorthPojo()
+
 
                 val merchantStoryListPojo = MerchantStoryListPojo()
                 merchantStoryListPojo.seen = false
                 merchantStoryListPojo.storyTag = if(imageText.visibility == View.GONE) "promotional" else imageText.text.toString()
                 merchantStoryListPojo.merchantStatusId = null
                 merchantStoryListPojo.merchantStatusImageLink = tvDownloadUri.text.toString()
-                merchantStoryListPojo.statusReachAndWorthPojo = StatusReachAndWorthPojo(statusWorthSlider.value.toInt(), numberOfViewSlider.value.toInt())
+                statusReachAndWorthPojo.status_worth = statusWorthSlider.value.toInt()
+                statusReachAndWorthPojo.status_reach = numberOfViewSlider.value.toInt()
+                merchantStoryListPojo.statusReachAndWorthPojo = statusReachAndWorthPojo
                 merchantStoryListPojo.viewers = arrayListOf()
 
                 db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document().set(merchantStoryListPojo)

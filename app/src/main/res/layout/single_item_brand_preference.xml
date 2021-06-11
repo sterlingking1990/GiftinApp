@@ -25,45 +25,35 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/tvFollowingStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="12sp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="5dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/tv_gifting_merchant_business_name"
+                />
 
             <TextView
                 android:id="@+id/tv_gifting_merchant_business_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_margin="10dp"
                 android:text="MrBiggs"
                 android:textSize="20sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tv_gifting_merchant_total_customer_gifted"
+                app:layout_constraintBottom_toTopOf="@id/ll_controls"
                 app:layout_constraintHorizontal_bias="0.11"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvFollowingStatus"
                 app:layout_constraintVertical_bias="0.16000003" />
 
-            <TextView
-                android:id="@+id/tv_gifting_merchant_total_customer_gifted"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:text="50"
-                android:textSize="20sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.957"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_customers_gifted_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="influencers(s) rewarded"
-                android:textSize="12sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.957"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_gifting_merchant_total_customer_gifted" />
-
             <LinearLayout
+                android:id="@+id/ll_controls"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -99,6 +89,19 @@
                     android:layout_marginTop="8dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/whatsapp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_toggle_preference"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:layout_marginStart="30dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/rectangle_shaped_button"
+                    android:elevation="100dp"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:focusable="true" />
             </LinearLayout>
 
 

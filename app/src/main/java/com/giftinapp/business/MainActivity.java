@@ -23,10 +23,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.giftinapp.business.customer.AboutFragment;
+import com.giftinapp.business.customer.BrandPreferenceFragment;
 import com.giftinapp.business.customer.GiftListFragment;
 import com.giftinapp.business.customer.GiftingMerchantFragment;
+import com.giftinapp.business.customer.InfluencerActivityRatingFragment;
 import com.giftinapp.business.customer.MerchantStoryList;
 import com.giftinapp.business.customer.MyGiftCartFragment;
 import com.giftinapp.business.customer.MyGiftHistoryFragment;
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     public StorySession storySession;
     public AlertDialog.Builder builder;
     public TextView navTextView;
+    public ImageView ivRating;
 
     protected CarouselView carouselView;
 
@@ -128,7 +132,8 @@ public class MainActivity extends AppCompatActivity {
         View headerView = nv.getHeaderView(0);
         navTextView = headerView.findViewById(R.id.nav_header_textView);
         ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
-        Picasso.get().load(R.drawable.gift).into(navImageView);
+        ImageView ivRating = headerView.findViewById(R.id.iv_rating);
+        ivRating.setVisibility(View.VISIBLE);
         navTextView.setText(getResources().getString(R.string.influenca_name_and_status,Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),"artic"));
 
         totalRatingForAllStatus=0L;
@@ -156,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
             case 0: {
                 getTotalGiftCoin();
-                holder.reportName.setText("Total Gift Coin");
+                holder.reportName.setText("Total Reward");
                 holder.reportIcon.setImageResource(R.drawable.gift_coin_icon);
                 long totalGiftCoinSum= totalGiftCoin==null ? 0L : totalGiftCoin;
                 holder.reportValue.setText(String.valueOf(totalGiftCoinSum));
@@ -165,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             case 1: {
-                holder.reportName.setText("Latest Redeemed Gift Worth");
+                holder.reportName.setText("Latest Redeemed Reward Worth");
                 long latestAmount= latestAmountRedeemed==null ? 0L : latestAmountRedeemed;
                 holder.reportValue.setText(String.valueOf(latestAmount));
                 holder.reportIcon.setImageResource(R.drawable.gift);
@@ -190,37 +195,34 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void selectDrawerItem(MenuItem menuitem){
-            switch (menuitem.getItemId()) {
-                case R.id.navigation_home:
-                    carouselView.setVisibility(View.GONE);
-                    GiftListFragment fragment = new GiftListFragment();
-                    openFragment(fragment);
-                    break;
-                case R.id.navigation_mygiftcart:
-                    carouselView.setVisibility(View.GONE);
-                    MyGiftCartFragment myGiftCartFragment = new MyGiftCartFragment();
-                    openFragment(myGiftCartFragment);
-                    break;
-
-                case R.id.navigation_gifting_history:
+        if(menuitem.getItemId() == R.id.navigation_gifting_history) {
                     carouselView.setVisibility(View.GONE);
                     MyGiftHistoryFragment myGiftHistoryFragment = new MyGiftHistoryFragment();
                     openFragment(myGiftHistoryFragment);
-                    break;
-
-                case R.id.navigation_gifting_merchant:
-                    carouselView.setVisibility(View.GONE);
+            }
+        if(menuitem.getItemId() == R.id.navigation_gifting_merchant){
+            carouselView.setVisibility(View.GONE);
                     GiftingMerchantFragment giftingMerchantFragment = new GiftingMerchantFragment();
                     openFragment(giftingMerchantFragment);
-                    break;
+        }
 
-                case R.id.navigation_view_reward_deal:
-                    carouselView.setVisibility(View.GONE);
-                    MerchantStoryList merchantStoryList = new MerchantStoryList();
-                    openFragment(merchantStoryList);
-                    break;
+        if(menuitem.getItemId() == R.id.navigation_view_reward_deal){
+            carouselView.setVisibility(View.GONE);
+            MerchantStoryList merchantStoryList = new MerchantStoryList();
+            openFragment(merchantStoryList);
+        }
 
-            }
+        if(menuitem.getItemId() == R.id.navigation_view_activity_rating){
+            carouselView.setVisibility(View.GONE);
+            InfluencerActivityRatingFragment influencerActivityRatingFragment = new InfluencerActivityRatingFragment();
+            openFragment(influencerActivityRatingFragment);
+        }
+
+        if(menuitem.getItemId() == R.id.navigation_view_brand_preference){
+            carouselView.setVisibility(View.GONE);
+            BrandPreferenceFragment brandPreferenceFragment = new BrandPreferenceFragment();
+            openFragment(brandPreferenceFragment);
+        }
             drawer.close();
     }
 
@@ -258,22 +260,20 @@ public class MainActivity extends AppCompatActivity {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            Log.d("CustomerRewardStories",(sessionManager.getCurrentFragment()));
             try {
                 if(sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")){
                     super.onBackPressed();
                 }
                 else {
-                    super.onBackPressed();
                     startActivity(new Intent(MainActivity.this,MainActivity.class));
-
+                    super.onBackPressed();
                 }
             }
             catch (Exception e){
-                mauth.signOut();
-                sessionManager.clearData();
-                storySession.clearData();
-                startActivity(new Intent(MainActivity.this,SignUpActivity.class));
+                //mauth.signOut();
+                //sessionManager.clearData();
+                //storySession.clearData();
+                startActivity(new Intent(MainActivity.this,MainActivity.class));
                 finish();
             }
         }
@@ -308,53 +308,49 @@ public class MainActivity extends AppCompatActivity {
         if(t.onOptionsItemSelected(item)){
             return true;
         }
-
-        switch (item.getItemId()){
-            case R.id.customer_refresh_page:
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.update_info:
-                carouselView.setVisibility(View.GONE);
-                SettingsFragment settingsFragment = new SettingsFragment();
-                openFragment(settingsFragment);
-                return true;
-            case R.id.about_giftin:
-                carouselView.setVisibility(View.GONE);
-                AboutFragment aboutFragment = new AboutFragment();
-                openFragment(aboutFragment);
-                return true;
-
-            case R.id.referwin:
-                shareAppLink();
-                return true;
-
-            case R.id.exit:
-                android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
-                // builder.setTitle("Alert");
-                // builder.setIcon(R.drawable.ic_launcher);
-                builder.setMessage("   Log out?");
-                builder.setCancelable(false);
-                builder.setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-
-                            }
-                        });
-
-                builder.setNeutralButton("Ok", (dialog, id) -> {
-                    mauth.signOut();
-                    sessionManager.clearData();
-                    storySession.clearData();
-                    startActivity(new Intent(MainActivity.this,SignUpActivity.class));
-                    dialog.cancel();
-                });
-                builder.show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if(item.getItemId()==R.id.customer_refresh_page){
+            carouselView.setVisibility(View.GONE);
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
         }
+        if(item.getItemId()==R.id.update_info){
+            carouselView.setVisibility(View.GONE);
+            SettingsFragment settingsFragment = new SettingsFragment();
+            openFragment(settingsFragment);
+        }
+        if(item.getItemId()==R.id.about_giftin){
+            carouselView.setVisibility(View.GONE);
+            AboutFragment aboutFragment = new AboutFragment();
+            openFragment(aboutFragment);
+        }
+        if(item.getItemId()==R.id.referwin){
+            carouselView.setVisibility(View.GONE);
+            shareAppLink();
+        }
+        if(item.getItemId()==R.id.exit) {
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
+            // builder.setTitle("Alert");
+            // builder.setIcon(R.drawable.ic_launcher);
+            builder.setMessage("   Log out?");
+            builder.setCancelable(false);
+            builder.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+
+                        }
+                    });
+
+            builder.setNeutralButton("Ok", (dialog, id) -> {
+                mauth.signOut();
+                sessionManager.clearData();
+                storySession.clearData();
+                startActivity(new Intent(MainActivity.this,SignUpActivity.class));
+                dialog.cancel();
+            });
+            builder.show();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void getTotalGiftCoin() {
@@ -470,8 +466,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void shareAppLink() {
+        Toast.makeText(this,"AM here",Toast.LENGTH_LONG).show();
 
-        String link = "https://giftinapp.page.link/getgifts/?link=gifting.com/?invitedBy=" + sessionManager.getEmail();
+        String link = "https://giftinapp.page.link/xEYL/?link=brandible-app.com/?invitedBy=" + sessionManager.getEmail();
 
         FirebaseDynamicLinks.getInstance().createDynamicLink()
                 .setLink(Uri.parse(link))
@@ -487,7 +484,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType("text/plain");
                     intent.putExtra(Intent.EXTRA_TEXT, mInvitationUrl.toString());
-                    startActivity(Intent.createChooser(intent, "Share GiftinApp With"));
+                    startActivity(Intent.createChooser(intent, "Share Brandible With"));
                 });
     }
 

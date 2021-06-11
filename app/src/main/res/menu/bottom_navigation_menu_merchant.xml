@@ -2,33 +2,35 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_gift_customer_fan"
-        android:icon="@drawable/ic_gift_customer_fan"
-        android:title="Gift fan(s)"/>
-    <item
-        android:id="@+id/navigation_wallet_info"
-        android:icon="@drawable/ic_wallet_info"
-        android:title="Wallet"/>
-    <item
-        android:id="@+id/navigation_merchant_gift_stats"
-        android:icon="@drawable/ic_merchant_gift_stats"
-        android:title="Merchant Stats"/>
-
-    <item
         android:id="@+id/navigation_set_reward_deal"
         android:icon="@drawable/ic_set_reward_status"
-        android:title="Set Influenca Deal"/>
+        android:title="Set Brand Deal"/>
 
 
     <item
         android:id="@+id/navigation_view_reward_deal"
         android:icon="@drawable/ic_view_reward_deal"
-        android:title="View Influenca Deals"/>
+        android:title="View Deals"/>
 
     <item
         android:id="@+id/navigation_view_rate_influencer"
         android:icon="@drawable/ic_rate_influencer"
         android:title="Rate Influenca"/>
+
+    <item
+        android:id="@+id/navigation_gift_customer_fan"
+        android:icon="@drawable/ic_gift_customer_fan"
+        android:title="Reward Influencer(s)"/>
+
+    <item
+        android:id="@+id/navigation_merchant_gift_stats"
+        android:icon="@drawable/ic_merchant_gift_stats"
+        android:title="Reward Stats"/>
+
+    <item
+        android:id="@+id/navigation_wallet_info"
+        android:icon="@drawable/ic_wallet_info"
+        android:title="My Wallet"/>
 
 
 </menu>

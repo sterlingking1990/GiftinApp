@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.giftinapp.business.model.CustomerFanToGiftPojo;
+import com.giftinapp.business.model.GiftList;
 import com.giftinapp.business.model.GiftinACustomerPojo;
+import com.giftinapp.business.model.MerchantStoryListPojo;
 import com.giftinapp.business.model.MerchantWalletPojo;
 import com.giftinapp.business.R;
 import com.giftinapp.business.model.RewardPojo;
@@ -32,10 +35,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.protobuf.Any;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class GiftACustomerFragment extends Fragment {
@@ -56,6 +61,8 @@ public class GiftACustomerFragment extends Fragment {
     public boolean foundMatch = false;
 
     public String emailToReward;
+
+    public int totalStoriesBudget =0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -132,11 +139,43 @@ public class GiftACustomerFragment extends Fragment {
             }
         });
 
+        getTotalAmountBudgetForStories();
+
     }
+
+    private void getTotalAmountBudgetForStories(){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("merchants").document(sessionManager.getEmail()).collection("statuslist").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                                MerchantStoryListPojo storiesWorthObject = document.toObject(MerchantStoryListPojo.class);
+                                if(storiesWorthObject.statusReachAndWorthPojo!=null) {
+                                    Log.d("link",storiesWorthObject.merchantStatusImageLink.toString());
+                                    Log.d("totalStoriesWorth",storiesWorthObject.statusReachAndWorthPojo.status_reach.toString());
+                                    int statusWorthTotal = storiesWorthObject.statusReachAndWorthPojo.status_worth * storiesWorthObject.statusReachAndWorthPojo.status_reach;
+                                    totalStoriesBudget += statusWorthTotal;
+                                }
+                            }
+                        }
+                    }
+                });
+    }
+
 
     private void rewardCustomerFanList() {
         if(list.isEmpty() || etCustomerFanEmailToReward.getText().toString().isEmpty() || etCustomerFanRewardCoin.getText().toString().isEmpty()){
-            builder.setMessage("Customer email and amount should be provided and added to the list ")
+            builder.setMessage("influencer email and amount should be provided and added to the list ")
                     .setCancelable(false)
                     .setPositiveButton("OK", (dialog, id) -> {
 
@@ -209,7 +248,9 @@ public class GiftACustomerFragment extends Fragment {
                                 DocumentSnapshot result = task.getResult();
                                 if (result.exists()) {
                                     long amount = (long) result.get("merchant_wallet_amount");
-                                    if (amount > Long.parseLong(reward)) {
+                                    //subtract amount from statusBudget
+
+                                    if ((amount-totalStoriesBudget) > Long.parseLong(reward)) {
 
                                         //2. The adding of each customers gifting record
                                         //a. get the ref for the particular email and point to the current merchant- get the exisiting amount if successful; then update the user and merchant data with current amount
@@ -259,7 +300,7 @@ public class GiftACustomerFragment extends Fragment {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
 
-                                                    builder.setMessage("Could not gift your customers at the moment due to no fund exist. However, you have been set up to gift customers, fund wallet to begin gifting your customers")
+                                                    builder.setMessage("Could not reward the influencer at the moment due to no fund exist. Please fund wallet to reward")
                                                             .setCancelable(false)
                                                             .setPositiveButton("OK", (dialog, id) -> {
                                                                 //take user to fund wallet fragment
@@ -308,10 +349,10 @@ public class GiftACustomerFragment extends Fragment {
                             if(!referrer.equals("none")){
                                 //reward the referrer
                                 RewardPojo rewardPojo = new RewardPojo();
-                                rewardPojo.email="GiftinAppBonus";
+                                rewardPojo.email="StatusViewBonus";
                                 rewardPojo.referrer =referrer;
                                 rewardPojo.firstName = firstName; //name of the referred
-                                //check if this referrer has something in her GiftinAppBonus so we update it
+                                //check if this referrer has something in her StatusViewBonus so we update it
                                 db.collection("users").document(referrer).collection("rewards").document("GiftinAppBonus").get()
                                         .addOnCompleteListener(task2 -> {
                                             if(task2.isSuccessful()){
@@ -363,7 +404,7 @@ public class GiftACustomerFragment extends Fragment {
     private void addCustomerFanToList(String email,String amount) {
         //check if email exist
         if (email.isEmpty() || amount.isEmpty()) {
-            builder.setMessage("Gifting Id of Customer and gift amount must not be empty")
+            builder.setMessage("Reward Id of Influencer and reward amount must not be empty")
                     .setCancelable(false)
                     .setPositiveButton("OK", (dialog, id) -> {
 
@@ -417,7 +458,7 @@ public class GiftACustomerFragment extends Fragment {
                                     }
                                 }
                                 if (!foundMatch) {
-                                    Toast.makeText(requireContext(), "Gifting Id does not exist, please re-verify", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(requireContext(), "Reward Id does not exist, please re-verify", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         }
@@ -453,7 +494,7 @@ public class GiftACustomerFragment extends Fragment {
                             if (Objects.requireNonNull(userInfo.get("facebook")).toString().equalsIgnoreCase("not provided") &&
                                     Objects.requireNonNull(userInfo.get("whatsapp")).toString().equalsIgnoreCase("not provided") &&
                                     Objects.requireNonNull(userInfo.get("instagram")).toString().equalsIgnoreCase("not provided")) {
-                                builder.setMessage("Please update your info before gifting your customers")
+                                builder.setMessage("Please update your info before rewarding your influencer")
                                         .setCancelable(false)
                                         .setPositiveButton("Ok", (dialog, id) -> {
                                             //take user to place to update info

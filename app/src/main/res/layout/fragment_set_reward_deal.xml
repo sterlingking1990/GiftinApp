@@ -232,6 +232,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:imeOptions="actionDone"
+                android:background="@drawable/rectangle_shaped_button"
                 android:backgroundTint="@color/tabColor"
                 android:text="@string/publish_reward_deal"
                 android:elevation="10dp"/>
