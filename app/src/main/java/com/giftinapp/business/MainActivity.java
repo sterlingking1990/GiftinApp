@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.giftinapp.business.customer.AboutFragment;
+import com.giftinapp.business.customer.BrandPreferenceFragment;
 import com.giftinapp.business.customer.GiftListFragment;
 import com.giftinapp.business.customer.GiftingMerchantFragment;
 import com.giftinapp.business.customer.InfluencerActivityRatingFragment;
@@ -215,6 +216,12 @@ public class MainActivity extends AppCompatActivity {
             carouselView.setVisibility(View.GONE);
             InfluencerActivityRatingFragment influencerActivityRatingFragment = new InfluencerActivityRatingFragment();
             openFragment(influencerActivityRatingFragment);
+        }
+
+        if(menuitem.getItemId() == R.id.navigation_view_brand_preference){
+            carouselView.setVisibility(View.GONE);
+            BrandPreferenceFragment brandPreferenceFragment = new BrandPreferenceFragment();
+            openFragment(brandPreferenceFragment);
         }
             drawer.close();
     }

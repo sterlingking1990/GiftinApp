@@ -7,12 +7,12 @@ import java.util.ArrayList;
 @Keep
  public class MerchantStoryListPojo {
 
-    public String merchantStatusId = null;
-    public String merchantStatusImageLink = null;
-    public String storyTag = null;
-    public Boolean seen = false;
+    public String merchantStatusId;
+    public String merchantStatusImageLink;
+    public String storyTag;
+    public Boolean seen;
     public ArrayList<String> viewers;
-    public StatusReachAndWorthPojo statusReachAndWorthPojo = null;
+    public StatusReachAndWorthPojo statusReachAndWorthPojo;
 
     public MerchantStoryListPojo(){}
 }

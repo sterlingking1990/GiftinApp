@@ -36,7 +36,8 @@ public class ExpandableListDataPump {
 
         List<String> receivingPayments = new ArrayList<String>();
         receivingPayments.add("As soon as you are rewarded from the completion of a status promotional task, once you are paid from the platform by the brand, make sure the brand rates you from his own Rate an Influencer menu " +
-                "Rating you goes a long way to helping you improve and get you a place in the future during recommendation ");
+                "Rating you goes a long way to helping you improve and get you a place in the future during recommendation. " +
+                " When your rewards is above #3000, you will see a cashout menu which when triggered will inform Brandible about your interest to withdrew your reward and then follow up with you on that process conveniently");
 
         List<String> taskToExpectFromABrand = new ArrayList<String>();
         taskToExpectFromABrand.add("Some brands might require you to test out their products and make a video about how it feels for you. " +

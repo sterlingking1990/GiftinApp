@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.giftinapp.business.model.CustomerFanToGiftPojo;
+import com.giftinapp.business.model.GiftList;
 import com.giftinapp.business.model.GiftinACustomerPojo;
+import com.giftinapp.business.model.MerchantStoryListPojo;
 import com.giftinapp.business.model.MerchantWalletPojo;
 import com.giftinapp.business.R;
 import com.giftinapp.business.model.RewardPojo;
@@ -32,10 +35,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.protobuf.Any;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class GiftACustomerFragment extends Fragment {
@@ -56,6 +61,8 @@ public class GiftACustomerFragment extends Fragment {
     public boolean foundMatch = false;
 
     public String emailToReward;
+
+    public int totalStoriesBudget =0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -132,7 +139,39 @@ public class GiftACustomerFragment extends Fragment {
             }
         });
 
+        getTotalAmountBudgetForStories();
+
     }
+
+    private void getTotalAmountBudgetForStories(){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("merchants").document(sessionManager.getEmail()).collection("statuslist").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                                MerchantStoryListPojo storiesWorthObject = document.toObject(MerchantStoryListPojo.class);
+                                if(storiesWorthObject.statusReachAndWorthPojo!=null) {
+                                    Log.d("link",storiesWorthObject.merchantStatusImageLink.toString());
+                                    Log.d("totalStoriesWorth",storiesWorthObject.statusReachAndWorthPojo.status_reach.toString());
+                                    int statusWorthTotal = storiesWorthObject.statusReachAndWorthPojo.status_worth * storiesWorthObject.statusReachAndWorthPojo.status_reach;
+                                    totalStoriesBudget += statusWorthTotal;
+                                }
+                            }
+                        }
+                    }
+                });
+    }
+
 
     private void rewardCustomerFanList() {
         if(list.isEmpty() || etCustomerFanEmailToReward.getText().toString().isEmpty() || etCustomerFanRewardCoin.getText().toString().isEmpty()){
@@ -209,7 +248,9 @@ public class GiftACustomerFragment extends Fragment {
                                 DocumentSnapshot result = task.getResult();
                                 if (result.exists()) {
                                     long amount = (long) result.get("merchant_wallet_amount");
-                                    if (amount > Long.parseLong(reward)) {
+                                    //subtract amount from statusBudget
+
+                                    if ((amount-totalStoriesBudget) > Long.parseLong(reward)) {
 
                                         //2. The adding of each customers gifting record
                                         //a. get the ref for the particular email and point to the current merchant- get the exisiting amount if successful; then update the user and merchant data with current amount

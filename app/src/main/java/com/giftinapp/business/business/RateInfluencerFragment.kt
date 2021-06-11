@@ -183,7 +183,10 @@ class RateInfluencerFragment : Fragment(), UploadedRewardStoryListAdapter.Clicka
                                             if(key2 == "status_reach"){
                                                 statusReach = value2
                                             }
-                                            merchantStoryListPojo.statusReachAndWorthPojo = StatusReachAndWorthPojo(statusWorth, statusReach)
+                                            val statusReachAndWorthPojo = StatusReachAndWorthPojo()
+                                            statusReachAndWorthPojo.status_reach = statusReach
+                                            statusReachAndWorthPojo.status_worth = statusWorth
+                                            merchantStoryListPojo.statusReachAndWorthPojo = statusReachAndWorthPojo
                                         }
 
                                     }

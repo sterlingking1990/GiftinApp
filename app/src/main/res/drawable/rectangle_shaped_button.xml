@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <corners android:radius="10dp"/>
-    <size android:height="45dp"/>
 
-</shape>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/colorPrimaryDark">
+    <item>
+        <shape>
+            <corners android:radius="10dp"/>
+            <size android:height="45dp"/>
+        </shape>
+    </item>
+</ripple>

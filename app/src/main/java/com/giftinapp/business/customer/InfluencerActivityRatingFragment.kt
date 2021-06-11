@@ -2,7 +2,6 @@ package com.giftinapp.business.customer
 
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,10 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
-import com.giftinapp.business.business.UploadedRewardStoryListAdapter
 import com.giftinapp.business.model.InfluencerActivityRatingPojo
-import com.giftinapp.business.model.MerchantStoryListPojo
-import com.giftinapp.business.model.StatusReachAndWorthPojo
 import com.giftinapp.business.utility.SessionManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
