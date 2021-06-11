@@ -9,40 +9,58 @@ public class MerchantExpandableListDataPump {
         HashMap<String, List<String>> expandableListDetail = new HashMap<String, List<String>>();
 
         List<String> giftinAppIntroHead = new ArrayList<String>();
-        giftinAppIntroHead.add("As a Business, you gifts when you buy certain products. Depending on the " +
-                "terms and condition of your business, you reward loyal customers with some amount of money. GiftinApp makes it " +
-                "easy by allowing you to reward your customers with any amount you can afford while still letting them know you care so much");
+        giftinAppIntroHead.add("Brandible gives you as a brand the opportunity to grow and become visible to the market as fast as possible by leveraging on the influencers ability to perform brand assigned tasks " +
+                "which can help your brand to scale and become visible in the market. " +
+                "example of this brand tasks can be to ask influencer to share your product status on the platforms he is available at, or " +
+                "make a video about any of your product or you can give the influencer your product to try out and tell people about it. " +
+                "These and more you can think of. " +
+                "When this task has been performed, you can then pay and rate the Influencer within the app");
 
-        List<String> availableGiftsHead = new ArrayList<String>();
-        availableGiftsHead.add("GiftinApp Inc., is a gifting company that delivers care and hospitality to your customer " +
-                "through gifts; these gifts are chosen by your customers but curated by GiftinApp Inc., with the help of experts who understands the inVogue " +
-                "things your customers might love as a gift when you continue to reward them as they patronise your businesses");
-
-
-        List<String> walletFunding = new ArrayList<String>();
-        walletFunding.add("To gifts customers, you need to have fund in your GiftinApp wallet, this is easy as you can fund with amount from 1000 above. Payment is processed in partnership with " +
-                "the reputable payment company Paystack to ensure secure and flexible payment");
+        List<String> requestingInfluencerToPerformBrandTask = new ArrayList<String>();
+        requestingInfluencerToPerformBrandTask.add("Requesting an Influencer to perform brand task is as simple as uploading a status about it. " +
+                "The Set Deal Menu provides a checkbox to use promotional banner which indicate your interest that you want an Influencer to engage with. " +
+                "The Influencer sees your Interest on status and pull up chat with you right in your whatsApp if you had set your phone number right else he chats with Brandible agent which then tries to reach to you" );
 
 
-        List<String> makingCustomersHappy = new ArrayList<String>();
-        makingCustomersHappy.add("Every little amount you gift your customers help them reach their gift mark and makes them happy!. GiftinApp is sure you value your customers as much as we do ");
-
-        List<String> redeemingGiftsHead = new ArrayList<String>();
-        redeemingGiftsHead.add("When customers gift mark is reached, GiftinApp reaches out to your customer and makes sure they get the treat they deserve" +
-                " for being an amazing customer. We let them know you contributed to their happiness in a memorable way ");
+        List<String> settingProductsAsStatus = new ArrayList<String>();
+        settingProductsAsStatus.add("The Set Deal Menu enables you to add status of products you will like influencers on the platform to see. " +
+                "However with as little as #2 per status view per influencer, you can decide how many Influencers to target with default being 50.");
 
 
+        List<String> decidingAnInfluencerForMyBrand = new ArrayList<String>();
+        decidingAnInfluencerForMyBrand.add("For now, you can work with the Influencers signed into the app, "+
+                "but subsequently we will be exposing Influencers rating, points and level so that you can use those to make decision of an Influencer to work with");
 
-        List<String> publicisingYou = new ArrayList<String>();
-        publicisingYou.add("Businesses that use GiftinApp are trusted businesses that understands the value of her customer. All users of GiftinApp as a customer always sees all businesses that reward any of her customer");
+        List<String> payingAnInfluencer = new ArrayList<String>();
+        payingAnInfluencer.add("Because our goal and mission is to help small and medium business get visibility as fast and as cheap as possible, " +
+                "Our Influencers also know that, they work with you based on how much you can afford and the task at hand. " +
+                "They understand they are not to overprice on task related to your brand promotion for any certain status" );
 
 
-        expandableListDetail.put("GiftinApp For Business", giftinAppIntroHead);
-        expandableListDetail.put("Available Gifts with GiftinApp", availableGiftsHead);
-        expandableListDetail.put("Before you can Gift your Customers", walletFunding);
-        expandableListDetail.put("What makes your customers Happy", makingCustomersHappy);
-        expandableListDetail.put("How we treat your customers", redeemingGiftsHead);
-        expandableListDetail.put("Does Customers Know Businesses That are Rewarding Her Customers", publicisingYou);
+
+        List<String> mediumForPayment = new ArrayList<String>();
+        mediumForPayment.add("Brandible provides you with wallet system from paystack payment systems. With this, you can fund your wallet once and then pay one or more Influencers at once from the Reward an Influencer Menu without having to do several bank transactions outside the app. "+
+                "After paying an Influencer for a particular status task been completed, you are expected to rate the influencer for that particular status task been completed. " +
+                "Note also that paying from the platform is not compulsory but it saves your from making several bank transactions when you have to pay more influencers." );
+
+        List<String> importantOfRatingInfluencer = new ArrayList<String>();
+        importantOfRatingInfluencer.add("When you rate an Influencer, it helps the Influencer to know if he has done well or he needs to do better next time. It also helps Brandible to suggest better Influencer to you in the future");
+
+
+        List<String> differenceFromOthers = new ArrayList<String>();
+        differenceFromOthers.add("Brandible is unique in the sense that it draws several users to first view your status because you promise a certain worth on each of your status as is been viewed, "
+                + " More so, you are focused on promoting your brand hence, Influencers on Brandible know that statuses are filled with products waiting to be promoted. " +
+                " Brandible opens you up to serious and numerous passionate Influencers who have one purpose, to scale your brand and they are proud of seeing your status, engaging in conversation with you via whatsApp and pushing your brand outside the market as fast and as cheap as possible");
+
+
+        expandableListDetail.put("Brandible For Brands", giftinAppIntroHead);
+        expandableListDetail.put("Requesting an Influencer to Perform Brand task", requestingInfluencerToPerformBrandTask);
+        expandableListDetail.put("How do I set Products I sell as Status", settingProductsAsStatus);
+        expandableListDetail.put("What Metrics do I use in Deciding the Influencer to work with", decidingAnInfluencerForMyBrand);
+        expandableListDetail.put("How much is Ideal to pay an Influencer after a task completion", payingAnInfluencer);
+        expandableListDetail.put("What Medium is appropriate to pay an Influencer", mediumForPayment);
+        expandableListDetail.put("Why is rating an Influencer for a status task so important", importantOfRatingInfluencer);
+        expandableListDetail.put("What Makes Brandible different from Other Platform", differenceFromOthers);
         return expandableListDetail;
     }
 }

@@ -13,8 +13,8 @@
     <color name="colorPrimaryDark">#000a12</color>
     <color name="colorPrimaryLight">#4f5b62</color>
 
-    <color name="tabColor">#FF9F1C</color>
-    <color name="tabColorLight">#FFEED6</color>
+    <color name="tabColor">#DE000000</color>
+    <color name="tabColorLight">#EB2D211A</color>
     <color name="colorAccent">#03a9f4</color>
 
     <color name="grey_500">#9E9E9E</color>

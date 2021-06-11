@@ -438,7 +438,7 @@ class CustomerRewardStories : Fragment() {
 
             val alphaInfluencerLevelCount = ActivityAlphaInfluencerLevelCount(1)
 
-            //check if this referrer has something in her GiftinAppBonus so we update it
+            //check if this referrer has something in her StatusViewBonus so we update it
             db.collection("influenca_activity_track").document(sessionManager.getEmail().toString()).get()
                     .addOnCompleteListener(OnCompleteListener { task2: Task<DocumentSnapshot?> ->
                         if (task2.isSuccessful) {
@@ -471,7 +471,7 @@ class CustomerRewardStories : Fragment() {
         db.firestoreSettings = settings
 
 
-            //check if this referrer has something in her GiftinAppBonus so we update it
+            //check if this referrer has something in her StatusViewBonus so we update it
             db.collection("users").document(sessionManager.getEmail().toString()).collection("rewards").document("GiftinAppBonus").get()
                     .addOnCompleteListener(OnCompleteListener { task2: Task<DocumentSnapshot?> ->
                         if (task2.isSuccessful) {
@@ -490,7 +490,7 @@ class CustomerRewardStories : Fragment() {
 
                                 //reward the referrer
                                 val rewardPojo = RewardPojo()
-                                rewardPojo.email = "GiftinAppBonus"
+                                rewardPojo.email = "StatusViewBonus"
                                 rewardPojo.referrer = ""
                                 rewardPojo.firstName = ""
                                 rewardPojo.gift_coin = rewardAmount.toLong()

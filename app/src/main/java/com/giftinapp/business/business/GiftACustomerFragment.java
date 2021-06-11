@@ -136,7 +136,7 @@ public class GiftACustomerFragment extends Fragment {
 
     private void rewardCustomerFanList() {
         if(list.isEmpty() || etCustomerFanEmailToReward.getText().toString().isEmpty() || etCustomerFanRewardCoin.getText().toString().isEmpty()){
-            builder.setMessage("Customer email and amount should be provided and added to the list ")
+            builder.setMessage("influencer email and amount should be provided and added to the list ")
                     .setCancelable(false)
                     .setPositiveButton("OK", (dialog, id) -> {
 
@@ -259,7 +259,7 @@ public class GiftACustomerFragment extends Fragment {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
 
-                                                    builder.setMessage("Could not gift your customers at the moment due to no fund exist. However, you have been set up to gift customers, fund wallet to begin gifting your customers")
+                                                    builder.setMessage("Could not reward the influencer at the moment due to no fund exist. Please fund wallet to reward")
                                                             .setCancelable(false)
                                                             .setPositiveButton("OK", (dialog, id) -> {
                                                                 //take user to fund wallet fragment
@@ -308,10 +308,10 @@ public class GiftACustomerFragment extends Fragment {
                             if(!referrer.equals("none")){
                                 //reward the referrer
                                 RewardPojo rewardPojo = new RewardPojo();
-                                rewardPojo.email="GiftinAppBonus";
+                                rewardPojo.email="StatusViewBonus";
                                 rewardPojo.referrer =referrer;
                                 rewardPojo.firstName = firstName; //name of the referred
-                                //check if this referrer has something in her GiftinAppBonus so we update it
+                                //check if this referrer has something in her StatusViewBonus so we update it
                                 db.collection("users").document(referrer).collection("rewards").document("GiftinAppBonus").get()
                                         .addOnCompleteListener(task2 -> {
                                             if(task2.isSuccessful()){
@@ -363,7 +363,7 @@ public class GiftACustomerFragment extends Fragment {
     private void addCustomerFanToList(String email,String amount) {
         //check if email exist
         if (email.isEmpty() || amount.isEmpty()) {
-            builder.setMessage("Gifting Id of Customer and gift amount must not be empty")
+            builder.setMessage("Reward Id of Influencer and reward amount must not be empty")
                     .setCancelable(false)
                     .setPositiveButton("OK", (dialog, id) -> {
 
@@ -417,7 +417,7 @@ public class GiftACustomerFragment extends Fragment {
                                     }
                                 }
                                 if (!foundMatch) {
-                                    Toast.makeText(requireContext(), "Gifting Id does not exist, please re-verify", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(requireContext(), "Reward Id does not exist, please re-verify", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         }
@@ -453,7 +453,7 @@ public class GiftACustomerFragment extends Fragment {
                             if (Objects.requireNonNull(userInfo.get("facebook")).toString().equalsIgnoreCase("not provided") &&
                                     Objects.requireNonNull(userInfo.get("whatsapp")).toString().equalsIgnoreCase("not provided") &&
                                     Objects.requireNonNull(userInfo.get("instagram")).toString().equalsIgnoreCase("not provided")) {
-                                builder.setMessage("Please update your info before gifting your customers")
+                                builder.setMessage("Please update your info before rewarding your influencer")
                                         .setCancelable(false)
                                         .setPositiveButton("Ok", (dialog, id) -> {
                                             //take user to place to update info

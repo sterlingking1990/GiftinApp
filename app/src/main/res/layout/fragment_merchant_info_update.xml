@@ -132,7 +132,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:text="GiftorId"
+                android:text="brand id"
                 android:textSize="16sp"
                 app:drawableEndCompat="@drawable/ic_info" />
 
@@ -152,6 +152,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:text="Update Info"
+            android:background="@drawable/rectangle_shaped_button"
             android:textAlignment="center"
             android:textSize="20dp" />
 

@@ -18,7 +18,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/gift" />
+        app:srcCompat="@drawable/ic_brandible_icon" />
 
     <TextView
         android:id="@+id/nav_header_textView"
@@ -31,7 +31,7 @@
     <ImageView
         android:id="@+id/iv_rating"
         android:layout_width="match_parent"
-
+        android:visibility="gone"
         android:layout_height="wrap_content"
         android:scaleType="fitStart"
         app:srcCompat="@drawable/ic_rate_influencer" />
