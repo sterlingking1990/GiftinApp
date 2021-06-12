@@ -2,8 +2,8 @@
     <!-- Base application theme. -->
     <style name="Theme.Merchant" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/tabColor</item>
-        <item name="colorPrimaryVariant">@color/tabColorLight</item>
+        <item name="colorPrimary">@color/tabColorLight</item>
+        <item name="colorPrimaryVariant">@color/tabColor</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -15,7 +15,7 @@
     </style>
 
     <!-- Dark Buttons -->
-    <style name="ThemeOverlay.MyDarkButton" parent="ThemeOverlay.AppCompat.Dark">
+    <style name="ThemeOverlay.MyDarkButton" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="colorButtonNormal">@color/grey_500</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:layout_marginRight">4dp</item>
@@ -25,7 +25,20 @@
 
 
     <style name="splashScreenDisplay" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="android:windowBackground">@drawable/ic_newsplash</item>
+        <item name="android:windowBackground">@drawable/ic_brandible_splash</item>
         <item name="android:statusBarColor">@color/black</item>
     </style>
+
+    <style name="RatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/grey_500</item>
+        <item name="colorControlActivated">@color/tabColor</item>
+    </style>
+
+<!--    <style name="Widget.MaterialComponents.TextInputLayout.FilledBox" parent="Base.Widget.MaterialComponents.TextInputLayout">-->
+<!--        &lt;!&ndash; underline color in FilledBox style &ndash;&gt;-->
+<!--        <item name="boxStrokeColor">@color/white</item>-->
+
+<!--        &lt;!&ndash; The color of the label when it is collapsed and the text field is active &ndash;&gt;-->
+<!--    </style>-->
+
 </resources>

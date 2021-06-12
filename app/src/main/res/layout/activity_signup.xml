@@ -7,7 +7,7 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="10dp"
     tools:context="com.giftinapp.business.SignUpActivity">
 
@@ -32,7 +32,7 @@
                 android:id="@+id/et_signup_firstname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="First Name"
+                android:hint="@string/first_name"
                 android:imeOptions="actionNext"
                 android:maxLines="1"
                 android:textSize="16sp" />
@@ -60,7 +60,7 @@
                 android:id="@+id/et_signup_lastname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Last Name"
+                android:hint="@string/last_name"
                 android:imeOptions="actionNext"
                 android:maxLines="1"
                 android:textSize="16sp" />
@@ -89,7 +89,7 @@
                 android:id="@+id/et_signup_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email Address"
+                android:hint="@string/email_address"
                 android:imeOptions="actionNext"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
@@ -118,7 +118,7 @@
                 android:id="@+id/et_signup_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Password"
+                android:hint="@string/password"
                 android:imeOptions="actionNext"
                 android:inputType="textPassword"
                 android:maxLines="1"
@@ -147,7 +147,7 @@
             android:layout_weight="1"
             android:fontFamily="sans-serif-black"
             android:gravity="center"
-            android:text="Sign up mode:"
+            android:text="@string/sign_up_mode"
             android:textSize="20sp" />
 
         <Spinner
@@ -173,7 +173,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:text="Sign Up"
+            android:text="@string/sign_up"
+            android:background="@drawable/rectangle_shaped_button"
             app:layout_constraintBottom_toTopOf="@id/ll_signin_notice"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.444"
@@ -200,15 +201,16 @@
             android:layout_weight="1"
             android:padding="10dp"
             android:fontFamily="@font/mtnbrightersansbold"
-            android:text="Already a user?"
+            android:text="@string/already_a_user"
             android:textSize="20sp" />
 
         <Button
             android:id="@+id/btn_sign_in_trigger"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/rectangle_shaped_button"
             android:layout_weight="1"
-            android:text="Sign In" />
+            android:text="@string/sign_in" />
 
     </LinearLayout>
 

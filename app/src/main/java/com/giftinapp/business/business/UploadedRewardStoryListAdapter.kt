@@ -29,10 +29,16 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
             val tvLink = findViewById<TextView>(R.id.tvStoryLink)
             val ivDelete = findViewById<ImageView>(R.id.ivDeleteStory)
 
-            tvLink.text = merchantStoryListPojo[position].merchantStatusImageLink
+            tvLink.text = merchantStoryListPojo[position].storyTag
 
             tvLink.setOnClickListener {
-                clickableUploadedStory.displayImage(merchantStoryListPojo[position].merchantStatusImageLink.toString(), merchantStoryListPojo[position].storyTag.toString())
+                if(merchantStoryListPojo[position].statusReachAndWorthPojo!=null) {
+                    clickableUploadedStory.displayImage(merchantStoryListPojo[position].merchantStatusImageLink.toString(), merchantStoryListPojo[position].storyTag.toString(), merchantStoryListPojo[position].statusReachAndWorthPojo.status_worth,
+                            merchantStoryListPojo[position].statusReachAndWorthPojo.status_reach,  merchantStoryListPojo[position].merchantStatusId)
+                }
+                else{
+                    clickableUploadedStory.displayImage(merchantStoryListPojo[position].merchantStatusImageLink.toString(), merchantStoryListPojo[position].storyTag.toString(),null,null,   merchantStoryListPojo[position].merchantStatusId)
+                }
             }
 
             ivDelete.setOnClickListener {
@@ -49,7 +55,7 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
 
     interface ClickableUploadedStory{
         fun deleteLink(link: String, id: String, positionId: Int)
-        fun displayImage(url: String, tag: String)
+        fun displayImage(url: String, tag: String, status_worth:Int?, status_reach:Int?, status_id:String?)
     }
 
     fun clear(position:Int) {

@@ -100,7 +100,7 @@
                 android:id="@+id/et_reward_goal_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Make Reward deal a catch"
+                android:hint="Sell your product(update status)"
                 android:imeOptions="actionNext"
                 android:lineSpacingExtra="2dp"
                 android:maxLength="105"
@@ -112,28 +112,137 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/ll_input_reward_hint"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        >
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_save_reward_status_hint"
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_selectStatusViewWorth"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:imeOptions="actionDone"
-            android:backgroundTint="@color/tabColor"
-            android:text="Publish Reward Deal"
-            android:elevation="10dp"/>
-    </androidx.appcompat.widget.LinearLayoutCompat>
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintTop_toBottomOf="@id/ll_input_reward_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            >
+
+            <TextView
+                android:id="@+id/tvStatusWorth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.5"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="10dp"
+                android:text="@string/status_worth"
+                />
+            <com.google.android.material.slider.Slider
+                android:id="@+id/statusWorthIndicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="0.5"
+                android:value="2.0"
+                android:valueTo="100.0"
+                android:stepSize="2.0"
+                android:valueFrom="2.0"
+                android:backgroundTint="@color/tabColor"
+                android:elevation="10dp"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_selectNumberOfReach"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintTop_toBottomOf="@id/ll_selectStatusViewWorth"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            >
+
+            <TextView
+                android:id="@+id/tvNumberOfReach"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.5"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="10dp"
+                android:text="@string/number_of_reach"
+                />
+            <com.google.android.material.slider.Slider
+                android:id="@+id/numberOfReachindicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="0.5"
+                android:value="50"
+                android:valueTo="1000"
+                android:stepSize="50"
+                android:valueFrom="50"
+                android:backgroundTint="@color/tabColor"
+                android:elevation="10dp"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_promotionalBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintTop_toBottomOf="@id/ll_selectNumberOfReach"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            >
+
+            <CheckBox
+                android:id="@+id/chkUsePromotionalBanner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:buttonTint="@color/tabColor"
+                android:checked="false"
+                android:text="Use promotional banner"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_rvBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/ll_promotionalBanner"
+            android:orientation="horizontal">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_banner"
+                android:layout_margin="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_publish"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/ll_rvBanner"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            >
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save_reward_status_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:imeOptions="actionDone"
+                android:background="@drawable/rectangle_shaped_button"
+                android:backgroundTint="@color/tabColor"
+                android:text="@string/publish_reward_deal"
+                android:elevation="10dp"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:layout_constraintTop_toBottomOf="@id/ll_publish"
             android:orientation="horizontal">
             <ProgressBar
                 android:id="@+id/pg_uploading"
@@ -159,6 +268,7 @@
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_rvStories"
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:orientation="horizontal">
@@ -171,7 +281,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
-
 
 
     </LinearLayout>

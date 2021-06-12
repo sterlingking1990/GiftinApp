@@ -16,22 +16,29 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.giftinapp.business.customer.AboutFragment;
+import com.giftinapp.business.customer.BrandPreferenceFragment;
 import com.giftinapp.business.customer.GiftListFragment;
 import com.giftinapp.business.customer.GiftingMerchantFragment;
+import com.giftinapp.business.customer.InfluencerActivityRatingFragment;
 import com.giftinapp.business.customer.MerchantStoryList;
 import com.giftinapp.business.customer.MyGiftCartFragment;
 import com.giftinapp.business.customer.MyGiftHistoryFragment;
 import com.giftinapp.business.customer.SettingsFragment;
+import com.giftinapp.business.model.InfluencerRatingPojo;
 import com.giftinapp.business.utility.SessionManager;
 import com.giftinapp.business.utility.StorySession;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.dynamiclinks.DynamicLink;
@@ -40,6 +47,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ViewListener;
@@ -53,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
     public SessionManager sessionManager;
     public StorySession storySession;
     public AlertDialog.Builder builder;
+    public TextView navTextView;
+    public ImageView ivRating;
 
     protected CarouselView carouselView;
 
@@ -61,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
     public Long totalGiftCoin = null;
 
     public Long latestAmountRedeemed =null;
+
+    public Long totalRatingForAllStatus = null;
+
 
     FirebaseAuth mauth;
 
@@ -76,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         mauth = FirebaseAuth.getInstance();
         carouselView = findViewById(R.id.carouselView);
 
-        carouselView.setPageCount(2);
+        carouselView.setPageCount(3);
         carouselView.setViewListener(viewListener);
 
         carouselView.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -117,13 +130,19 @@ public class MainActivity extends AppCompatActivity {
         builder = new AlertDialog.Builder(getApplicationContext());
 
         View headerView = nv.getHeaderView(0);
-        TextView navTextView = headerView.findViewById(R.id.nav_header_textView);
+        navTextView = headerView.findViewById(R.id.nav_header_textView);
         ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
-        Picasso.get().load(R.drawable.gift).into(navImageView);
-        navTextView.setText(Objects.requireNonNull(mauth.getCurrentUser()).getEmail());
+        ImageView ivRating = headerView.findViewById(R.id.iv_rating);
+        ivRating.setVisibility(View.VISIBLE);
+        navTextView.setText(getResources().getString(R.string.influenca_name_and_status,Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),"artic"));
+
+        totalRatingForAllStatus=0L;
 
         getTotalGiftCoin();
         getLatestAmountRedeemed();
+        getInfluencerPoints();
+        computeInfluencerRankBasedOnActivity();
+
 
     }
 
@@ -142,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
             case 0: {
                 getTotalGiftCoin();
-                holder.reportName.setText("Total Gift Coin");
+                holder.reportName.setText("Total Reward");
                 holder.reportIcon.setImageResource(R.drawable.gift_coin_icon);
                 long totalGiftCoinSum= totalGiftCoin==null ? 0L : totalGiftCoin;
                 holder.reportValue.setText(String.valueOf(totalGiftCoinSum));
@@ -151,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             case 1: {
-                holder.reportName.setText("Latest Redeemed Gift Worth");
+                holder.reportName.setText("Latest Redeemed Reward Worth");
                 long latestAmount= latestAmountRedeemed==null ? 0L : latestAmountRedeemed;
                 holder.reportValue.setText(String.valueOf(latestAmount));
                 holder.reportIcon.setImageResource(R.drawable.gift);
@@ -159,43 +178,51 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
 
+            case 2: {
+                holder.reportName.setText("Influencer Point");
+                long influencerPoint= totalRatingForAllStatus==null ? 0L : totalRatingForAllStatus;
+                holder.reportValue.setText(String.valueOf(influencerPoint));
+                holder.reportIcon.setImageResource(R.drawable.influencer_point_icon);
+                holderList.put(2, holder);
+                break;
+            }
+
+
+
         }
 
         return customView;
     };
 
     private void selectDrawerItem(MenuItem menuitem){
-            switch (menuitem.getItemId()) {
-                case R.id.navigation_home:
-                    carouselView.setVisibility(View.GONE);
-                    GiftListFragment fragment = new GiftListFragment();
-                    openFragment(fragment);
-                    break;
-                case R.id.navigation_mygiftcart:
-                    carouselView.setVisibility(View.GONE);
-                    MyGiftCartFragment myGiftCartFragment = new MyGiftCartFragment();
-                    openFragment(myGiftCartFragment);
-                    break;
-
-                case R.id.navigation_gifting_history:
+        if(menuitem.getItemId() == R.id.navigation_gifting_history) {
                     carouselView.setVisibility(View.GONE);
                     MyGiftHistoryFragment myGiftHistoryFragment = new MyGiftHistoryFragment();
                     openFragment(myGiftHistoryFragment);
-                    break;
-
-                case R.id.navigation_gifting_merchant:
-                    carouselView.setVisibility(View.GONE);
+            }
+        if(menuitem.getItemId() == R.id.navigation_gifting_merchant){
+            carouselView.setVisibility(View.GONE);
                     GiftingMerchantFragment giftingMerchantFragment = new GiftingMerchantFragment();
                     openFragment(giftingMerchantFragment);
-                    break;
+        }
 
-                case R.id.navigation_view_reward_deal:
-                    carouselView.setVisibility(View.GONE);
-                    MerchantStoryList merchantStoryList = new MerchantStoryList();
-                    openFragment(merchantStoryList);
-                    break;
+        if(menuitem.getItemId() == R.id.navigation_view_reward_deal){
+            carouselView.setVisibility(View.GONE);
+            MerchantStoryList merchantStoryList = new MerchantStoryList();
+            openFragment(merchantStoryList);
+        }
 
-            }
+        if(menuitem.getItemId() == R.id.navigation_view_activity_rating){
+            carouselView.setVisibility(View.GONE);
+            InfluencerActivityRatingFragment influencerActivityRatingFragment = new InfluencerActivityRatingFragment();
+            openFragment(influencerActivityRatingFragment);
+        }
+
+        if(menuitem.getItemId() == R.id.navigation_view_brand_preference){
+            carouselView.setVisibility(View.GONE);
+            BrandPreferenceFragment brandPreferenceFragment = new BrandPreferenceFragment();
+            openFragment(brandPreferenceFragment);
+        }
             drawer.close();
     }
 
@@ -213,6 +240,12 @@ public class MainActivity extends AppCompatActivity {
                 holderList.get(1).reportValue.setText(String.valueOf(latestAmount));
                 break;
             }
+
+            case 2: {
+                long influencerPoint= totalRatingForAllStatus==null ? 0L : totalRatingForAllStatus;
+                holderList.get(2).reportValue.setText(String.valueOf(influencerPoint));
+                break;
+            }
         }
     }
 
@@ -228,14 +261,19 @@ public class MainActivity extends AppCompatActivity {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             try {
-                super.onBackPressed();
-                startActivity(new Intent(MainActivity.this,MainActivity.class));
+                if(sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")){
+                    super.onBackPressed();
+                }
+                else {
+                    startActivity(new Intent(MainActivity.this,MainActivity.class));
+                    super.onBackPressed();
+                }
             }
             catch (Exception e){
-                mauth.signOut();
-                sessionManager.clearData();
-                storySession.clearData();
-                startActivity(new Intent(MainActivity.this,SignUpActivity.class));
+                //mauth.signOut();
+                //sessionManager.clearData();
+                //storySession.clearData();
+                startActivity(new Intent(MainActivity.this,MainActivity.class));
                 finish();
             }
         }
@@ -270,53 +308,49 @@ public class MainActivity extends AppCompatActivity {
         if(t.onOptionsItemSelected(item)){
             return true;
         }
-
-        switch (item.getItemId()){
-            case R.id.customer_refresh_page:
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.update_info:
-                carouselView.setVisibility(View.GONE);
-                SettingsFragment settingsFragment = new SettingsFragment();
-                openFragment(settingsFragment);
-                return true;
-            case R.id.about_giftin:
-                carouselView.setVisibility(View.GONE);
-                AboutFragment aboutFragment = new AboutFragment();
-                openFragment(aboutFragment);
-                return true;
-
-            case R.id.referwin:
-                shareAppLink();
-                return true;
-
-            case R.id.exit:
-                android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
-                // builder.setTitle("Alert");
-                // builder.setIcon(R.drawable.ic_launcher);
-                builder.setMessage("   Log out?");
-                builder.setCancelable(false);
-                builder.setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-
-                            }
-                        });
-
-                builder.setNeutralButton("Ok", (dialog, id) -> {
-                    mauth.signOut();
-                    sessionManager.clearData();
-                    storySession.clearData();
-                    startActivity(new Intent(MainActivity.this,SignUpActivity.class));
-                    dialog.cancel();
-                });
-                builder.show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if(item.getItemId()==R.id.customer_refresh_page){
+            carouselView.setVisibility(View.GONE);
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
         }
+        if(item.getItemId()==R.id.update_info){
+            carouselView.setVisibility(View.GONE);
+            SettingsFragment settingsFragment = new SettingsFragment();
+            openFragment(settingsFragment);
+        }
+        if(item.getItemId()==R.id.about_giftin){
+            carouselView.setVisibility(View.GONE);
+            AboutFragment aboutFragment = new AboutFragment();
+            openFragment(aboutFragment);
+        }
+        if(item.getItemId()==R.id.referwin){
+            carouselView.setVisibility(View.GONE);
+            shareAppLink();
+        }
+        if(item.getItemId()==R.id.exit) {
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
+            // builder.setTitle("Alert");
+            // builder.setIcon(R.drawable.ic_launcher);
+            builder.setMessage("   Log out?");
+            builder.setCancelable(false);
+            builder.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+
+                        }
+                    });
+
+            builder.setNeutralButton("Ok", (dialog, id) -> {
+                mauth.signOut();
+                sessionManager.clearData();
+                storySession.clearData();
+                startActivity(new Intent(MainActivity.this,SignUpActivity.class));
+                dialog.cancel();
+            });
+            builder.show();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void getTotalGiftCoin() {
@@ -371,10 +405,70 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    private void getInfluencerPoints(){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("influenca_activity_track").document(sessionManager.getEmail()).collection("status_rating").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if(task.isSuccessful()){
+                            QuerySnapshot queryDocumentSnapshots = task.getResult();
+                            for (DocumentSnapshot eachDoc:queryDocumentSnapshots.getDocuments()){
+                                if(eachDoc.get("rating")!=null){
+                                    Log.d("rating",eachDoc.get("rating").toString());
+
+                                    totalRatingForAllStatus += (long) eachDoc.get("rating");
+                                }
+                            }
+
+                        }
+                    }
+                });
+    }
+
+    private void computeInfluencerRankBasedOnActivity(){
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("influenca_activity_track").document(sessionManager.getEmail()).get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()){
+                            DocumentSnapshot documentSnapshot = task.getResult();
+                            if(documentSnapshot.getBoolean("influencer_first_saw_a_brands_post")!=null) {
+                                Boolean influencerFirstSawPost = documentSnapshot.getBoolean("influencer_first_saw_a_brands_post");
+                                if(influencerFirstSawPost){
+                                    navTextView.setText(getResources().getString(R.string.influenca_name_and_status,Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),"pioneer"));
+                                }
+                            }
+
+                        }
+                    }
+                });
+
+    }
+
 
     private void shareAppLink() {
+        Toast.makeText(this,"AM here",Toast.LENGTH_LONG).show();
 
-        String link = "https://giftinapp.page.link/getgifts/?link=gifting.com/?invitedBy=" + sessionManager.getEmail();
+        String link = "https://giftinapp.page.link/xEYL/?link=brandible-app.com/?invitedBy=" + sessionManager.getEmail();
 
         FirebaseDynamicLinks.getInstance().createDynamicLink()
                 .setLink(Uri.parse(link))
@@ -390,7 +484,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType("text/plain");
                     intent.putExtra(Intent.EXTRA_TEXT, mInvitationUrl.toString());
-                    startActivity(Intent.createChooser(intent, "Share GiftinApp With"));
+                    startActivity(Intent.createChooser(intent, "Share Brandible With"));
                 });
     }
 

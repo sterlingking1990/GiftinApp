@@ -104,7 +104,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:text="Gifting Id"
+                android:text="Influencer Id"
                 android:textSize="16sp"
                 app:drawableEndCompat="@drawable/ic_info" />
 
@@ -122,6 +122,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
+            android:background="@drawable/rectangle_shaped_button"
             android:text="Update Info"
             android:textAlignment="center"
             android:textSize="20dp" />

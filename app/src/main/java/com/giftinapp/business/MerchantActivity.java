@@ -25,6 +25,7 @@ import com.giftinapp.business.business.GiftACustomerFragment;
 import com.giftinapp.business.business.GiftinAboutForMerchant;
 import com.giftinapp.business.business.MerchantGiftStatsFragment;
 import com.giftinapp.business.business.MerchantInfoUpdate;
+import com.giftinapp.business.business.RateInfluencerFragment;
 import com.giftinapp.business.business.SetRewardDeal;
 import com.giftinapp.business.business.WalletInfo;
 import com.giftinapp.business.customer.MerchantStoryList;
@@ -73,12 +74,6 @@ public class MerchantActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_merchant);
 
-        FirebaseApp.initializeApp(this);
-
-        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
-
-        firebaseAppCheck.installAppCheckProviderFactory(SafetyNetAppCheckProviderFactory.getInstance());
-
         sessionManager = new SessionManager(getApplicationContext());
 
         drawer = findViewById(R.id.merchantNavDrawerLayout);
@@ -99,7 +94,7 @@ public class MerchantActivity extends AppCompatActivity {
         View headerView = nv.getHeaderView(0);
         TextView navTextView = headerView.findViewById(R.id.nav_header_textView);
         ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
-        Picasso.get().load(R.drawable.gift).into(navImageView);
+//        Picasso.get().load(R.drawable.ic_brandible_icon).into(navImageView);
         navTextView.setText(Objects.requireNonNull(mAuth.getCurrentUser()).getEmail());
 
         carouselViewMerchant = findViewById(R.id.carouselView);
@@ -139,7 +134,7 @@ public class MerchantActivity extends AppCompatActivity {
 
             case 0: {
                 getNumberOfCustomersGifted();
-                holder.reportName.setText("Total Customers Gifted");
+                holder.reportName.setText("Total Influencers Rewarded");
                 holder.reportIcon.setImageResource(R.drawable.happycustomer);
                 long totalGiftCoinSum= numberOfCustomerGifted==null ? 0 : numberOfCustomerGifted;
                 holder.reportValue.setText(String.valueOf(totalGiftCoinSum));
@@ -158,7 +153,7 @@ public class MerchantActivity extends AppCompatActivity {
 
             case 1: {
                 getWalletBalance();
-                holder.reportName.setText("Gift Wallet Balance");
+                holder.reportName.setText("Wallet Balance");
                 holder.reportValue.setText(String.valueOf(totalWalletBalance));
                 holder.reportIcon.setImageResource(R.drawable.gift_coin_icon);
                 holderListMerchant.put(2, holder);
@@ -355,36 +350,40 @@ public class MerchantActivity extends AppCompatActivity {
 
 
     private void selectDrawerItem(MenuItem menuitem){
-        switch (menuitem.getItemId()) {
-            case R.id.navigation_gift_customer_fan:
-                carouselViewMerchant.setVisibility(View.GONE);
-                GiftACustomerFragment giftACustomer = new GiftACustomerFragment();
-                openFragment(giftACustomer);
-                break;
-            case R.id.navigation_wallet_info:
-                carouselViewMerchant.setVisibility(View.GONE);
-                WalletInfo walletInfo = new WalletInfo();
-                openFragment(walletInfo);
-               break;
-
-            case R.id.navigation_merchant_gift_stats:
-                carouselViewMerchant.setVisibility(View.GONE);
-                MerchantGiftStatsFragment merchantGiftStatsFragment = new MerchantGiftStatsFragment();
-                openFragment(merchantGiftStatsFragment);
-                break;
-            case R.id.navigation_set_reward_deal:
-                carouselViewMerchant.setVisibility(View.GONE);
-                SetRewardDeal setRewardDeal = new SetRewardDeal();
-                openFragment(setRewardDeal);
-                break;
-
-            case R.id.navigation_view_reward_deal:
-                carouselViewMerchant.setVisibility(View.GONE);
-                MerchantStoryList merchantStoryList = new MerchantStoryList();
-                openFragment(merchantStoryList);
-                break;
-
-
+        if(menuitem.getItemId()==R.id.navigation_gift_customer_fan){
+            carouselViewMerchant.setVisibility(View.GONE);
+            GiftACustomerFragment giftACustomer = new GiftACustomerFragment();
+            openFragment(giftACustomer);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_wallet_info){
+            carouselViewMerchant.setVisibility(View.GONE);
+            WalletInfo walletInfo = new WalletInfo();
+            openFragment(walletInfo);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_merchant_gift_stats) {
+            carouselViewMerchant.setVisibility(View.GONE);
+            MerchantGiftStatsFragment merchantGiftStatsFragment = new MerchantGiftStatsFragment();
+            openFragment(merchantGiftStatsFragment);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_set_reward_deal) {
+            carouselViewMerchant.setVisibility(View.GONE);
+            SetRewardDeal setRewardDeal = new SetRewardDeal();
+            openFragment(setRewardDeal);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_view_reward_deal) {
+            carouselViewMerchant.setVisibility(View.GONE);
+            MerchantStoryList merchantStoryList = new MerchantStoryList();
+            openFragment(merchantStoryList);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_view_reward_deal) {
+            carouselViewMerchant.setVisibility(View.GONE);
+            MerchantStoryList merchantStoryList = new MerchantStoryList();
+            openFragment(merchantStoryList);
+        }
+        else if(menuitem.getItemId() == R.id.navigation_view_rate_influencer){
+            carouselViewMerchant.setVisibility(View.GONE);
+            RateInfluencerFragment rateInfluencerFragment = new RateInfluencerFragment();
+            openFragment(rateInfluencerFragment);
         }
         drawer.close();
     }
@@ -396,12 +395,18 @@ public class MerchantActivity extends AppCompatActivity {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             try {
-                super.onBackPressed();
-                startActivity(new Intent(MerchantActivity.this, MerchantActivity.class));
+                if(sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")){
+                    super.onBackPressed();
+                }
+                else {
+
+                    startActivity(new Intent(MerchantActivity.this, MerchantActivity.class));
+                    super.onBackPressed();
+                }
             }
             catch (Exception e) {
-                mAuth.signOut();
-                sessionManager.clearData();
+                //mAuth.signOut();
+                //sessionManager.clearData();
                 startActivity(new Intent(MerchantActivity.this, SignUpActivity.class));
                 finish();
             }

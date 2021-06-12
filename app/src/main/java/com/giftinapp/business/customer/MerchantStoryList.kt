@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,7 +48,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
 
     private  var allListStory: ArrayList<MerchantStoryListPojo> = ArrayList()
 
-
+    var isFollower:Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -76,6 +77,8 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
         builder = AlertDialog.Builder(requireContext())
 
         etSearchStoryId = view.findViewById(R.id.etSearchStoryId)
+
+        sessionManager.setCurrentFragment("MerchantStoryList")
 
         etSearchStoryId.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
@@ -122,65 +125,73 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                             if (result != null) {
                                 val merchantStoryPojos = ArrayList<MerchantStoryPojo>()
                                 for (eachRes in result) {
-                                    db.collection("merchants").document(eachRes.id).collection("statuslist").get()
-                                            .addOnCompleteListener { task2 ->
-                                                if (task2.isSuccessful) {
+                                    db.collection("merchants").document(eachRes.id).collection("followers").get()
+                                            .addOnCompleteListener {followersTask->
+                                                if(followersTask.isSuccessful){
+                                                    followersTask.result?.forEach { eachFollower->
+                                                        if(eachFollower.id == sessionManager.getEmail()){
 
-                                                    //now we would get the document id and then the data for the document
-                                                    try {
+                                                            db.collection("merchants").document(eachRes.id).collection("statuslist").get()
+                                                                    .addOnCompleteListener { task2 ->
+                                                                        if (task2.isSuccessful) {
 
+                                                                            //now we would get the document id and then the data for the document
+                                                                            try {
+                                                                                val merchantStoryListPojos = ArrayList<MerchantStoryListPojo>()
+                                                                                val merchantStoryHeaderPojos = ArrayList<StoryHeaderPojo>()
+                                                                                for (eachList in task2.result!!) {
+                                                                                    val merchantStoryListPojo = MerchantStoryListPojo()
+                                                                                    merchantStoryListPojo.merchantStatusId = eachList.getString("merchantStatusId")
+                                                                                    merchantStoryListPojo.seen = eachList.getBoolean("seen")
+                                                                                    merchantStoryListPojo.storyTag = eachList.getString("storyTag")
+                                                                                    merchantStoryListPojo.merchantStatusImageLink = eachList.getString("merchantStatusImageLink")
+                                                                                    //val merchantStoryListPojo = eachList.toObject(MerchantStoryListPojo::class.java)
+                                                                                    merchantStoryListPojo.merchantStatusId = eachList.id
+                                                                                    merchantStoryListPojos.add(merchantStoryListPojo)
 
-                                                        val merchantStoryListPojos = ArrayList<MerchantStoryListPojo>()
-                                                        val merchantStoryHeaderPojos = ArrayList<StoryHeaderPojo>()
-                                                        for (eachList in task2.result!!) {
-                                                            val merchantStoryListPojo = MerchantStoryListPojo()
-                                                            merchantStoryListPojo.merchantStatusId = eachList.getString("merchantStatusId")
-                                                            merchantStoryListPojo.seen = eachList.getBoolean("seen")
-                                                            merchantStoryListPojo.storyTag = eachList.getString("storyTag")
-                                                            merchantStoryListPojo.merchantStatusImageLink = eachList.getString("merchantStatusImageLink")
-                                                            //val merchantStoryListPojo = eachList.toObject(MerchantStoryListPojo::class.java)
-                                                            merchantStoryListPojo.merchantStatusId = eachList.id
-                                                            merchantStoryListPojos.add(merchantStoryListPojo)
+                                                                                }
 
+                                                                                if (merchantStoryListPojos.size > 0) {
+                                                                                    //this means business has more stories
+                                                                                    val merchantStoryPojo = MerchantStoryPojo()
+                                                                                    merchantStoryPojo.merchantId = if (eachRes.getString("giftorId") != null) eachRes.getString("giftorId") else eachRes.id
+                                                                                    merchantStoryPojo.storyOwner = eachRes.id
+                                                                                    merchantStoryPojo.merchantStoryList = merchantStoryListPojos
+                                                                                    merchantStoryPojos.add(merchantStoryPojo)
+                                                                                } else {
+                                                                                    if (eachRes.id == sessionManager.getEmail()) {
+                                                                                        showMessage(true)
+                                                                                        return@addOnCompleteListener
+                                                                                    }
+                                                                                }
+
+                                                                                if (merchantStoryPojos.size > 0) {
+
+                                                                                    if (eachRes.id == sessionManager.getEmail()) {
+
+                                                                                        isStoryHasHeader = true
+                                                                                    }
+                                                                                    pgLoading.visibility = View.GONE
+                                                                                    merchantStoryListAdapter.setMerchantStatus(merchantStoryPojos, requireContext(), isStoryHasHeader)
+                                                                                    merchantStoryListRecyclerView.adapter = merchantStoryListAdapter
+                                                                                }
+                                                                            } catch (e: Exception) {
+                                                                                Log.d("NO STATUS", "Can't find record for no status")
+                                                                            }
+                                                                        }
+
+                                                                    }
                                                         }
-
-                                                        if (merchantStoryListPojos.size > 0) {
-                                                            //this means business has more stories
-                                                            val merchantStoryPojo = MerchantStoryPojo()
-                                                            merchantStoryPojo.merchantId = if (eachRes.getString("giftorId") != null) eachRes.getString("giftorId") else eachRes.id
-                                                            merchantStoryPojo.storyOwner = eachRes.id
-                                                            merchantStoryPojo.merchantStoryList = merchantStoryListPojos
-                                                            merchantStoryPojos.add(merchantStoryPojo)
-                                                        } else {
-                                                            if (eachRes.id == sessionManager.getEmail()) {
-                                                                showMessage(true)
-                                                                return@addOnCompleteListener
-                                                            }
-                                                        }
-
-                                                        if (merchantStoryPojos.size > 0) {
-
-                                                            if (eachRes.id == sessionManager.getEmail()) {
-
-                                                                isStoryHasHeader = true
-                                                            }
-                                                            pgLoading.visibility = View.GONE
-                                                            merchantStoryListAdapter.setMerchantStatus(merchantStoryPojos, requireContext(), isStoryHasHeader)
-                                                            merchantStoryListRecyclerView.adapter = merchantStoryListAdapter
-                                                        }
-                                                    } catch (e: Exception) {
-                                                        Log.d("NO STATUS", "Can't find record for no status")
                                                     }
                                                 }
-
                                             }
+                                    }
                                 }
 
                             }
 
                         }
                     }
-    }
 
     override fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, owner: String) {
 

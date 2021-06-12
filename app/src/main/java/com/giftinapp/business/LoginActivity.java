@@ -37,8 +37,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private ProgressDialogUtil progressDialogUtil;
 
-    private Button btnSendVerificationEmail;
-
     private RadioGroup radioLoginAs;
 
     public AlertDialog.Builder builder;
@@ -58,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
 
         TextView tvResetPassword = findViewById(R.id.tv_reset_password_trigger);
 
-        btnSendVerificationEmail = findViewById(R.id.btn_resend_email_verification);
+        Button btnSendVerificationEmail = findViewById(R.id.btn_resend_email_verification);
 
         btnSendVerificationEmail.setVisibility(View.GONE);
 
@@ -161,8 +159,8 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
         db.setFirestoreSettings(settings);
 
-        boolean selectedCustomer = selectedLoginMode.getText().toString().equals("login as customer".trim());
-        boolean selectedBusiness = selectedLoginMode.getText().toString().equals("login as business".trim());
+        boolean selectedCustomer = selectedLoginMode.getText().toString().equals("login as influencer".trim());
+        boolean selectedBusiness = selectedLoginMode.getText().toString().equals("login as brand".trim());
 
         if(selectedCustomer){
             //check if the user has signed up as a business but not yet verified as a business, then toast that
@@ -197,7 +195,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     }
                                                     else{
                                                         //Toast.makeText(getApplicationContext(),"This account might not exist as a customer",Toast.LENGTH_LONG).show();
-                                                        builder.setMessage("This account might not exist as a customer, if you signed up as a business, please select to login as business")
+                                                        builder.setMessage("This account might not exist as a influencer, if you signed up as a brand, please select to login as brand")
                                                                 .setCancelable(true)
                                                                 .setPositiveButton("OK", (dialog, id) -> {
                                                                 });
@@ -247,8 +245,8 @@ public class LoginActivity extends AppCompatActivity {
                                                         }
                                                         else{
                                                             //Toast.makeText(getApplicationContext(),"This account might not exist as a business or is not yet a verified business by giftinApp",Toast.LENGTH_LONG).show();
-                                                            builder.setMessage("This account is not a verified business account by giftinApp." +
-                                                                    "If you have signed up as a business, please contact giftinApp on +2348060456301 for quick verification.")
+                                                            builder.setMessage("This account is not a verified brand account by giftinApp." +
+                                                                    "If you have signed up as a brand, please contact giftinApp on +2348060456301 for quick verification.")
                                                                     .setCancelable(false)
                                                                     .setPositiveButton("OK", (dialog, id) -> {
                                                                     });
