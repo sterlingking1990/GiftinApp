@@ -37,8 +37,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private ProgressDialogUtil progressDialogUtil;
 
-    private Button btnSendVerificationEmail;
-
     private RadioGroup radioLoginAs;
 
     public AlertDialog.Builder builder;
@@ -58,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
 
         TextView tvResetPassword = findViewById(R.id.tv_reset_password_trigger);
 
-        btnSendVerificationEmail = findViewById(R.id.btn_resend_email_verification);
+        Button btnSendVerificationEmail = findViewById(R.id.btn_resend_email_verification);
 
         btnSendVerificationEmail.setVisibility(View.GONE);
 
