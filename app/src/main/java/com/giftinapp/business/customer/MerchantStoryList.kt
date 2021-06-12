@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -126,7 +125,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                 val merchantStoryPojos = ArrayList<MerchantStoryPojo>()
                                 for (eachRes in result) {
                                     db.collection("merchants").document(eachRes.id).collection("followers").get()
-                                            .addOnCompleteListener {followersTask->
+                                            .addOnCompleteListener { followersTask->
                                                 if(followersTask.isSuccessful){
                                                     followersTask.result?.forEach { eachFollower->
                                                         if(eachFollower.id == sessionManager.getEmail()){
@@ -174,6 +173,17 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                                                     pgLoading.visibility = View.GONE
                                                                                     merchantStoryListAdapter.setMerchantStatus(merchantStoryPojos, requireContext(), isStoryHasHeader)
                                                                                     merchantStoryListRecyclerView.adapter = merchantStoryListAdapter
+                                                                                }
+                                                                                else{
+                                                                                    pgLoading.visibility = View.GONE
+                                                                                    builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
+                                                                                            .setCancelable(false)
+                                                                                            .setPositiveButton("OK") { dialog: DialogInterface?, id: Int ->
+                                                                                                // take user to rewarding merchants
+                                                                                                openFragment(BrandPreferenceFragment())
+                                                                                            }
+                                                                                    val alert = builder!!.create()
+                                                                                    alert.show()
                                                                                 }
                                                                             } catch (e: Exception) {
                                                                                 Log.d("NO STATUS", "Can't find record for no status")

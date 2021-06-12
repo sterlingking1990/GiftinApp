@@ -191,7 +191,7 @@ class CustomerRewardStories : Fragment() {
                 .addOnCompleteListener { it2->
                     if(it2.isSuccessful){
                         val result = it2.result
-                        adUnit = result?.getString("ad_unit") ?: "ca-app-pub-3940256099942544/5224354917"
+                        adUnit = result?.getString("ad_unit") ?: "ca-app-pub-8310656376115666/7927925782"
                         Log.d("AdUnit", adUnit.toString())
 
                         //load the ad

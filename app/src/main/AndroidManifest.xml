@@ -19,7 +19,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-8310656376115666~1292179338"/>
+            android:value="ca-app-pub-8310656376115666~2145315757"/>
 
         <activity android:name=".SplashActivity">
             <intent-filter>
@@ -56,7 +56,7 @@
 
         <meta-data
             android:name="co.paystack.android.PublicKey"
-            android:value="pk_test_c6ee2e7a44ffb088bff0cd3cfe7665336b40b6c0" />
+            android:value="pk_live_1cf1d10946b2e92b7bd91a00598febf140d604c3" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
