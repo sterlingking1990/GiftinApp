@@ -178,7 +178,7 @@ public class LoginActivity extends AppCompatActivity {
                                                 if(task.isSuccessful()){
                                                     // if(FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()){
                                                     DocumentSnapshot documentSnapshot = task.getResult();
-                                                    if(documentSnapshot.exists() && documentSnapshot.get("login_mode").toString().equals("customer".trim()) && documentSnapshot.get("interest").equals("As Customer")){
+                                                    if(documentSnapshot.exists() && documentSnapshot.get("login_mode").toString().equals("customer".trim()) && documentSnapshot.get("interest").equals("As Influencer")){
                                                         if(documentSnapshot.getId().equals("giftinappinc@gmail.com".trim())){
                                                             progressDialogUtil.stopDialog();
                                                             sessionManager.saveEmailAndUserMode(username, "giftinauthority");
