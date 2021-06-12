@@ -89,11 +89,11 @@ public class MyGiftHistoryFragment extends Fragment implements GiftHistoryAdapte
                                 }
 
                         if(giftHistoryIdPojos.size()==0) {
-                                    builder.setMessage("You have no gifting history yet, don't worry!, you will be taking to list of merchants that rewards for every product you buy!")
+                                    builder.setMessage("You have no reward history yet, don't worry!, you will be taking to list of brands to follow and start receiving rewards for every status you view and brand activity performed")
                                             .setCancelable(false)
                                             .setPositiveButton("OK", (dialog, id) -> {
                                                // take user to rewarding merchants
-                                                openFragment(new GiftingMerchantFragment());
+                                                openFragment(new BrandPreferenceFragment());
                                             });
                                     AlertDialog alert = builder.create();
                                     alert.show();

@@ -28,7 +28,8 @@ public class ExpandableListDataPump {
                 "This is also important as it helps us to track your performance which we will use in the future to recommend you to brands seeking Influencers with some levels of performance");
 
         List<String> rewardTypesInBrandible = new ArrayList<String>();
-        rewardTypesInBrandible.add("you are rewarded when you are among the target number set by the brand to view her status. " + " You also receive reward from the brand after carrying out activity which leads to the brands visibility for a particular promotional status");
+        rewardTypesInBrandible.add("you are rewarded when you are among the target number set by the brand to view her status. " + " You also receive reward from the brand after carrying out activity which leads to the brands visibility for a particular promotional status" +
+                "When you referrer someone to become a Brandible Influencer, you get rewarded everytime the person receives reward from carrying out task leading to a brands visibility");
 
         List<String> pointsInBrandible = new ArrayList<String>();
         pointsInBrandible.add("Brandible measures your participation within the app to gather you points which translates also to levels such as pioneer, artic etc. This in future will be a driver for brands to decide which Influencer to work with. "+
