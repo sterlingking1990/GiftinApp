@@ -13,6 +13,7 @@ import androidx.viewpager.widget.ViewPager;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,19 +28,23 @@ import android.widget.Toast;
 
 import com.giftinapp.business.customer.AboutFragment;
 import com.giftinapp.business.customer.BrandPreferenceFragment;
-import com.giftinapp.business.customer.GiftListFragment;
 import com.giftinapp.business.customer.GiftingMerchantFragment;
 import com.giftinapp.business.customer.InfluencerActivityRatingFragment;
 import com.giftinapp.business.customer.MerchantStoryList;
-import com.giftinapp.business.customer.MyGiftCartFragment;
 import com.giftinapp.business.customer.MyGiftHistoryFragment;
 import com.giftinapp.business.customer.SettingsFragment;
-import com.giftinapp.business.model.InfluencerRatingPojo;
 import com.giftinapp.business.utility.SessionManager;
 import com.giftinapp.business.utility.StorySession;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.InstallStatus;
+import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
@@ -48,14 +53,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.squareup.picasso.Picasso;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ViewListener;
 
 import java.util.Objects;
-
-import static androidx.navigation.ui.AppBarConfigurationKt.AppBarConfiguration;
-
 public class MainActivity extends AppCompatActivity {
 
     public SessionManager sessionManager;
@@ -74,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
     public Long totalRatingForAllStatus = null;
 
+    AppUpdateManager appUpdateManager;
+
 
     FirebaseAuth mauth;
 
@@ -85,6 +88,39 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+         appUpdateManager = AppUpdateManagerFactory.create(this);
+
+// Returns an intent object that you use to check for an update.
+        com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+// Checks that the platform will allow the specified type of update.
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    // This example applies an immediate update. To apply a flexible update
+                    // instead, pass in AppUpdateType.FLEXIBLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                // Request the update.
+
+                try {
+                    appUpdateManager.startUpdateFlowForResult(
+                            // Pass the intent that is returned by 'getAppUpdateInfo()'.
+                            appUpdateInfo,
+                            // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
+                            AppUpdateType.IMMEDIATE,
+                            // The current activity making the update request.
+                            this,
+                            // Include a request code to later monitor this update request.
+                            1);
+                } catch (IntentSender.SendIntentException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+
 
         mauth = FirebaseAuth.getInstance();
         carouselView = findViewById(R.id.carouselView);
@@ -486,6 +522,46 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra(Intent.EXTRA_TEXT, mInvitationUrl.toString());
                     startActivity(Intent.createChooser(intent, "Share Brandible With"));
                 });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        appUpdateManager
+                .getAppUpdateInfo()
+                .addOnSuccessListener(appUpdateInfo -> {
+                    // If the update is downloaded but not installed,
+                    // notify the user to complete the update.
+                    if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                        popupSnackbarForCompleteUpdate();
+                    }
+                });
+    }
+
+    private void popupSnackbarForCompleteUpdate() {
+        Snackbar snackbar =
+                Snackbar.make(
+                        findViewById(R.id.rl_activity_main),
+                        "An update has just been downloaded.",
+                        Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("RESTART", view -> appUpdateManager.completeUpdate());
+        snackbar.setActionTextColor(
+                getResources().getColor(R.color.tabColorLight));
+        snackbar.show();
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode != RESULT_OK) {
+                Log.d("UpdateFlowFailed", String.valueOf(resultCode));
+                // If the update is cancelled or fails,
+                // you can request to start the update again.
+            }
+        }
     }
 
 }
