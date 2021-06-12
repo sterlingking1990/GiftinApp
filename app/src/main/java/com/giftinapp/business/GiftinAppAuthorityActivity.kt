@@ -2,7 +2,9 @@ package com.giftinapp.business
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.IntentSender.SendIntentException
 import android.os.Bundle
+import android.util.Log
 import android.util.SparseArray
 import android.view.Menu
 import android.view.MenuItem
@@ -19,6 +21,13 @@ import com.giftinapp.business.admin.*
 import com.giftinapp.business.utility.SessionManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.InstallStatus
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -47,9 +56,37 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
     private var t: ActionBarDrawerToggle? = null
     private var nv: NavigationView? = null
 
+    var appUpdateManager: AppUpdateManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_giftin_app_authority)
+
+        appUpdateManager = AppUpdateManagerFactory.create(this)
+
+// Returns an intent object that you use to check for an update.
+        val appUpdateInfoTask = appUpdateManager!!.appUpdateInfo
+
+
+// Checks that the platform will allow the specified type of update.
+
+// Checks that the platform will allow the specified type of update.
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo: AppUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE // This example applies an immediate update. To apply a flexible update
+                    // instead, pass in AppUpdateType.FLEXIBLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                // Request the update.
+                try {
+                    appUpdateManager!!.startUpdateFlowForResult( // Pass the intent that is returned by 'getAppUpdateInfo()'.
+                            appUpdateInfo,  // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
+                            AppUpdateType.IMMEDIATE,  // The current activity making the update request.
+                            this,  // Include a request code to later monitor this update request.
+                            1)
+                } catch (e: SendIntentException) {
+                    e.printStackTrace()
+                }
+            }
+        }
 
         carouselViewGiftinAuthority = findViewById<CarouselView>(R.id.carouselView)
 
@@ -322,11 +359,46 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
                 super.onBackPressed()
                 startActivity(Intent(this, GiftinAppAuthorityActivity::class.java))
             }
-            catch (e:Exception) {
+            catch (e: Exception) {
                 mAuth.signOut()
                 sessionManager.clearData()
                 startActivity(Intent(this, SignUpActivity::class.java))
                 finish()
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        appUpdateManager
+                ?.appUpdateInfo
+                ?.addOnSuccessListener { appUpdateInfo: AppUpdateInfo ->
+                    // If the update is downloaded but not installed,
+                    // notify the user to complete the update.
+                    if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                        popupSnackbarForCompleteUpdate()
+                    }
+                }
+    }
+
+    private fun popupSnackbarForCompleteUpdate() {
+        val snackbar = Snackbar.make(
+                findViewById(R.id.cl_activity_main),
+                "An update has just been downloaded.",
+                Snackbar.LENGTH_INDEFINITE)
+        snackbar.setAction("RESTART") { view: View? -> appUpdateManager!!.completeUpdate() }
+        snackbar.setActionTextColor(
+                resources.getColor(R.color.tabColorLight))
+        snackbar.show()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1) {
+            if (resultCode != RESULT_OK) {
+                Log.d("UpdateFlowFailed", resultCode.toString())
+                // If the update is cancelled or fails,
+                // you can request to start the update again.
             }
         }
     }
