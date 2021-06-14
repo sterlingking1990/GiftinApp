@@ -12,6 +12,10 @@
         android:icon="@drawable/ic_view_reward_deal"
         android:title="View Deals"/>
 
+    <item android:id="@+id/navigation_merchant_follow_brands"
+        android:icon="@drawable/ic_baseline_filter_tilt_shift_24"
+        android:title="Follow Brands"/>
+
     <item
         android:id="@+id/navigation_view_rate_influencer"
         android:icon="@drawable/ic_rate_influencer"
