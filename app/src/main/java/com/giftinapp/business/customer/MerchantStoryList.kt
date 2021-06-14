@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,11 +46,13 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
 
     var isStoryHasHeader = false
 
+    var following=0
+
     private  var allListStory: ArrayList<MerchantStoryListPojo> = ArrayList()
 
     var isFollower:Boolean = false
 
-    var following:Boolean = false
+    var countDoc = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -131,15 +134,18 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                             val result: QuerySnapshot? = task.result
                             if (result != null) {
                                 val merchantStoryPojos = ArrayList<MerchantStoryPojo>()
+
                                 for (eachRes in result) {
-                                    following = false
+                                    countDoc+=1
                                     pgLoading.visibility = View.VISIBLE
                                     db.collection("merchants").document(eachRes.id).collection("followers").get()
                                             .addOnCompleteListener { followersTask->
                                                 if(followersTask.isSuccessful){
+                                                    var followingCount=0
                                                     followersTask.result?.forEach { eachFollower->
                                                         if(eachFollower.id == sessionManager.getEmail()){
-                                                            following = true
+                                                            followingCount += 1
+                                                            sessionManager.setFollowingCount(followingCount)
                                                             db.collection("merchants").document(eachRes.id).collection("statuslist").get()
                                                                     .addOnCompleteListener { task2 ->
                                                                         if (task2.isSuccessful) {
@@ -195,7 +201,8 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                 }
                                             }
                                     }
-                                    if (!following && sessionManager.getUserMode()=="customer") {
+                                if(countDoc == result.documents.size){
+                                    if (sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="customer") {
                                         pgLoading.visibility = View.GONE
                                         builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
                                                 .setCancelable(false)
@@ -206,8 +213,8 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                         val alert = builder!!.create()
                                         alert.show()
                                     }
-                                else{
-                                    //this person is a brand and needs to follow brands to view status
+                                    else if(sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="business"){
+                                        //this person is a brand and needs to follow brands to view status
                                         pgLoading.visibility = View.GONE
                                         builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
                                                 .setCancelable(false)
@@ -218,6 +225,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                         val alert = builder!!.create()
                                         alert.show()
                                     }
+                                }
 
                                 }
 
