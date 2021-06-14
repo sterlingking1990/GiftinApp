@@ -29,6 +29,7 @@ import com.giftinapp.business.business.MerchantInfoUpdate;
 import com.giftinapp.business.business.RateInfluencerFragment;
 import com.giftinapp.business.business.SetRewardDeal;
 import com.giftinapp.business.business.WalletInfo;
+import com.giftinapp.business.customer.BrandPreferenceFragment;
 import com.giftinapp.business.customer.MerchantStoryList;
 import com.giftinapp.business.utility.SessionManager;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -425,6 +426,12 @@ public class MerchantActivity extends AppCompatActivity {
             RateInfluencerFragment rateInfluencerFragment = new RateInfluencerFragment();
             openFragment(rateInfluencerFragment);
         }
+
+        else if(menuitem.getItemId() == R.id.navigation_merchant_follow_brands){
+            carouselViewMerchant.setVisibility(View.GONE);
+            BrandPreferenceFragment brandPreferenceFragment = new BrandPreferenceFragment();
+            openFragment(brandPreferenceFragment);
+        }
         drawer.close();
     }
 
@@ -484,7 +491,6 @@ public class MerchantActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        carouselViewMerchant.setVisibility(View.GONE);
         if(data!=null){
             Log.d("Data",data.toString());
         }

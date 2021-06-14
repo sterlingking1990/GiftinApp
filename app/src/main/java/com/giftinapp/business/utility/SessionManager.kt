@@ -28,6 +28,8 @@ class SessionManager(context: Context) {
 
         const val CURRENT_FRAGMENT = "current_fragment"
 
+        const val FOLLOWING_COUNT = "following_count"
+
     }
 
     /**
@@ -87,6 +89,17 @@ class SessionManager(context: Context) {
         val editor = prefs.edit()
         editor.putBoolean(IS_CUSTOMER_EMAIL_TO_REDEEM_VALID,true)
         editor.apply()
+    }
+
+    fun setFollowingCount(followingCount:Int){
+        val editor = prefs.edit()
+        editor.putInt(FOLLOWING_COUNT,followingCount)
+        editor.apply()
+    }
+
+
+    fun getFollowingCount():Int{
+        return prefs.getInt(FOLLOWING_COUNT,0)
     }
 
     fun getEmail():String?{

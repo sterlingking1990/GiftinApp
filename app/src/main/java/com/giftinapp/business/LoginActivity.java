@@ -245,8 +245,8 @@ public class LoginActivity extends AppCompatActivity {
                                                         }
                                                         else{
                                                             //Toast.makeText(getApplicationContext(),"This account might not exist as a business or is not yet a verified business by giftinApp",Toast.LENGTH_LONG).show();
-                                                            builder.setMessage("This account is not a verified brand account by giftinApp." +
-                                                                    "If you have signed up as a brand, please contact giftinApp on +2348060456301 for quick verification.")
+                                                            builder.setMessage("This account is not a verified brand account." +
+                                                                    "If you have signed up as a brand, please contact Brandible on +2348060456301 for quick verification.")
                                                                     .setCancelable(false)
                                                                     .setPositiveButton("OK", (dialog, id) -> {
                                                                     });
@@ -265,7 +265,7 @@ public class LoginActivity extends AppCompatActivity {
                                         });
                             }
                             else{
-                                Toast.makeText(getApplicationContext(),"Could not log in, email or password might not exist",Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(),"Could not log in, email or password might be incorrect",Toast.LENGTH_LONG).show();
                                 progressDialogUtil.stopDialog();
                             }
                         }
