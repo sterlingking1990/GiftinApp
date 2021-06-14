@@ -133,16 +133,19 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.314" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tv_reset_password_trigger"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clickable="true"
+            android:background="?android:attr/selectableItemBackground"
             android:padding="10dp"
             android:text="@string/reset_password"
             android:textColor="@color/secondColorType"
             android:textColorLink="@color/teal_200"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:focusable="true" />
 
     </LinearLayout>
 
