@@ -31,15 +31,18 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
     private lateinit var context: Context
     private lateinit var sessionManager: SessionManager
     private var isHasStoryHeader:Boolean = false
+    var numFollowing:Int = 0
     //private var numberOfViews:String = "0"
 
 
-    fun setMerchantStatus(merchantStats: ArrayList<MerchantStoryPojo>, context: Context, isStoryHeader: Boolean){
+    fun setMerchantStatus(merchantStats: ArrayList<MerchantStoryPojo>, context: Context, isStoryHeader: Boolean, numFollowed:Int){
         this.merchantStories = merchantStats
         this.context = context
         this.sessionManager = SessionManager(context)
         this.isHasStoryHeader = isStoryHeader
         this.merchantStoriesAll = merchantStats
+        this.numFollowing = numFollowed
+
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
