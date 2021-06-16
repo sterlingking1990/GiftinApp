@@ -46,14 +46,8 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
 
     var isStoryHasHeader = false
 
-    var following=0
-
-    private  var allListStory: ArrayList<MerchantStoryListPojo> = ArrayList()
-
     var countDoc = 0
     var followingCount=0
-
-    var counter=0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {

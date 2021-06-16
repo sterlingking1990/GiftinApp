@@ -34,9 +34,6 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
 
     private var etSearchBrands: EditText? = null
 
-    var counter=0
-    var numberOfFollowers=0
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_brand_preference, container, false)
@@ -49,11 +46,10 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
         etSearchBrands = view.findViewById(R.id.etSearchBrand)
 
         brandPreferenceAdapter = BrandPreferenceAdapter(this)
-        layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
-
-        sessionManager = SessionManager(requireContext())
-
         rvBrands = view.findViewById(R.id.rv_brands)
+        layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+        rvBrands?.layoutManager = layoutManager
+        sessionManager = SessionManager(requireContext())
 
         builder = AlertDialog.Builder(requireContext())
 
@@ -78,55 +74,6 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
                 }
             }
         })
-    }
-
-    private fun getNumberOfFollowers() {
-        val db = FirebaseFirestore.getInstance()
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
-        val settings = FirebaseFirestoreSettings.Builder()
-                .setPersistenceEnabled(true)
-                .build()
-        db.firestoreSettings = settings
-
-        db.collection("merchants").get()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val result: QuerySnapshot? = task.result
-                        if (result != null) {
-                            val listOfNumFollows= mutableListOf<Int>()
-
-                            for (eachRes in result) {
-                                counter+=1
-                                db.collection("merchants").document(eachRes.id).collection("followers").get()
-                                        .addOnCompleteListener { followersTask ->
-                                            if (followersTask.isSuccessful) {
-                                                followersTask.result?.forEach { eachFollower ->
-                                                    if (eachFollower.id == sessionManager?.getEmail()) {
-                                                        numberOfFollowers+=1
-                                                        listOfNumFollows.add(numberOfFollowers)
-                                                    }
-                                                }
-                                                Log.d("counter",counter.toString())
-                                                Log.d("resultSize",result.documents.size.toString())
-
-                                                if(counter==result.documents.size) {
-                                                    Log.d("NumFollow", numberOfFollowers.toString())
-                                                    sessionManager?.setFollowingCount(numberOfFollowers)
-                                                }
-                                            }
-                                        }
-
-                            }
-
-
-                        }
-                    }
-                }
     }
 
     private fun loadBrands() {
@@ -167,7 +114,6 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
                             if (giftingMerchantViewPojo.giftingMerchantId != sessionManager?.getEmail()) {
                                 giftingMerchantViewPojos.add(giftingMerchantViewPojo)
                                 brandPreferenceAdapter?.setGiftingMerchantList(giftingMerchantViewPojos)
-                                rvBrands?.layoutManager = layoutManager
                                 rvBrands?.adapter = brandPreferenceAdapter
                                 brandPreferenceAdapter?.notifyDataSetChanged()
                             }
