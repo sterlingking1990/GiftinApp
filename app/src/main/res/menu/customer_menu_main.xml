@@ -17,6 +17,10 @@
         android:icon="@drawable/ic_about"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/cash_out"
+        android:title="Cashout"
+        app:showAsAction="never"/>
+
     <item android:title="Refer n Win"
         android:id="@+id/referwin"
         app:showAsAction="never"/>
