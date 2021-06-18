@@ -42,17 +42,12 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
 
     lateinit var pgLoading:ProgressBar
 
-    var builder: AlertDialog.Builder? = null
+    private var builder: AlertDialog.Builder? = null
 
     var isStoryHasHeader = false
 
-    var following=0
-
-    private  var allListStory: ArrayList<MerchantStoryListPojo> = ArrayList()
-
-    var isFollower:Boolean = false
-
     var countDoc = 0
+    var followingCount=0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -66,7 +61,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
         merchantStoryListRecyclerView = view.findViewById(R.id.rvMerchantStoryList)
         merchantRecyclerViewLayoutManager = LinearLayoutManager(requireContext())
         merchantRecyclerViewLayoutManager.orientation = LinearLayoutManager.VERTICAL
-        merchantStoryListRecyclerView.layoutManager=merchantRecyclerViewLayoutManager
+        merchantStoryListRecyclerView.layoutManager = merchantRecyclerViewLayoutManager
         merchantStoryListRecyclerView.setHasFixedSize(true)
 
 
@@ -104,15 +99,14 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
             }
         })
 
+        checkFollowingRate()
+
+        //getNumberOfFollowers()
 
         loadRewardStoryList()
-        checkIfInfluencerIsNotFollowingAnyBrand()
 
     }
 
-    private fun checkIfInfluencerIsNotFollowingAnyBrand(){
-
-    }
 
     private fun loadRewardStoryList() {
 
@@ -141,11 +135,8 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                     db.collection("merchants").document(eachRes.id).collection("followers").get()
                                             .addOnCompleteListener { followersTask->
                                                 if(followersTask.isSuccessful){
-                                                    var followingCount=0
                                                     followersTask.result?.forEach { eachFollower->
                                                         if(eachFollower.id == sessionManager.getEmail()){
-                                                            followingCount += 1
-                                                            sessionManager.setFollowingCount(followingCount)
                                                             db.collection("merchants").document(eachRes.id).collection("statuslist").get()
                                                                     .addOnCompleteListener { task2 ->
                                                                         if (task2.isSuccessful) {
@@ -187,7 +178,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                                                             isStoryHasHeader = true
                                                                                         }
                                                                                         pgLoading.visibility = View.GONE
-                                                                                        merchantStoryListAdapter.setMerchantStatus(merchantStoryPojos, requireContext(), isStoryHasHeader)
+                                                                                        merchantStoryListAdapter.setMerchantStatus(merchantStoryPojos, requireContext(), isStoryHasHeader, followingCount)
                                                                                         merchantStoryListRecyclerView.adapter = merchantStoryListAdapter
                                                                                     }
                                                                                 } catch (e: Exception) {
@@ -198,34 +189,12 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                                     }
                                                         }
                                                     }
+
                                                 }
                                             }
                                     }
-                                if(countDoc == result.documents.size){
-                                    if (sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="customer") {
-                                        pgLoading.visibility = View.GONE
-                                        builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
-                                                .setCancelable(false)
-                                                .setPositiveButton("OK") { _: DialogInterface?, _: Int ->
-                                                    // take user to rewarding merchants
-                                                    openFragmentForInfluencer(BrandPreferenceFragment())
-                                                }
-                                        val alert = builder!!.create()
-                                        alert.show()
-                                    }
-                                    else if(sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="business"){
-                                        //this person is a brand and needs to follow brands to view status
-                                        pgLoading.visibility = View.GONE
-                                        builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
-                                                .setCancelable(false)
-                                                .setPositiveButton("OK") { _: DialogInterface?, _: Int ->
-                                                    // take user to rewarding merchants
-                                                    openFragment(BrandPreferenceFragment())
-                                                }
-                                        val alert = builder!!.create()
-                                        alert.show()
-                                    }
-                                }
+
+
 
                                 }
 
@@ -233,6 +202,33 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
 
                         }
                     }
+
+    private fun checkFollowingRate(){
+        Log.d("NumNum",sessionManager.getFollowingCount().toString())
+        if(sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="customer"){
+            pgLoading.visibility = View.GONE
+                    builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
+                            .setCancelable(false)
+                            .setPositiveButton("OK") { dia: DialogInterface?, _: Int ->
+                                // take user to rewarding merchants
+                                openFragmentForInfluencer(BrandPreferenceFragment())
+                            }
+                    val alert = builder!!.create()
+                    alert.show()
+                }
+                else if(sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="business"){
+                    //this person is a brand and needs to follow brands to view status
+                    pgLoading.visibility = View.GONE
+                    builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
+                            .setCancelable(false)
+                            .setPositiveButton("OK") { d: DialogInterface?, _: Int ->
+                                // take user to rewarding merchants
+                                openFragment(BrandPreferenceFragment())
+                            }
+                    val alert = builder!!.create()
+                    alert.show()
+                }
+    }
 
     override fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, owner: String) {
 
@@ -257,6 +253,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                     ?.addToBackStack(null)
                     ?.commit()
     }
+
 
     fun showMessage(isDisplay: Boolean) {
 
@@ -291,4 +288,5 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                 .addToBackStack(null)
                 .commit()
     }
+
 }

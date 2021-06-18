@@ -56,6 +56,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ViewListener;
 
+import java.util.List;
 import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
@@ -71,12 +72,15 @@ public class MainActivity extends AppCompatActivity {
 
     public Long totalGiftCoin = null;
 
-    public Long latestAmountRedeemed =null;
+    public Long latestAmountRedeemed = null;
 
     public Long totalRatingForAllStatus = null;
 
     AppUpdateManager appUpdateManager;
 
+    public Integer counter = 0;
+
+    public Integer following = 0;
 
     FirebaseAuth mauth;
 
@@ -89,8 +93,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-         appUpdateManager = AppUpdateManagerFactory.create(this);
+        appUpdateManager = AppUpdateManagerFactory.create(this);
 
 // Returns an intent object that you use to check for an update.
         com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
@@ -121,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
         mauth = FirebaseAuth.getInstance();
         carouselView = findViewById(R.id.carouselView);
 
@@ -145,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         drawer = findViewById(R.id.drawer_layout);
-        t = new ActionBarDrawerToggle(this, drawer,R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        t = new ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
         drawer.addDrawerListener(t);
         t.syncState();
@@ -170,27 +172,25 @@ public class MainActivity extends AppCompatActivity {
         ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
         ImageView ivRating = headerView.findViewById(R.id.iv_rating);
         ivRating.setVisibility(View.VISIBLE);
-        navTextView.setText(getResources().getString(R.string.influenca_name_and_status,Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),"artic"));
+        navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(), "artic"));
 
-        totalRatingForAllStatus=0L;
+        totalRatingForAllStatus = 0L;
 
         getTotalGiftCoin();
         getLatestAmountRedeemed();
         getInfluencerPoints();
         computeInfluencerRankBasedOnActivity();
 
-
+        getNumberOfFollowers();
     }
 
     ViewListener viewListener = position -> {
-        @SuppressLint("InflateParams") View customView = getLayoutInflater().inflate(R.layout.single_item_customer_carousel_report,null);
+        @SuppressLint("InflateParams") View customView = getLayoutInflater().inflate(R.layout.single_item_customer_carousel_report, null);
 
         ReportsViewHolder holder = new ReportsViewHolder();
         holder.reportValue = customView.findViewById(R.id.kpi_report_value);
         holder.reportName = customView.findViewById(R.id.kpi_report_name);
         holder.reportIcon = customView.findViewById(R.id.kpi_report_icon);
-
-
 
 
         switch (position) {
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 getTotalGiftCoin();
                 holder.reportName.setText("Total Reward");
                 holder.reportIcon.setImageResource(R.drawable.gift_coin_icon);
-                long totalGiftCoinSum= totalGiftCoin==null ? 0L : totalGiftCoin;
+                long totalGiftCoinSum = totalGiftCoin == null ? 0L : totalGiftCoin;
                 holder.reportValue.setText(String.valueOf(totalGiftCoinSum));
                 holderList.put(0, holder);
                 break;
@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
 
             case 1: {
                 holder.reportName.setText("Latest Redeemed Reward Worth");
-                long latestAmount= latestAmountRedeemed==null ? 0L : latestAmountRedeemed;
+                long latestAmount = latestAmountRedeemed == null ? 0L : latestAmountRedeemed;
                 holder.reportValue.setText(String.valueOf(latestAmount));
                 holder.reportIcon.setImageResource(R.drawable.gift);
                 holderList.put(1, holder);
@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
 
             case 2: {
                 holder.reportName.setText("Influencer Point");
-                long influencerPoint= totalRatingForAllStatus==null ? 0L : totalRatingForAllStatus;
+                long influencerPoint = totalRatingForAllStatus == null ? 0L : totalRatingForAllStatus;
                 holder.reportValue.setText(String.valueOf(influencerPoint));
                 holder.reportIcon.setImageResource(R.drawable.influencer_point_icon);
                 holderList.put(2, holder);
@@ -224,42 +224,41 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-
         }
 
         return customView;
     };
 
-    private void selectDrawerItem(MenuItem menuitem){
-        if(menuitem.getItemId() == R.id.navigation_gifting_history) {
-                    carouselView.setVisibility(View.GONE);
-                    MyGiftHistoryFragment myGiftHistoryFragment = new MyGiftHistoryFragment();
-                    openFragment(myGiftHistoryFragment);
-            }
-        if(menuitem.getItemId() == R.id.navigation_gifting_merchant){
+    private void selectDrawerItem(MenuItem menuitem) {
+        if (menuitem.getItemId() == R.id.navigation_gifting_history) {
             carouselView.setVisibility(View.GONE);
-                    GiftingMerchantFragment giftingMerchantFragment = new GiftingMerchantFragment();
-                    openFragment(giftingMerchantFragment);
+            MyGiftHistoryFragment myGiftHistoryFragment = new MyGiftHistoryFragment();
+            openFragment(myGiftHistoryFragment);
+        }
+        if (menuitem.getItemId() == R.id.navigation_gifting_merchant) {
+            carouselView.setVisibility(View.GONE);
+            GiftingMerchantFragment giftingMerchantFragment = new GiftingMerchantFragment();
+            openFragment(giftingMerchantFragment);
         }
 
-        if(menuitem.getItemId() == R.id.navigation_view_reward_deal){
+        if (menuitem.getItemId() == R.id.navigation_view_reward_deal) {
             carouselView.setVisibility(View.GONE);
             MerchantStoryList merchantStoryList = new MerchantStoryList();
             openFragment(merchantStoryList);
         }
 
-        if(menuitem.getItemId() == R.id.navigation_view_activity_rating){
+        if (menuitem.getItemId() == R.id.navigation_view_activity_rating) {
             carouselView.setVisibility(View.GONE);
             InfluencerActivityRatingFragment influencerActivityRatingFragment = new InfluencerActivityRatingFragment();
             openFragment(influencerActivityRatingFragment);
         }
 
-        if(menuitem.getItemId() == R.id.navigation_view_brand_preference){
+        if (menuitem.getItemId() == R.id.navigation_view_brand_preference) {
             carouselView.setVisibility(View.GONE);
             BrandPreferenceFragment brandPreferenceFragment = new BrandPreferenceFragment();
             openFragment(brandPreferenceFragment);
         }
-            drawer.close();
+        drawer.close();
     }
 
     private void updateCounter(int position) {
@@ -267,18 +266,18 @@ public class MainActivity extends AppCompatActivity {
         switch (position) {
             case 0: {
                 getTotalGiftCoin();
-                long totalGiftCoinSum= totalGiftCoin==null ? 0L : totalGiftCoin;
+                long totalGiftCoinSum = totalGiftCoin == null ? 0L : totalGiftCoin;
                 holderList.get(0).reportValue.setText(String.valueOf(totalGiftCoinSum));
                 break;
             }
             case 1: {
-                long latestAmount= latestAmountRedeemed==null ? 0L : latestAmountRedeemed;
+                long latestAmount = latestAmountRedeemed == null ? 0L : latestAmountRedeemed;
                 holderList.get(1).reportValue.setText(String.valueOf(latestAmount));
                 break;
             }
 
             case 2: {
-                long influencerPoint= totalRatingForAllStatus==null ? 0L : totalRatingForAllStatus;
+                long influencerPoint = totalRatingForAllStatus == null ? 0L : totalRatingForAllStatus;
                 holderList.get(2).reportValue.setText(String.valueOf(influencerPoint));
                 break;
             }
@@ -297,19 +296,17 @@ public class MainActivity extends AppCompatActivity {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             try {
-                if(sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")){
+                if (sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")) {
+                    super.onBackPressed();
+                } else {
+                    startActivity(new Intent(MainActivity.this, MainActivity.class));
                     super.onBackPressed();
                 }
-                else {
-                    startActivity(new Intent(MainActivity.this,MainActivity.class));
-                    super.onBackPressed();
-                }
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 //mauth.signOut();
                 //sessionManager.clearData();
                 //storySession.clearData();
-                startActivity(new Intent(MainActivity.this,MainActivity.class));
+                startActivity(new Intent(MainActivity.this, MainActivity.class));
                 finish();
             }
         }
@@ -322,8 +319,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     public void openFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fr_game, fragment)
@@ -333,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.customer_menu_main,menu);
+        getMenuInflater().inflate(R.menu.customer_menu_main, menu);
         return true;
     }
 
@@ -341,29 +336,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        if(t.onOptionsItemSelected(item)){
+        if (t.onOptionsItemSelected(item)) {
             return true;
         }
-        if(item.getItemId()==R.id.customer_refresh_page){
+        if (item.getItemId() == R.id.customer_refresh_page) {
             carouselView.setVisibility(View.GONE);
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
-        if(item.getItemId()==R.id.update_info){
+        if (item.getItemId() == R.id.update_info) {
             carouselView.setVisibility(View.GONE);
             SettingsFragment settingsFragment = new SettingsFragment();
             openFragment(settingsFragment);
         }
-        if(item.getItemId()==R.id.about_giftin){
+        if (item.getItemId() == R.id.about_giftin) {
             carouselView.setVisibility(View.GONE);
             AboutFragment aboutFragment = new AboutFragment();
             openFragment(aboutFragment);
         }
-        if(item.getItemId()==R.id.referwin){
+        if (item.getItemId() == R.id.referwin) {
             carouselView.setVisibility(View.GONE);
             shareAppLink();
         }
-        if(item.getItemId()==R.id.exit) {
+        if (item.getItemId() == R.id.exit) {
             android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
             // builder.setTitle("Alert");
             // builder.setIcon(R.drawable.ic_launcher);
@@ -381,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
                 mauth.signOut();
                 sessionManager.clearData();
                 storySession.clearData();
-                startActivity(new Intent(MainActivity.this,SignUpActivity.class));
+                startActivity(new Intent(MainActivity.this, SignUpActivity.class));
                 dialog.cancel();
             });
             builder.show();
@@ -403,19 +398,18 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
 
                     if (task.isSuccessful()) {
-                        totalGiftCoin=0L;
+                        totalGiftCoin = 0L;
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
                             long giftCoin = (long) queryDocumentSnapshot.get("gift_coin");
                             totalGiftCoin += giftCoin;
                         }
-                    }
-                    else{
-                        totalGiftCoin=0L;
+                    } else {
+                        totalGiftCoin = 0L;
                     }
                 });
     }
 
-    public void getLatestAmountRedeemed(){
+    public void getLatestAmountRedeemed() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
 
@@ -430,18 +424,16 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             DocumentSnapshot documentSnapshot = task.getResult();
                             latestAmountRedeemed = (long) documentSnapshot.get("gift_coin");
-                        }
-                        catch (Exception e){
+                        } catch (Exception e) {
                             latestAmountRedeemed = 0L;
                         }
-                        }
-                    else{
-                        latestAmountRedeemed=0L;
+                    } else {
+                        latestAmountRedeemed = 0L;
                     }
                 });
     }
 
-    private void getInfluencerPoints(){
+    private void getInfluencerPoints() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
 
@@ -455,11 +447,11 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             QuerySnapshot queryDocumentSnapshots = task.getResult();
-                            for (DocumentSnapshot eachDoc:queryDocumentSnapshots.getDocuments()){
-                                if(eachDoc.get("rating")!=null){
-                                    Log.d("rating",eachDoc.get("rating").toString());
+                            for (DocumentSnapshot eachDoc : queryDocumentSnapshots.getDocuments()) {
+                                if (eachDoc.get("rating") != null) {
+                                    Log.d("rating", eachDoc.get("rating").toString());
 
                                     totalRatingForAllStatus += (long) eachDoc.get("rating");
                                 }
@@ -470,7 +462,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void computeInfluencerRankBasedOnActivity(){
+    private void computeInfluencerRankBasedOnActivity() {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
@@ -485,12 +477,12 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             DocumentSnapshot documentSnapshot = task.getResult();
-                            if(documentSnapshot.getBoolean("influencer_first_saw_a_brands_post")!=null) {
+                            if (documentSnapshot.getBoolean("influencer_first_saw_a_brands_post") != null) {
                                 Boolean influencerFirstSawPost = documentSnapshot.getBoolean("influencer_first_saw_a_brands_post");
-                                if(influencerFirstSawPost){
-                                    navTextView.setText(getResources().getString(R.string.influenca_name_and_status,Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),"pioneer"));
+                                if (influencerFirstSawPost) {
+                                    navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(), "pioneer"));
                                 }
                             }
 
@@ -502,7 +494,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void shareAppLink() {
-        Toast.makeText(this,"AM here",Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "AM here", Toast.LENGTH_LONG).show();
 
         String link = "https://giftinapp.page.link/xEYL/?link=brandible-app.com/?invitedBy=" + sessionManager.getEmail();
 
@@ -564,4 +556,54 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    private void getNumberOfFollowers() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("merchants").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            QuerySnapshot result = task.getResult();
+                            if (result != null) {
+                                List<DocumentSnapshot> eachRes = result.getDocuments();
+                                for (int i = 0; i < eachRes.size(); i++) {
+                                    counter += 1;
+                                    db.collection("merchants").document(eachRes.get(i).getId()).collection("followers").get()
+                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<QuerySnapshot> followersTask) {
+                                                    if (followersTask.isSuccessful()) {
+                                                        QuerySnapshot followersQuerry = followersTask.getResult();
+                                                        if (followersQuerry != null) {
+                                                            List<DocumentSnapshot> eachFollower = followersQuerry.getDocuments();
+                                                            for (int j = 0; j < eachFollower.size(); j++) {
+                                                                if (eachFollower.get(j).getId().equals(sessionManager.getEmail())) {
+                                                                    following += 1;
+                                                                }
+                                                            }
+
+                                                            if (counter == result.getDocuments().size()) {
+                                                                sessionManager.setFollowingCount(following);
+
+                                                            }
+                                                        }
+                                                    }
+
+                                                }
+                                            });
+                                }
+                            }
+                        }
+                    }
+                });
+    }
 }

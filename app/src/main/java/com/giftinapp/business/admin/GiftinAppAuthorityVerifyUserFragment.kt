@@ -8,9 +8,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.giftinapp.business.model.DataForVerificationPojo
-import com.giftinapp.business.model.MerchantInfoUpdatePojo
 import com.giftinapp.business.R
+import com.giftinapp.business.model.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 
@@ -143,7 +142,14 @@ class GiftinAppAuthorityVerifyUserFragment : Fragment(), GiftinAppAuthorityVerif
                                             db.collection("users").document(item.email.toString()).update("verification_status","verified")
                                                     .addOnCompleteListener {verifiedIcon->
                                                         if(verifiedIcon.isSuccessful){
-                                                            getListOfRegisteredUser()
+                                                            val emptyData = SendGiftPojo("empty")
+                                                            db.collection("merchants").document(item.email.toString()).collection("followers").document(item.email.toString()).set(emptyData)
+                                                                    .addOnCompleteListener { followSelf->
+                                                                        if(followSelf.isSuccessful){
+                                                                            getListOfRegisteredUser()
+                                                                        }
+                                                                    }
+
                                                         }
                                                     }
                                         }

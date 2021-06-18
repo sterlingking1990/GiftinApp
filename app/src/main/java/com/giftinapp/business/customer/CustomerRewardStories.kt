@@ -22,6 +22,7 @@ import com.giftinapp.business.R
 import com.giftinapp.business.model.*
 import com.giftinapp.business.utility.*
 import com.google.android.gms.ads.*
+import com.google.android.gms.ads.initialization.AdapterStatus
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.gms.tasks.OnCompleteListener
@@ -144,10 +145,15 @@ class CustomerRewardStories : Fragment() {
                     if (it.isSuccessful) {
                         val result = it.result
                         val phone = result?.getString("whatsapp")
+                        var msg=""
+                        msg = if (statusTag=="promotional"){
+                            "Hi, I am a *Brandible Influencer* and am available to help improve your brand visibility. I saw your *$statusTag* request on Brandible"
+                        } else{
+                            "let's talk about *$statusTag* advertised on Brandible"
+                        }
                         if (phone.isNullOrEmpty()) {
                             //open our whatsapp instead
                             try {
-                                val msg = "let's talk about *$statusTag* advertised on giftinApp"
                                 val url = "https://api.whatsapp.com/send?phone=${"+2348060456301" + "&text=" + URLEncoder.encode(msg, "UTF-8")}"
                                 val i = Intent(Intent.ACTION_VIEW)
                                 i.data = Uri.parse(url)
@@ -158,7 +164,6 @@ class CustomerRewardStories : Fragment() {
                         } else {
                             //open their whatsapp
                             try {
-                                val msg = "let's talk about *$statusTag* advertised on giftinApp"
                                 val url = "https://api.whatsapp.com/send?phone=${"+234$phone" + "&text=" + URLEncoder.encode(msg, "UTF-8")}"
                                 val i = Intent(Intent.ACTION_VIEW)
                                 i.data = Uri.parse(url)
@@ -187,27 +192,35 @@ class CustomerRewardStories : Fragment() {
                 .build()
         db.firestoreSettings = settings
 
-        storyOwner?.let { db.collection("adkeys").document(it).get()
+        db.collection("adkeys").get()
                 .addOnCompleteListener { it2->
                     if(it2.isSuccessful){
                         val result = it2.result
-                        adUnit = result?.getString("ad_unit") ?: "ca-app-pub-8310656376115666/7927925782"
-                        Log.d("AdUnit", adUnit.toString())
+                        if(result!=null) {
+                            val allAdOwners = result.documents
+                            allAdOwners.forEach {
+                                if(it.get("email")==storyOwner){
+                                    var adUnit: String? = it.getString("ad_unit")
+                                    if(adUnit==null) {
+                                        adUnit = "ca-app-pub-3940256099942544/5224354917"
+                                    }
+                                    //load the ad
+                                    val adRequest = AdRequest.Builder().build()
+                                    RewardedAd.load(requireContext(), adUnit, adRequest, object : RewardedAdLoadCallback() {
+                                        override fun onAdFailedToLoad(adError: LoadAdError) {
+                                            Log.d("CustomerRewardAdFailed", adError.message)
+                                            mRewardedAd = null
+                                        }
 
-                        //load the ad
-                        val adRequest = AdRequest.Builder().build()
-
-                        RewardedAd.load(requireContext(), adUnit, adRequest, object : RewardedAdLoadCallback() {
-                            override fun onAdFailedToLoad(adError: LoadAdError) {
-                                Log.d("CustomerRewardStoriesAd", adError.message)
-                                mRewardedAd = null
+                                        override fun onAdLoaded(rewardedAd: RewardedAd) {
+                                            Log.d("CustomerRewardAdLoad", "Ad was loaded.")
+                                            mRewardedAd = rewardedAd
+                                        }
+                                    })
                             }
 
-                            override fun onAdLoaded(rewardedAd: RewardedAd) {
-                                Log.d("CustomerRewardStoriesAd", "Ad was loaded.")
-                                mRewardedAd = rewardedAd
-                            }
-                        })
+                        }
+
                     }
                 }
         }
@@ -397,6 +410,7 @@ class CustomerRewardStories : Fragment() {
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
                 Log.d("CustomerRewardStoriesAd", "Ad failed to show.")
+
             }
 
             override fun onAdShowedFullScreenContent() {
@@ -416,6 +430,37 @@ class CustomerRewardStories : Fragment() {
             }
         } else {
             Log.d("CustomerRewardStoriesAd", "The rewarded ad wasn't ready yet.")
+            val totalStoryList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList?.size}
+            compareNumberOfTimesUserGotRewardOnTotalBrandStatusAgainstTotalBrandStatusList(numberOfTimeUserGotRewardOnABrandStatus,totalStoryList)
+            if(currentSlide) {
+
+
+                currentStoryPos = currentStoryPos!! +1
+                imagesList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList
+
+                }
+                storyOwner =  currentStoryPos?.let { allStories?.get(it)?.storyOwner
+
+                }
+
+                mDisposable = null
+                mCurrentProgress = 0L
+                mCurrentIndex = 0
+                ll_status.removeAllViews()
+                ll_progress_bar.removeAllViews()
+                startTime = System.currentTimeMillis()
+                setImageStatusData()
+                setProgressData()
+                startViewing()
+            }
+            else{
+                //last slide in the reward stories list
+                mDisposable?.dispose()
+                mDisposable = null
+                val fragmentToMoveTo: Fragment = MerchantStoryList::class.java.newInstance()
+                openFragment(fragmentToMoveTo)
+            }
+            //do the normal flow
         }
     }
 

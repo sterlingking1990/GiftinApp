@@ -3,6 +3,7 @@ package com.giftinapp.business.customer
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,10 +15,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
 import com.giftinapp.business.model.GiftingMerchantPojo
 import com.giftinapp.business.model.GiftingMerchantViewPojo
+import com.giftinapp.business.model.MerchantStoryPojo
 import com.giftinapp.business.model.SendGiftPojo
 import com.giftinapp.business.utility.SessionManager
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.QuerySnapshot
 import java.util.*
 
 class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon {
@@ -31,7 +34,6 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
 
     private var etSearchBrands: EditText? = null
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_brand_preference, container, false)
@@ -39,14 +41,15 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
+        sessionManager?.setFollowingCount(0)
+
         etSearchBrands = view.findViewById(R.id.etSearchBrand)
 
         brandPreferenceAdapter = BrandPreferenceAdapter(this)
-        layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
-
-        sessionManager = SessionManager(requireContext())
-
         rvBrands = view.findViewById(R.id.rv_brands)
+        layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+        rvBrands?.layoutManager = layoutManager
+        sessionManager = SessionManager(requireContext())
 
         builder = AlertDialog.Builder(requireContext())
 
@@ -74,6 +77,10 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
     }
 
     private fun loadBrands() {
+
+        //getNumberOfFollowers()
+
+        //Log.d("NumFollowers",sessionManager?.getFollowingCount().toString())
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
 
@@ -91,23 +98,25 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
                     if (task.isSuccessful) {
                         val giftingMerchantViewPojos = ArrayList<GiftingMerchantViewPojo>()
                         for (document in Objects.requireNonNull(task.result)!!) {
-                            val giftingMerchantViewPojo = GiftingMerchantViewPojo()
-                            val giftingMerchantPojo = document.toObject(GiftingMerchantPojo::class.java)
-                            if (giftingMerchantPojo.whatsapp == null || giftingMerchantPojo.instagram == null || giftingMerchantPojo.facebook == null || giftingMerchantPojo.address == null) {
-                                giftingMerchantPojo.whatsapp = "not provided"
-                                giftingMerchantPojo.address = "not provided"
-                                giftingMerchantPojo.facebook = "not provided"
-                                giftingMerchantPojo.instagram = "not provided"
-                            }
-                            giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo
-                            giftingMerchantViewPojo.numberOfCustomerGifted = 0
-                            giftingMerchantViewPojo.giftingMerchantId = document.id
 
-                            giftingMerchantViewPojos.add(giftingMerchantViewPojo)
-                            brandPreferenceAdapter?.setGiftingMerchantList(giftingMerchantViewPojos)
-                            rvBrands?.layoutManager = layoutManager
-                            rvBrands?.adapter = brandPreferenceAdapter
-                            brandPreferenceAdapter?.notifyDataSetChanged()
+                            val giftingMerchantViewPojo = GiftingMerchantViewPojo()
+
+                                val giftingMerchantPojo = document.toObject(GiftingMerchantPojo::class.java)
+                                if (giftingMerchantPojo.whatsapp == null || giftingMerchantPojo.instagram == null || giftingMerchantPojo.facebook == null || giftingMerchantPojo.address == null) {
+                                    giftingMerchantPojo.whatsapp = "not provided"
+                                    giftingMerchantPojo.address = "not provided"
+                                    giftingMerchantPojo.facebook = "not provided"
+                                    giftingMerchantPojo.instagram = "not provided"
+                                }
+                                giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo
+                                giftingMerchantViewPojo.numberOfCustomerGifted = 0
+                                giftingMerchantViewPojo.giftingMerchantId = document.id
+                            if (giftingMerchantViewPojo.giftingMerchantId != sessionManager?.getEmail()) {
+                                giftingMerchantViewPojos.add(giftingMerchantViewPojo)
+                                brandPreferenceAdapter?.setGiftingMerchantList(giftingMerchantViewPojos)
+                                rvBrands?.adapter = brandPreferenceAdapter
+                                brandPreferenceAdapter?.notifyDataSetChanged()
+                            }
                         }
                     }
                 }
@@ -141,9 +150,11 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
         if(btnToggleBrandStatus == "UNFOLLOW"){
             //influer will stop following, hence delete his account from the followers list
             db.collection("merchants").document(brandId).collection("followers").document(sessionManager?.getEmail().toString()).delete()
+            sessionManager?.getFollowingCount()?.minus(1)?.let { sessionManager!!.setFollowingCount(it) }
             loadBrands()
         }
         else{
+            sessionManager?.getFollowingCount()?.plus(1)?.let { sessionManager?.setFollowingCount(it) }
             //i will follow
                 val sendGiftPojo = SendGiftPojo("empty")
                 db.collection("merchants").document(brandId).collection("followers").document(sessionManager?.getEmail().toString()).set(sendGiftPojo)

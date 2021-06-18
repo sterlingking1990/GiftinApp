@@ -56,6 +56,7 @@ import com.squareup.picasso.Picasso;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ViewListener;
 
+import java.util.List;
 import java.util.Objects;
 
 public class MerchantActivity extends AppCompatActivity {
@@ -78,6 +79,10 @@ public class MerchantActivity extends AppCompatActivity {
     private NavigationView nv;
 
     AppUpdateManager appUpdateManager;
+
+    public Integer counter = 0;
+
+    public Integer following = 0;
 
 
     @Override
@@ -116,6 +121,8 @@ public class MerchantActivity extends AppCompatActivity {
         });
 
         sessionManager = new SessionManager(getApplicationContext());
+
+        getNumberOfFollowers();
 
         drawer = findViewById(R.id.merchantNavDrawerLayout);
         t = new ActionBarDrawerToggle(this, drawer,R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -502,5 +509,56 @@ public class MerchantActivity extends AppCompatActivity {
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    private void getNumberOfFollowers() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("merchants").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            QuerySnapshot result = task.getResult();
+                            if (result != null) {
+                                List<DocumentSnapshot> eachRes = result.getDocuments();
+                                for (int i = 0; i < eachRes.size(); i++) {
+                                    counter += 1;
+                                    db.collection("merchants").document(eachRes.get(i).getId()).collection("followers").get()
+                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<QuerySnapshot> followersTask) {
+                                                    if (followersTask.isSuccessful()) {
+                                                        QuerySnapshot followersQuerry = followersTask.getResult();
+                                                        if (followersQuerry != null) {
+                                                            List<DocumentSnapshot> eachFollower = followersQuerry.getDocuments();
+                                                            for (int j = 0; j < eachFollower.size(); j++) {
+                                                                if (eachFollower.get(j).getId().equals(sessionManager.getEmail())) {
+                                                                    following += 1;
+                                                                }
+                                                            }
+
+                                                            if (counter == result.getDocuments().size()) {
+                                                                sessionManager.setFollowingCount(following);
+
+                                                            }
+                                                        }
+                                                    }
+
+                                                }
+                                            });
+                                }
+                            }
+                        }
+                    }
+                });
     }
 }
