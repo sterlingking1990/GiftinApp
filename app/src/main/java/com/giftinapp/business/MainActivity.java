@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.giftinapp.business.customer.AboutFragment;
 import com.giftinapp.business.customer.BrandPreferenceFragment;
+import com.giftinapp.business.customer.CashoutFragment;
 import com.giftinapp.business.customer.GiftingMerchantFragment;
 import com.giftinapp.business.customer.InfluencerActivityRatingFragment;
 import com.giftinapp.business.customer.MerchantStoryList;
@@ -58,6 +59,11 @@ import com.synnapps.carouselview.ViewListener;
 
 import java.util.List;
 import java.util.Objects;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
     public SessionManager sessionManager;
@@ -70,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected SparseArray<ReportsViewHolder> holderList = new SparseArray<>();
 
-    public Long totalGiftCoin = null;
+    public long totalGiftCoin = 0L;
 
     public Long latestAmountRedeemed = null;
 
@@ -199,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                 getTotalGiftCoin();
                 holder.reportName.setText("Total Reward");
                 holder.reportIcon.setImageResource(R.drawable.gift_coin_icon);
-                long totalGiftCoinSum = totalGiftCoin == null ? 0L : totalGiftCoin;
+                long totalGiftCoinSum = totalGiftCoin == 0L ? 0L : totalGiftCoin;
                 holder.reportValue.setText(String.valueOf(totalGiftCoinSum));
                 holderList.put(0, holder);
                 break;
@@ -266,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
         switch (position) {
             case 0: {
                 getTotalGiftCoin();
-                long totalGiftCoinSum = totalGiftCoin == null ? 0L : totalGiftCoin;
+                long totalGiftCoinSum = totalGiftCoin == 0L ? 0L : totalGiftCoin;
                 holderList.get(0).reportValue.setText(String.valueOf(totalGiftCoinSum));
                 break;
             }
@@ -344,6 +350,8 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
+
+
         if (item.getItemId() == R.id.update_info) {
             carouselView.setVisibility(View.GONE);
             SettingsFragment settingsFragment = new SettingsFragment();
@@ -358,6 +366,13 @@ public class MainActivity extends AppCompatActivity {
             carouselView.setVisibility(View.GONE);
             shareAppLink();
         }
+
+        if (item.getItemId() == R.id.cash_out) {
+            carouselView.setVisibility(View.GONE);
+            CashoutFragment cashoutFragment = new CashoutFragment();
+            openFragment(cashoutFragment);
+        }
+
         if (item.getItemId() == R.id.exit) {
             android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
             // builder.setTitle("Alert");
@@ -400,7 +415,7 @@ public class MainActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         totalGiftCoin = 0L;
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            long giftCoin = (long) queryDocumentSnapshot.get("gift_coin");
+                            Double giftCoin = queryDocumentSnapshot.getDouble("gift_coin");
                             totalGiftCoin += giftCoin;
                         }
                     } else {

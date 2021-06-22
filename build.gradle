@@ -2,10 +2,61 @@
 ext{
     compileSdkVersion = 26
     buildToolsVersion = 29
+
+    kotlinVersion = '1.4.32'
+    appCompatVersion = '1.3.0'
+    constraintLayoutVersion = '2.0.4'
+    androidXTestVersion = '1.3.0'
+    espressoVersion = '3.4.0-beta02'
+    gradleVersion = '3.3.1'
+    junitVersion = '4.13.2'
+    hamcrestVersion = '1.3'
+    runnerExtVersion = '1.1.2'
+    rulesVersion = '1.0.1'
+    supportLibraryVersion = '1.0.2'
+    archLifecycleVersion = '2.1.0-alpha03'
+    androidXLegacySupportV4Version = '1.0.0'
+    androidXLifecycleExtensionVersion = '2.2.0'
+    androidXLifecycleViewModelKtxVersion = '2.3.1'
+    googleAndroidMaterialVersion = '1.3.0'
+    androidXCoreKtxVersion = '1.5.0'
+    squareupRetrofit2Version = '2.9.0'
+    squareupRetrofit2ConverterMoshiVersion = '2.5.0'
+    squareupMoshiVersion = '1.8.0'
+    squareupMoshiKotlinVersion = '1.8.0'
+    androidXNavigationFragmentKtxVersion = '2.3.5'
+    androidXNavigationUiKtxVersion = '2.3.5'
+    googleFirebaseCoreVersion = '17.4.4'
+    androidCrashlyticsVersion = '2.10.1'
+    googleFirebasePerfVersion = '19.0.8'
+    googleFirebaseAuthVersion = '19.3.2'
+    hbb20CCPVersion = '2.2.4'
+    googleFirebaseMessagingVersion = '20.2.3'
+    googleFirebaseAnalyticsVersion = '17.5.0'
+    synappsCarouselViewVersion = '0.1.5'
+    intercomAndroidSdkBaseTransitiveVersion = '6.+'
+    squareupOttoVersion = '1.3.8'
+    githubBumptechGlideVersion = '4.11.0'
+    githubBumptechGlideGifDecoderVersion = '4.11.0'
+    githubBumptechGlideAnnotationsVersion = '4.11.0'
+    githubBumptechGlideDiskLruCacheVersion = '4.11.0'
+    squareupOkioVersion = '2.6.0'
+    squareUpOkHttp3Version = '4.9.0'
+    kotlinXCoroutinesCoreVersion = '1.4.2-native-mt'
+    kotlinXCoroutinesAndroidVersion = '1.4.1'
+    androidXFragmentKtxVersion = '1.3.4'
+    squareupOkHttp3LoggingInterceptorVersion = '4.9.0'
+    smartLookVersion = '1.4.2-native'
+    searchableSpinnerVersion = '2.0'
+    androidXPreferenceLibraryVersion = '1.1.1'
+    googleGsonVersion = '2.8.5'
+    beustKlaxonVersion = '5.0.1'
+    sentryVersion = '2.1.1'
 }
 
 buildscript {
-    ext.kotlin_version = '1.4.20'
+    ext.kotlin_version = '1.4.32'
+    ext.hilt_version = '2.35'
     repositories {
         google()
         jcenter()
@@ -14,7 +65,9 @@ buildscript {
         classpath "com.android.tools.build:gradle:4.1.3"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.gms:google-services:4.3.8'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.6.1'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.7.0'
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+        classpath "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:1.2.0"
 
 
 
