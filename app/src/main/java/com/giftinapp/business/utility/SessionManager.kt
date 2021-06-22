@@ -30,6 +30,8 @@ class SessionManager(context: Context) {
 
         const val FOLLOWING_COUNT = "following_count"
 
+        const val CASHOUT_AMOUNT = "cashout_amount"
+
     }
 
     /**
@@ -170,6 +172,16 @@ class SessionManager(context: Context) {
 
     fun getGiftorId():String?{
         return prefs.getString(GIFTOR_ID,"")
+    }
+
+    fun setCashoutAmount(amount: Double){
+        val editor = prefs.edit()
+        editor.putLong(CASHOUT_AMOUNT, amount.toLong())
+        editor.apply()
+    }
+
+    fun getCashoutAmount(): Long {
+        return prefs.getLong(CASHOUT_AMOUNT,0L)
     }
 
     fun clearData(){

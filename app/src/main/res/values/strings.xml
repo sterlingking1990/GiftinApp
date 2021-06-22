@@ -81,4 +81,6 @@
     <string name="rate_influencer">Rate Influencer</string>
 
     <string name="rated_by">Rated By: %1$s</string>
+
+    <string name="amount_to_cashout">cashout\namount-\n#%1$s</string>
 </resources>
