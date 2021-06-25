@@ -20,7 +20,8 @@ public class ExpandableListDataPump {
 
         List<String> chargingBrandsInBrandible = new ArrayList<String>();
         chargingBrandsInBrandible.add(" When a brand has posted her interest to be promoted by you the Influencer, you are to engage via whatsApp with the brand, carry out the task successfully and to the best of your expertise " +
-                "After which the brand is said to pay what you both have bargained for during conversation. " + " Charging brands should be in consideration that they are small and yet thriving so you are willing to give them that helping hand to do so as fast as possible ");
+                "After which the brand is said to pay using this format - (your highest number of followership from any of your social media platform/ 500) * 100." + " That is if you have 5000 followership on facebook, you are to be paid- (5000/500) * 100 which is #1000." +
+                "This is for a single content across all your popular social media plaform" );
 
 
         List<String> paymentChannel = new ArrayList<String>();
@@ -40,11 +41,9 @@ public class ExpandableListDataPump {
                 "Rating you goes a long way to helping you improve and get you a place in the future during recommendation. " +
                 " When your rewards is above #3000, you will see a cashout menu which when triggered will inform Brandible about your interest to withdrew your reward and then follow up with you on that process conveniently");
 
-        List<String> taskToExpectFromABrand = new ArrayList<String>();
-        taskToExpectFromABrand.add("Some brands might require you to test out their products and make a video about how it feels for you. " +
-        "Other brands might require you to just share their products or service banner across your social media platform " +
-                "You might also be asked to write about the brand or make a video which centers on certain product or service the brand offers. " +
-                "In all, you are to see yourself as an Influencer willing and driven by the goal of helping the brand get visibility and as fast as possible");
+        List<String> whatIfAmNotBeenPaid = new ArrayList<String>();
+        whatIfAmNotBeenPaid.add("Ten minutes after posting brands content and the brand have acknowledge to have seen it but is refusing to pay you via Brandible's platform, " +
+        "You have every right to immediately take down the brands post from any of your popular social media where you had posted the brands status");
 
 
         expandableListDetail.put("Brandible For Influencer", brandibleIntroHead);
@@ -54,7 +53,7 @@ public class ExpandableListDataPump {
         expandableListDetail.put("Reward types in Brandible", rewardTypesInBrandible);
         expandableListDetail.put("How Influencers are awarded points and levels", pointsInBrandible);
         expandableListDetail.put("Receiving Payments and rating", receivingPayments);
-        expandableListDetail.put("What kind of task can i expect from a brand", taskToExpectFromABrand);
+        expandableListDetail.put("What if am not been paid", whatIfAmNotBeenPaid);
         return expandableListDetail;
     }
 }

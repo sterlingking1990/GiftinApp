@@ -92,8 +92,7 @@ public class WalletInfo extends Fragment {
         db.setFirestoreSettings(settings);
 
         MerchantWalletPojo merchantWalletPojo = new MerchantWalletPojo();
-        Long totalAmountWallet = (long) (walletAmountFromDb + amountInKobo);
-        merchantWalletPojo.merchant_wallet_amount= totalAmountWallet;
+        merchantWalletPojo.merchant_wallet_amount= (long) (walletAmountFromDb + amountInKobo);
 
 
         db.collection("merchants").document(sessionManager.getEmail()).collection("reward_wallet").document("deposit").set(merchantWalletPojo);
@@ -182,7 +181,7 @@ public class WalletInfo extends Fragment {
                             @Override
                             public void onSuccess(Transaction transaction) {
                                 btnProceed.setEnabled(true);
-                                snackBar("onSuccess");
+                                snackBar("Successfully funded your wallet, you can add brand stories now");
                                 updateWallet(amountInKobo/100);
                                 refreshWallet();
                             }
@@ -232,9 +231,5 @@ public class WalletInfo extends Fragment {
     private void snackBar(String msg) {
         Snackbar.make(etCardCvv, msg, Snackbar.LENGTH_LONG).show();
     }
-
-
-
-
 
 }

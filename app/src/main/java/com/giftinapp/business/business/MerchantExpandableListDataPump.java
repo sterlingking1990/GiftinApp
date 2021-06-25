@@ -33,15 +33,16 @@ public class MerchantExpandableListDataPump {
 
         List<String> payingAnInfluencer = new ArrayList<>();
         payingAnInfluencer.add("Because our goal and mission is to help small and medium business get visibility as fast and as cheap as possible, " +
-                "Our Influencers also know that, they work with you based on how much you can afford and the task at hand. " +
-                "They understand they are not to overprice on task related to your brand promotion for any certain status" );
+                "Payment is computed as the product of the (highest number of followership an Influencer have on any social platform divided by 500) by 100. " +
+                "That is if Influencer has highest followership in facebook as 5000 it means he gets (5000/500) * 100 = #1000 for posting your brand's single content across all his popular social platform. " +
+                "When you do not pay an influencer after 10 minutes of acknowledging to have seen your brands post across his popular social platform, your brand status is immediately pulled down by the Influencer from his social media platforms" );
 
 
 
         List<String> mediumForPayment = new ArrayList<>();
         mediumForPayment.add("Brandible provides you with wallet system from paystack payment systems. With this, you can fund your wallet once and then pay one or more Influencers at once from the Reward an Influencer Menu without having to do several bank transactions outside the app. "+
-                "After paying an Influencer for a particular status task been completed, you are expected to rate the influencer for that particular status task been completed. " +
-                "Note also that paying from the platform is not compulsory but it saves your from making several bank transactions when you have to pay more influencers." );
+                "After paying an Influencer for a particular status task been completed, you are expected to rate the influencer for that particular status task been completed. "
+        );
 
         List<String> importantOfRatingInfluencer = new ArrayList<>();
         importantOfRatingInfluencer.add("When you rate an Influencer, it helps the Influencer to know if he has done well or he needs to do better next time. It also helps Brandible to suggest better Influencer to you in the future");
@@ -63,7 +64,7 @@ public class MerchantExpandableListDataPump {
         expandableListDetail.put("Requesting an Influencer to Perform Brand task", requestingInfluencerToPerformBrandTask);
         expandableListDetail.put("How do I set Products I sell as Status", settingProductsAsStatus);
         expandableListDetail.put("What Metrics do I use in Deciding the Influencer to work with", decidingAnInfluencerForMyBrand);
-        expandableListDetail.put("How much is Ideal to pay an Influencer after a task completion", payingAnInfluencer);
+        expandableListDetail.put("Paying an Influencer after carrying out tasks", payingAnInfluencer);
         expandableListDetail.put("What Medium is appropriate to pay an Influencer", mediumForPayment);
         expandableListDetail.put("Why is rating an Influencer for a status task so important", importantOfRatingInfluencer);
         expandableListDetail.put("What Makes Brandible different from Other Platform", differenceFromOthers);
