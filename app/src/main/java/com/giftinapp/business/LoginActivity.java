@@ -4,9 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,7 +45,10 @@ public class LoginActivity extends AppCompatActivity {
 
     public AlertDialog.Builder builder;
 
+    public Boolean isPasswordVisible = false;
 
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,7 +101,32 @@ public class LoginActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(getApplicationContext());
 
+        etSignInPassword.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.performClick();
+                int RIGHT = 2;
+                if(event.getAction()==MotionEvent.ACTION_UP){
+                    if(event.getRawX()>=etSignInPassword.getRight() - etSignInPassword.getCompoundDrawables()[RIGHT].getBounds().width()){
+                        int selection = etSignInPassword.getSelectionEnd();
+                        if(isPasswordVisible){
+                            etSignInPassword.setCompoundDrawablesRelativeWithIntrinsicBounds(0,0, R.drawable.ic_password_toggle_off,0);
+                            etSignInPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                            isPasswordVisible=false;
+                        }
+                        else{
+                            etSignInPassword.setCompoundDrawablesRelativeWithIntrinsicBounds(0,0,R.drawable.ic_password_toggle,0);
+                            etSignInPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                            isPasswordVisible = true;
+                        }
+                        etSignInPassword.setSelection(selection);
+                        return true;
+                    }
+                }
 
+                return false;
+            }
+        });
     }
 
     private void resendVerificationEmail() {
