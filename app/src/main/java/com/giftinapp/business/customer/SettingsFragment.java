@@ -95,7 +95,7 @@ public class SettingsFragment extends Fragment {
         });
 
         tvGiftingId.setOnClickListener(v -> {
-            builder.setMessage("This is used by your favourite business as an Id when gifting you. Please choose options that businesses can relate with easily")
+            builder.setMessage("This is used by brands as an Id when rewarding you. Please choose options that brands can relate with easily")
                     .setCancelable(true)
                     .setPositiveButton("OK", (dialog, id) -> {
 
@@ -199,7 +199,7 @@ public class SettingsFragment extends Fragment {
                                etFacebook.setText(documentSnapshot.get("facebook").toString());
                                etInstagram.setText(documentSnapshot.get("instagram").toString());
                                etWhatsApp.setText(documentSnapshot.get("whatsapp").toString());
-                               String giftinIdText = "Gifting Id" + "<b><p>" +  "* " + documentSnapshot.getString("giftingId") + "</p></b> ";
+                               String giftinIdText = "Influencer Id" + "<b><p>" +  "* " + documentSnapshot.getString("giftingId") + "</p></b> ";
                                tvGiftingId.setText(Html.fromHtml(giftinIdText));
 
                            }

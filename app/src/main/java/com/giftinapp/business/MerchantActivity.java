@@ -59,6 +59,8 @@ import com.synnapps.carouselview.ViewListener;
 import java.util.List;
 import java.util.Objects;
 
+import co.paystack.android.PaystackSdk;
+
 public class MerchantActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigation;
 
@@ -90,8 +92,10 @@ public class MerchantActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_merchant);
 
+
         appUpdateManager = AppUpdateManagerFactory.create(this);
 
+        PaystackSdk.initialize(getApplicationContext());
         // Returns an intent object that you use to check for an update.
         com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
 
@@ -147,7 +151,7 @@ public class MerchantActivity extends AppCompatActivity {
 
         carouselViewMerchant = findViewById(R.id.carouselView);
 
-        carouselViewMerchant.setPageCount(2);
+        carouselViewMerchant.setPageCount(3);
         carouselViewMerchant.setViewListener(viewListener);
 
         carouselViewMerchant.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -204,6 +208,15 @@ public class MerchantActivity extends AppCompatActivity {
                 holder.reportName.setText("Wallet Balance");
                 holder.reportValue.setText(String.valueOf(totalWalletBalance));
                 holder.reportIcon.setImageResource(R.drawable.gift_coin_icon);
+                holderListMerchant.put(1, holder);
+                break;
+            }
+
+            case 2: {
+                getNumberOfFollowers();
+                holder.reportName.setText("Influencers following your Brand");
+                holder.reportValue.setText(String.valueOf(sessionManager.getFollowingCount()));
+                holder.reportIcon.setImageResource(R.drawable.influencer_following_brand_icon);
                 holderListMerchant.put(2, holder);
                 break;
             }
@@ -232,7 +245,14 @@ public class MerchantActivity extends AppCompatActivity {
             case 1: {
                 getWalletBalance();
                 long walletBalanceTotal= totalWalletBalance==null ? 0L : totalWalletBalance;
-                holderListMerchant.get(2).reportValue.setText(String.valueOf(walletBalanceTotal));
+                holderListMerchant.get(1).reportValue.setText(String.valueOf(walletBalanceTotal));
+                break;
+            }
+
+            case 2: {
+                getNumberOfFollowers();
+                int numberOfFollowers= sessionManager.getFollowingCount();
+                holderListMerchant.get(2).reportValue.setText(String.valueOf(numberOfFollowers));
                 break;
             }
         }

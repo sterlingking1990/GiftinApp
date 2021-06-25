@@ -119,6 +119,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/password"
+                android:drawableEnd="@drawable/ic_password_toggle_off"
                 android:imeOptions="actionNext"
                 android:inputType="textPassword"
                 android:maxLines="1"

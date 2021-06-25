@@ -12,15 +12,12 @@ import dagger.hilt.android.HiltAndroidApp;
 
 
 @HiltAndroidApp
-public class PaymentApp extends Application {
-    @Override
-    public void onCreate() {
+public class PaymentApp extends Application{}
+//    @Override
+//    public void onCreate() {
+//
+//        super.onCreate();
+//        FirebaseApp.initializeApp(this);
+//        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
+//        firebaseAppCheck.installAppCheckProviderFactory(SafetyNetAppCheckProviderFactory.getInstance());
 
-        super.onCreate();
-        FirebaseApp.initializeApp(this);
-        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
-        firebaseAppCheck.installAppCheckProviderFactory(SafetyNetAppCheckProviderFactory.getInstance());
-
-        PaystackSdk.initialize(getApplicationContext());
-    }
-}
