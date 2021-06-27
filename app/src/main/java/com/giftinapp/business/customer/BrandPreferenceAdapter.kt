@@ -57,8 +57,14 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
             }
 
 
-            btnTogglePreference.setOnClickListener {
-                clickableIcon.togglePreference(giftingMerchantList[position].giftingMerchantId, btnTogglePreference.text.toString())
+            btnTogglePreference.apply {
+                setOnClickListener {
+                    clickableIcon.togglePreference(giftingMerchantList[position].giftingMerchantId, btnTogglePreference.text.toString())
+                    text = if(btnTogglePreference.text.toString() == "FOLLOW") "UNFOLLOW" else "FOLLOW"
+                    textSize = if(btnTogglePreference.text.toString() == "UNFOLLOW") 18F else 18F
+                    followingStatus.text = if(btnTogglePreference.text.toString() == "FOLLOW") "not following" else "following"
+                    if(btnTogglePreference.text.toString() == "FOLLOW") followingStatus.setTextColor(context.resources.getColor(R.color.tabColor)) else followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
+                }
             }
 
             checkIfUserFollowedBrand(giftingMerchantList[position].giftingMerchantId,btnTogglePreference,context,followingStatus)

@@ -151,7 +151,6 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
             //influer will stop following, hence delete his account from the followers list
             db.collection("merchants").document(brandId).collection("followers").document(sessionManager?.getEmail().toString()).delete()
             sessionManager?.getFollowingCount()?.minus(1)?.let { sessionManager!!.setFollowingCount(it) }
-            loadBrands()
         }
         else{
             sessionManager?.getFollowingCount()?.plus(1)?.let { sessionManager?.setFollowingCount(it) }
@@ -160,7 +159,7 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
                 db.collection("merchants").document(brandId).collection("followers").document(sessionManager?.getEmail().toString()).set(sendGiftPojo)
                         .addOnCompleteListener {
                             if(it.isSuccessful){
-                                loadBrands()
+
                             }
                         }
 
