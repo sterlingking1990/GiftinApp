@@ -509,7 +509,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void shareAppLink() {
-        Toast.makeText(this, "AM here", Toast.LENGTH_LONG).show();
 
         String link = "https://giftinapp.page.link/xEYL/?link=brandible-app.com/?invitedBy=" + sessionManager.getEmail();
 
