@@ -7,10 +7,10 @@
     tools:context="com.giftinapp.business.customer.AboutFragment">
 
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="197dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/giftpack" />
+        android:scaleType="fitCenter"
+        android:src="@drawable/about_us" />
 
     <TextView
         android:layout_width="wrap_content"
