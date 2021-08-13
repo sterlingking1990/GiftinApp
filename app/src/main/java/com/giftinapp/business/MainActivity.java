@@ -1,4 +1,4 @@
-package com.giftinapp.business;
+ package com.giftinapp.business;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -125,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IntentSender.SendIntentException e) {
                     e.printStackTrace();
                 }
-
             }
         });
 
