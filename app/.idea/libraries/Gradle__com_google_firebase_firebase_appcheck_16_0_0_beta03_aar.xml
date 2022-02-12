@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Gradle: com.google.firebase:firebase-appcheck:16.0.0-beta03@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/transforms-3/4ad8edf040e06a50e4237e0ef41c6617/transformed/jetified-firebase-appcheck-16.0.0-beta03/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/4ad8edf040e06a50e4237e0ef41c6617/transformed/jetified-firebase-appcheck-16.0.0-beta03/res" />
+      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/4ad8edf040e06a50e4237e0ef41c6617/transformed/jetified-firebase-appcheck-16.0.0-beta03/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/modules-2/files-2.1/com.google.firebase/firebase-appcheck/16.0.0-beta03/9e56c371bac4292da39f3a50beab07ffdd4a8f6/firebase-appcheck-16.0.0-beta03-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/modules-2/files-2.1/com.google.firebase/firebase-appcheck/16.0.0-beta03/b96b41144d0963dc31b81d829d65d723ec4a8e00/firebase-appcheck-16.0.0-beta03-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

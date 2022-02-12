@@ -96,6 +96,9 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
     private lateinit var linearLayoutInputRewardHint: LinearLayoutCompat
 
+    private lateinit var tvNumberOfViewers:TextView
+    private lateinit var tvNumberOfLikes:TextView
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -155,6 +158,13 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         tvNumberOfReach = view.findViewById(R.id.tvNumberOfReach)
 
         linearLayoutInputRewardHint = view.findViewById(R.id.ll_input_reward_hint)
+
+        tvNumberOfViewers = view.findViewById(R.id.tvNumberOfViewers)
+        tvNumberOfLikes = view.findViewById(R.id.tvNumberOfLikes)
+
+        tvNumberOfViewers.text = "0"
+        tvNumberOfLikes.text = "0"
+
 
         uploadButton.setOnClickListener {
             uploadRewardMeme()
@@ -502,7 +512,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                     if(it.isSuccessful){
                         val result = it.result
 
-                        merchantWallet = (result?.get("merchant_wallet_amount") ?:0) as Long
+                        merchantWallet = (result?.get("merchant_wallet_amount") ?: 0L) as Long
 
                     }
                 }
@@ -571,6 +581,34 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
             tvStatusWorth.text = if (status_worth!=null) resources.getString(R.string.status_worth, status_worth.toString()) else resources.getString(R.string.status_worth, "2")
             tvNumberOfReach.text = if (status_reach!=null) resources.getString(R.string.number_of_reach, status_reach.toString()) else resources.getString(R.string.number_of_reach, "50")
+
+            val db = FirebaseFirestore.getInstance()
+            // [END get_firestore_instance]
+
+            // [START set_firestore_settings]
+            // [END get_firestore_instance]
+
+            // [START set_firestore_settings]
+            val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+            db.firestoreSettings = settings
+
+            db.collection("statusview").document(status_id.toString()).collection("likedBy").get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful){
+                        val result = it.result
+                        tvNumberOfLikes.text = result?.size().toString()?:"0"
+                    }
+                }
+
+            db.collection("statusview").document(status_id.toString()).collection("viewers").get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful){
+                        val result = it.result
+                        tvNumberOfViewers.text = result?.size().toString()?:"0"
+                    }
+                }
         }
         catch (e: Exception){
             Log.e("NoStatusWorthNReach", e.message.toString())

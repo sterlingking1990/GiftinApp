@@ -70,12 +70,16 @@ class CustomerRewardStories : Fragment() {
     lateinit var tvNumberOfViewers:TextView
     var numberOfStatusView:Int? =0
 
+    var numberOfLikes:Int? = 0
+
     var storyWorth:Int = 0
     var numberOfViewsTarget:Int = 0
 
     var numberOfTimeUserGotRewardOnABrandStatus:Int = 0
 
     var firstToSeeStatusAndBeRewarded:Boolean = false
+
+    private lateinit var tvLikeBrandStory:TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -107,7 +111,13 @@ class CustomerRewardStories : Fragment() {
 
         tvNumberOfViewers = view.findViewById(R.id.tvNumberOfViewers)
 
+        tvLikeBrandStory = view.findViewById(R.id.tvLikeBrandStory)
 
+
+
+        tvLikeBrandStory.setOnClickListener {
+            likeStory(mCurrentIndex)
+        }
 
         ll_status.setOnTouchListener(onTouchListener)
 
@@ -124,6 +134,54 @@ class CustomerRewardStories : Fragment() {
         setImageStatusData()
         startViewing()
         setProgressData()
+    }
+
+    private fun likeStory(mCurrentIndex: Int) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        val storyId = imagesList?.get(mCurrentIndex)?.merchantStatusId.toString()
+
+        val imageLink = imagesList?.get(mCurrentIndex)?.merchantStatusImageLink.toString()
+
+        val storyTag = imagesList?.get(mCurrentIndex)?.storyTag.toString()
+
+        val storyIsSeen = true
+
+        val merchantStoryListPojo = MerchantStoryListPojo()
+        merchantStoryListPojo.storyTag = storyTag
+        merchantStoryListPojo.seen = storyIsSeen
+        merchantStoryListPojo.merchantStatusImageLink = imageLink
+        merchantStoryListPojo.merchantStatusId = storyId
+
+
+        //here i need to keep track of whether current status have reache the story size -1 then i will increment the number of view of the stauts right in the document of story owner
+        //first i have to get the number of view, if null then it will be set to 1, else incremented by 1 if only the person viewing it is not the owner of the story i.e sessionManager.email
+        //is not equal to the story owner
+
+
+
+        //db.collection("users").document(sessionManager.getEmail().toString()).collection("statusowners").document(storyOwner.toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
+
+        //.addOnCompleteListener {
+        // if(it.isSuccessful){
+        db.collection("statusowners").document(storyOwner.toString()).collection("likedBy").document(sessionManager.getEmail().toString()).set(SendGiftPojo(empty = ""))
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    db.collection("statusowners").document(storyOwner.toString()).collection("likedBy").document(sessionManager.getEmail().toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
+                }
+            }
+
+        updateStatusLikersRecord(storyId)
     }
 
 
@@ -292,6 +350,7 @@ class CustomerRewardStories : Fragment() {
                 .addOnCompleteListener {
                     if(it.isSuccessful){
                         val result = it.result
+                        Log.d("NumberofViews",result.toString())
                         numberOfStatusView = result?.size()?:0
                     }
                 }
@@ -699,6 +758,34 @@ class CustomerRewardStories : Fragment() {
                 })
     }
 
+    private fun updateStatusLikersRecord(storyId: String) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        //just to store empty string
+        val sendGiftPojo = SendGiftPojo("empty string")
+
+
+        val statusViewRecordPojo = StatusViewRecordPojo(null, sessionManager.getEmail().toString(), storyOwner.toString(), storyId)
+        //means this user has his details updated...now send this to redeemable gifts
+        //means this user has his details updated...now send this to redeemable gifts
+        db.collection("statusview").document(storyId).collection("likedBy").document(sessionManager.getEmail().toString()).set(statusViewRecordPojo)
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    Log.d("SuccessfullySetLikedBy","true")
+                }
+            }
+    }
+
     private fun rewardUserOrNotBasedOnStatusWorthAndReach(storyId: String) {
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
@@ -741,10 +828,34 @@ class CustomerRewardStories : Fragment() {
             (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = progress.toInt()
             tvRewardStoryTag.text = imagesList?.get(mCurrentIndex)?.storyTag
             getNumberOfViews(imagesList?.get(mCurrentIndex)?.merchantStatusId.toString())
+            getNumberOfLikes(imagesList?.get(mCurrentIndex)?.merchantStatusId.toString())
             getStatusWorthAndNumberOfViewsFor(imagesList?.get(mCurrentIndex)?.merchantStatusId.toString())
             tvNumberOfViewers.text = numberOfStatusView.toString()
+            tvLikeBrandStory.text = numberOfLikes.toString()
             statusTag = imagesList?.get(mCurrentIndex)?.storyTag
         }
+    }
+
+    private fun getNumberOfLikes(merchantStatusId: String) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("statusview").document(merchantStatusId).collection("likedBy").get()
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    val result = it.result
+                    numberOfLikes = result?.size()?:0
+                }
+            }
     }
 
     private fun startViewing() {
@@ -833,6 +944,9 @@ class CustomerRewardStories : Fragment() {
         var fragmentType = R.id.fr_game
 
         if(hasHeader){
+            fragmentType = R.id.fr_layout_merchant
+        }
+        if(storyOwner != sessionManager.getEmail()){
             fragmentType = R.id.fr_layout_merchant
         }
         fragmentManager?.beginTransaction()

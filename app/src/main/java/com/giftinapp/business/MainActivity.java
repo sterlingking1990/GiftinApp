@@ -240,11 +240,11 @@ public class MainActivity extends AppCompatActivity {
             MyGiftHistoryFragment myGiftHistoryFragment = new MyGiftHistoryFragment();
             openFragment(myGiftHistoryFragment);
         }
-        if (menuitem.getItemId() == R.id.navigation_gifting_merchant) {
-            carouselView.setVisibility(View.GONE);
-            GiftingMerchantFragment giftingMerchantFragment = new GiftingMerchantFragment();
-            openFragment(giftingMerchantFragment);
-        }
+//        if (menuitem.getItemId() == R.id.navigation_gifting_merchant) {
+//            carouselView.setVisibility(View.GONE);
+//            GiftingMerchantFragment giftingMerchantFragment = new GiftingMerchantFragment();
+//            openFragment(giftingMerchantFragment);
+//        }
 
         if (menuitem.getItemId() == R.id.navigation_view_reward_deal) {
             carouselView.setVisibility(View.GONE);
@@ -252,11 +252,11 @@ public class MainActivity extends AppCompatActivity {
             openFragment(merchantStoryList);
         }
 
-        if (menuitem.getItemId() == R.id.navigation_view_activity_rating) {
-            carouselView.setVisibility(View.GONE);
-            InfluencerActivityRatingFragment influencerActivityRatingFragment = new InfluencerActivityRatingFragment();
-            openFragment(influencerActivityRatingFragment);
-        }
+//        if (menuitem.getItemId() == R.id.navigation_view_activity_rating) {
+//            carouselView.setVisibility(View.GONE);
+//            InfluencerActivityRatingFragment influencerActivityRatingFragment = new InfluencerActivityRatingFragment();
+//            openFragment(influencerActivityRatingFragment);
+//        }
 
         if (menuitem.getItemId() == R.id.navigation_view_brand_preference) {
             carouselView.setVisibility(View.GONE);

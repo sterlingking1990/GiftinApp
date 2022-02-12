@@ -4,14 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.method.HideReturnsTransformationMethod;
-import android.text.method.PasswordTransformationMethod;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -57,9 +52,6 @@ public class SignUpActivity extends AppCompatActivity {
 
     public AlertDialog.Builder builder;
 
-    public Boolean isPasswordVisible = false;
-
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,33 +96,6 @@ public class SignUpActivity extends AppCompatActivity {
             }
             else{
                 Toast.makeText(getApplicationContext(),"email empty or invalid",Toast.LENGTH_LONG).show();
-            }
-        });
-
-        etPassword.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                v.performClick();
-                int RIGHT = 2;
-                if(event.getAction()==MotionEvent.ACTION_UP){
-                    if(event.getRawX()>=etPassword.getRight() - etPassword.getCompoundDrawables()[RIGHT].getBounds().width()){
-                        int selection = etPassword.getSelectionEnd();
-                        if(isPasswordVisible){
-                            etPassword.setCompoundDrawablesRelativeWithIntrinsicBounds(0,0, R.drawable.ic_password_toggle_off,0);
-                            etPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                            isPasswordVisible=false;
-                        }
-                        else{
-                            etPassword.setCompoundDrawablesRelativeWithIntrinsicBounds(0,0,R.drawable.ic_password_toggle,0);
-                            etPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                            isPasswordVisible = true;
-                        }
-                        etPassword.setSelection(selection);
-                        return true;
-                    }
-                }
-
-                return false;
             }
         });
 

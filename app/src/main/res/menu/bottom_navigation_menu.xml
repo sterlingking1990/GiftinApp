@@ -22,20 +22,20 @@
             android:icon="@drawable/ic_view_reward_deal"
             android:title="Brand Deals"/>
 
-        <item
-            android:id="@+id/navigation_view_activity_rating"
-            android:icon="@drawable/ic_rate_influencer"
-            android:title="My Activity Ratings"/>
+<!--        <item-->
+<!--            android:id="@+id/navigation_view_activity_rating"-->
+<!--            android:icon="@drawable/ic_rate_influencer"-->
+<!--            android:title="My Activity Ratings"/>-->
 
         <item
             android:id="@+id/navigation_gifting_history"
             android:icon="@drawable/merchants_care"
             android:title="My Rewards" />
 
-        <item
-            android:id="@+id/navigation_gifting_merchant"
-            android:icon="@drawable/ic_gifting_merchant"
-            android:title="Brands Pay Log"/>
+<!--        <item-->
+<!--            android:id="@+id/navigation_gifting_merchant"-->
+<!--            android:icon="@drawable/ic_gifting_merchant"-->
+<!--            android:title="Brands Pay Log"/>-->
 
     </group>
 

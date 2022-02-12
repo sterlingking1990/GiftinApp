@@ -112,22 +112,16 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
                             var isFollowed = false
                             for(i in it.result!!){
                                 if(i.id.equals(emailOfFollower)){
-                                    isFollowed = true
+                                    btnToggleBrandFollowership.text = "UNFOLLOW"
+                                    btnToggleBrandFollowership.textSize = 18F
+                                    followingStatus.text = "following"
+                                    followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
                                 }
-                            }
-
-                            if(isFollowed){
-                                btnToggleBrandFollowership.text = "UNFOLLOW"
-                                btnToggleBrandFollowership.textSize = 18F
-                                followingStatus.text = "following"
-                                followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
-
-                                //addToCart.visibility= View.GONE
-                            }
-                            else{
-                                btnToggleBrandFollowership.text = "FOLLOW"
-                                followingStatus.text = "not following"
-                                followingStatus.setTextColor(context.resources.getColor(R.color.tabColor))
+                                else{
+                                    btnToggleBrandFollowership.text = "FOLLOW"
+                                    followingStatus.text = "not following"
+                                    followingStatus.setTextColor(context.resources.getColor(R.color.tabColor))
+                                }
                             }
                         }
                     }

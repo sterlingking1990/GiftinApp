@@ -418,21 +418,22 @@ public class MerchantActivity extends AppCompatActivity {
 
 
     private void selectDrawerItem(MenuItem menuitem){
-        if(menuitem.getItemId()==R.id.navigation_gift_customer_fan){
-            carouselViewMerchant.setVisibility(View.GONE);
-            GiftACustomerFragment giftACustomer = new GiftACustomerFragment();
-            openFragment(giftACustomer);
-        }
-        else if(menuitem.getItemId() == R.id.navigation_wallet_info){
+//        if(menuitem.getItemId()==R.id.navigation_gift_customer_fan){
+//            carouselViewMerchant.setVisibility(View.GONE);
+//            GiftACustomerFragment giftACustomer = new GiftACustomerFragment();
+//            openFragment(giftACustomer);
+//        }
+        if(menuitem.getItemId() == R.id.navigation_wallet_info){
             carouselViewMerchant.setVisibility(View.GONE);
             WalletInfo walletInfo = new WalletInfo();
             openFragment(walletInfo);
         }
-        else if(menuitem.getItemId() == R.id.navigation_merchant_gift_stats) {
-            carouselViewMerchant.setVisibility(View.GONE);
-            MerchantGiftStatsFragment merchantGiftStatsFragment = new MerchantGiftStatsFragment();
-            openFragment(merchantGiftStatsFragment);
-        }
+//        else if(menuitem.getItemId() == R.id.navigation_merchant_gift_stats) {
+//            carouselViewMerchant.setVisibility(View.GONE);
+//            MerchantGiftStatsFragment merchantGiftStatsFragment = new MerchantGiftStatsFragment();
+//            openFragment(merchantGiftStatsFragment);
+//        }
+
         else if(menuitem.getItemId() == R.id.navigation_set_reward_deal) {
             carouselViewMerchant.setVisibility(View.GONE);
             SetRewardDeal setRewardDeal = new SetRewardDeal();
@@ -443,16 +444,11 @@ public class MerchantActivity extends AppCompatActivity {
             MerchantStoryList merchantStoryList = new MerchantStoryList();
             openFragment(merchantStoryList);
         }
-        else if(menuitem.getItemId() == R.id.navigation_view_reward_deal) {
-            carouselViewMerchant.setVisibility(View.GONE);
-            MerchantStoryList merchantStoryList = new MerchantStoryList();
-            openFragment(merchantStoryList);
-        }
-        else if(menuitem.getItemId() == R.id.navigation_view_rate_influencer){
-            carouselViewMerchant.setVisibility(View.GONE);
-            RateInfluencerFragment rateInfluencerFragment = new RateInfluencerFragment();
-            openFragment(rateInfluencerFragment);
-        }
+//        else if(menuitem.getItemId() == R.id.navigation_view_rate_influencer){
+//            carouselViewMerchant.setVisibility(View.GONE);
+//            RateInfluencerFragment rateInfluencerFragment = new RateInfluencerFragment();
+//            openFragment(rateInfluencerFragment);
+//        }
 
         else if(menuitem.getItemId() == R.id.navigation_merchant_follow_brands){
             carouselViewMerchant.setVisibility(View.GONE);

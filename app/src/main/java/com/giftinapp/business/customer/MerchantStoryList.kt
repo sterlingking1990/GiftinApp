@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -230,7 +229,8 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                 }
     }
 
-    override fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, owner: String) {
+    override fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, storyOwner: String) {
+        Log.d("StoryOwner",storyOwner)
 
             val fragment = CustomerRewardStories()
             val fm = fragmentManager
@@ -240,11 +240,14 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
             arguments.putSerializable("storyList", merchantStoryList as Serializable)
             arguments.putSerializable("allStory", allList as Serializable)
             arguments.putInt("currentStoryPos", currentStoryPos)
-            arguments.putString("storyOwner", owner)
+            arguments.putString("storyOwner", storyOwner)
             arguments.putBoolean("hasHeader", isStoryHasHeader)
             if (isStoryHasHeader) {
                 fragmentType = R.id.fr_layout_merchant
             }
+        if(storyOwner != sessionManager.getEmail()) {
+            fragmentType = R.id.fr_layout_merchant
+        }
             fragment.arguments = arguments
 
             CustomerRewardStories().arguments = arguments
