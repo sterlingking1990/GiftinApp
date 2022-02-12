@@ -20,7 +20,7 @@
     <color name="grey_500">#9E9E9E</color>
 
     <color name="startGradient">#CCBD99</color>
-    <color name="endGradient">#BFADEE</color>
+    <color name="endGradient">#9E9E9E</color>
     <color name="btn_login_color">#5297B6</color>
 
     <color name="secondColorType">#5297B6</color>

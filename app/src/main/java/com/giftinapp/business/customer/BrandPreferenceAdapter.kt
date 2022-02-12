@@ -57,8 +57,14 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
             }
 
 
-            btnTogglePreference.setOnClickListener {
-                clickableIcon.togglePreference(giftingMerchantList[position].giftingMerchantId, btnTogglePreference.text.toString())
+            btnTogglePreference.apply {
+                setOnClickListener {
+                    clickableIcon.togglePreference(giftingMerchantList[position].giftingMerchantId, btnTogglePreference.text.toString())
+                    text = if(btnTogglePreference.text.toString() == "FOLLOW") "UNFOLLOW" else "FOLLOW"
+                    textSize = if(btnTogglePreference.text.toString() == "UNFOLLOW") 18F else 18F
+                    followingStatus.text = if(btnTogglePreference.text.toString() == "FOLLOW") "not following" else "following"
+                    if(btnTogglePreference.text.toString() == "FOLLOW") followingStatus.setTextColor(context.resources.getColor(R.color.tabColor)) else followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
+                }
             }
 
             checkIfUserFollowedBrand(giftingMerchantList[position].giftingMerchantId,btnTogglePreference,context,followingStatus)
@@ -106,22 +112,16 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
                             var isFollowed = false
                             for(i in it.result!!){
                                 if(i.id.equals(emailOfFollower)){
-                                    isFollowed = true
+                                    btnToggleBrandFollowership.text = "UNFOLLOW"
+                                    btnToggleBrandFollowership.textSize = 18F
+                                    followingStatus.text = "following"
+                                    followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
                                 }
-                            }
-
-                            if(isFollowed){
-                                btnToggleBrandFollowership.text = "UNFOLLOW"
-                                btnToggleBrandFollowership.textSize = 18F
-                                followingStatus.text = "following"
-                                followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
-
-                                //addToCart.visibility= View.GONE
-                            }
-                            else{
-                                btnToggleBrandFollowership.text = "FOLLOW"
-                                followingStatus.text = "not following"
-                                followingStatus.setTextColor(context.resources.getColor(R.color.tabColor))
+                                else{
+                                    btnToggleBrandFollowership.text = "FOLLOW"
+                                    followingStatus.text = "not following"
+                                    followingStatus.setTextColor(context.resources.getColor(R.color.tabColor))
+                                }
                             }
                         }
                     }

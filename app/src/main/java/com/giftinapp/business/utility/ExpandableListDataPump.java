@@ -14,12 +14,12 @@ public class ExpandableListDataPump {
 
         List<String> beingBrandibleInfluencer = new ArrayList<String>();
         beingBrandibleInfluencer.add("Being an enviable Brandible Influencer means to not see brandible as a get rich quick platform but as a platform to distinguish yourself and shine out as a brand mover and enabler. " +
-                "An Influencer in Brandible is ready to engage with brands calling for promotion of their products across social media. " + " She is passionate and wants to really be seen as a unique Influencer " +
+                "An Influencer in Brandible is ready to engage with brands calling for promotion of their products or services across social media. " + " She is passionate and wants to really be seen as a unique Influencer " +
                 " She is not about the money but her fulfilment comes from helping businesses and brands get a voice or visibility as fast as possible");
 
 
         List<String> chargingBrandsInBrandible = new ArrayList<String>();
-        chargingBrandsInBrandible.add(" When a brand has posted her interest to be promoted by you the Influencer, you are to engage via whatsApp with the brand, carry out the task successfully and to the best of your expertise " +
+        chargingBrandsInBrandible.add(" When a brand posts a promotional status, you are to engage via whatsApp with the brand, carry out the task successfully and to the best of your expertise " +
                 "After which the brand is said to pay using this format - (your highest number of followership from any of your social media platform/ 500) * 100." + " That is if you have 5000 followership on facebook, you are to be paid- (5000/500) * 100 which is #1000." +
                 "This is for a single content across all your popular social media plaform" );
 
