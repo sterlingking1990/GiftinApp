@@ -50,7 +50,8 @@
     <string name="login_failed">"Login failed"</string>
     <string name="giftinapp_link">https://giftinapp.page.link/getgifts</string>
     <string name="share_link">Share</string>
-    <string name="about_giftin">Brandible is a brand promotion app focusing on helping small and medium businesses gain visibility in the market as fast and as cheap as possible, leveraging on Influencers within the app.</string>
+    <string name="about_giftin">With Brandible, you earn for every time your favourite brand promotes their product, service or any deal and wishes you to make first impression (viewing and/or liking) about it. Stay up and active on Brandible to always be among those who earn.</string>
+    <string name="about_brandible">Brandible is your market first impression tool. 1. Create a product, promotion, service or any deal story, 2. set reward for when users make impression(view and/or like), 3. Relax and see how users react to it. Brandible aids you to make market decisions as fast and as cheap as possible.</string>
     <string name="navigation_drawer_open">open</string>
     <string name="navigation_drawer_close">close</string>
     <string name="default_notification_channel_id">GIFTINAPPMESSAGING</string>

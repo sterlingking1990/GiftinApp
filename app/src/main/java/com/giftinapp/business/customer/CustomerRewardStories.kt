@@ -257,8 +257,9 @@ class CustomerRewardStories : Fragment() {
                         if(result!=null) {
                             val allAdOwners = result.documents
                             allAdOwners.forEach {
-                                if(it.get("email")==storyOwner){
+                                if(it.get("merchant_email")==storyOwner){
                                     var adUnit: String? = it.getString("ad_unit")
+                                    Log.d("AdUnit",adUnit.toString())
                                     if(adUnit==null) {
                                         adUnit = "ca-app-pub-3940256099942544/5224354917"
                                     }
