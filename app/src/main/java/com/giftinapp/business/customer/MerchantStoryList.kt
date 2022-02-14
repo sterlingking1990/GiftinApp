@@ -173,7 +173,6 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                                                     if (merchantStoryPojos.size > 0) {
 
                                                                                         if (eachRes.id == sessionManager.getEmail()) {
-
                                                                                             isStoryHasHeader = true
                                                                                         }
                                                                                         pgLoading.visibility = View.GONE
@@ -242,12 +241,9 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
             arguments.putInt("currentStoryPos", currentStoryPos)
             arguments.putString("storyOwner", storyOwner)
             arguments.putBoolean("hasHeader", isStoryHasHeader)
-            if (isStoryHasHeader) {
+            if (isStoryHasHeader || storyOwner == sessionManager.getEmail()) {
                 fragmentType = R.id.fr_layout_merchant
             }
-        if(storyOwner != sessionManager.getEmail()) {
-            fragmentType = R.id.fr_layout_merchant
-        }
             fragment.arguments = arguments
 
             CustomerRewardStories().arguments = arguments

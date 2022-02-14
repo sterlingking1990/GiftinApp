@@ -259,7 +259,6 @@ class CustomerRewardStories : Fragment() {
                             allAdOwners.forEach {
                                 if(it.get("merchant_email")==storyOwner){
                                     var adUnit: String? = it.getString("ad_unit")
-                                    Log.d("AdUnit",adUnit.toString())
                                     if(adUnit==null) {
                                         adUnit = "ca-app-pub-3940256099942544/5224354917"
                                     }
@@ -944,10 +943,7 @@ class CustomerRewardStories : Fragment() {
     private fun openFragment(fragment: Fragment?) {
         var fragmentType = R.id.fr_game
 
-        if(hasHeader){
-            fragmentType = R.id.fr_layout_merchant
-        }
-        if(storyOwner != sessionManager.getEmail()){
+        if(hasHeader || storyOwner == sessionManager.getEmail()){
             fragmentType = R.id.fr_layout_merchant
         }
         fragmentManager?.beginTransaction()

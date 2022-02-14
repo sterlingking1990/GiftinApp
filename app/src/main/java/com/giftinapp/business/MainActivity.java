@@ -36,6 +36,7 @@ import com.giftinapp.business.customer.MyGiftHistoryFragment;
 import com.giftinapp.business.customer.SettingsFragment;
 import com.giftinapp.business.utility.SessionManager;
 import com.giftinapp.business.utility.StorySession;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
@@ -98,7 +99,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        MobileAds.initialize(this); {
 
+        }
+
+        //MediationTestSuite.launch(MainActivity.this);
         appUpdateManager = AppUpdateManagerFactory.create(this);
 
 // Returns an intent object that you use to check for an update.

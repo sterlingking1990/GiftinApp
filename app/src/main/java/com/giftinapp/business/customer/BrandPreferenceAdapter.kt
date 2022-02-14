@@ -1,6 +1,7 @@
 package com.giftinapp.business.customer
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -66,9 +67,7 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
                     if(btnTogglePreference.text.toString() == "FOLLOW") followingStatus.setTextColor(context.resources.getColor(R.color.tabColor)) else followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
                 }
             }
-
             checkIfUserFollowedBrand(giftingMerchantList[position].giftingMerchantId,btnTogglePreference,context,followingStatus)
-
         }
     }
 
@@ -104,6 +103,7 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
 
         //check if this user already added this gift to redeemable
         if (emailOfFollower != null) {
+            Log.d("EmailOfFollower",emailOfFollower.toString())
             db.collection("merchants").document(brandId).collection("followers")
                     .get()
                     .addOnCompleteListener {
@@ -112,16 +112,19 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
                             var isFollowed = false
                             for(i in it.result!!){
                                 if(i.id.equals(emailOfFollower)){
-                                    btnToggleBrandFollowership.text = "UNFOLLOW"
-                                    btnToggleBrandFollowership.textSize = 18F
-                                    followingStatus.text = "following"
-                                    followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
+                                    isFollowed = true
                                 }
-                                else{
-                                    btnToggleBrandFollowership.text = "FOLLOW"
-                                    followingStatus.text = "not following"
-                                    followingStatus.setTextColor(context.resources.getColor(R.color.tabColor))
-                                }
+                            }
+                            if(isFollowed){
+                                btnToggleBrandFollowership.text = "UNFOLLOW"
+                                btnToggleBrandFollowership.textSize = 18F
+                                followingStatus.text = "following"
+                                followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
+                            }
+                            else{
+                                btnToggleBrandFollowership.text = "FOLLOW"
+                                followingStatus.text = "not following"
+                                followingStatus.setTextColor(context.resources.getColor(R.color.tabColor))
                             }
                         }
                     }

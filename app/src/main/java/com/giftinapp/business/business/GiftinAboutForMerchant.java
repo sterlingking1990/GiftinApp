@@ -20,10 +20,10 @@ import java.util.List;
 
 public class GiftinAboutForMerchant extends Fragment {
 
-    ExpandableListView expandableListView;
-    ExpandableListAdapter expandableListAdapter;
-    List<String> expandableListTitle;
-    HashMap<String, List<String>> expandableListDetail;
+//    ExpandableListView expandableListView;
+//    ExpandableListAdapter expandableListAdapter;
+//    List<String> expandableListTitle;
+//    HashMap<String, List<String>> expandableListDetail;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -35,10 +35,10 @@ public class GiftinAboutForMerchant extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        expandableListView = (ExpandableListView) view.findViewById(R.id.expandableListView);
-        expandableListDetail = MerchantExpandableListDataPump.getData();
-        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-        expandableListAdapter = new MerchantExpandableListAdapter(getContext(), expandableListTitle, expandableListDetail);
-        expandableListView.setAdapter(expandableListAdapter);
+//        expandableListView = (ExpandableListView) view.findViewById(R.id.expandableListView);
+//        expandableListDetail = MerchantExpandableListDataPump.getData();
+//        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+//        expandableListAdapter = new MerchantExpandableListAdapter(getContext(), expandableListTitle, expandableListDetail);
+//        expandableListView.setAdapter(expandableListAdapter);
     }
 }

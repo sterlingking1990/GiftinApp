@@ -32,6 +32,7 @@ import com.giftinapp.business.business.WalletInfo;
 import com.giftinapp.business.customer.BrandPreferenceFragment;
 import com.giftinapp.business.customer.MerchantStoryList;
 import com.giftinapp.business.utility.SessionManager;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -92,6 +93,7 @@ public class MerchantActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_merchant);
 
+        MobileAds.initialize(this); {}
 
         appUpdateManager = AppUpdateManagerFactory.create(this);
 

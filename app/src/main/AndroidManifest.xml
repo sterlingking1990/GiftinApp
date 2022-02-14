@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.giftinapp.business">
-
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
@@ -15,13 +14,14 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.Merchant"
+        android:networkSecurityConfig="@xml/ad_network_security_config"
         tools:targetApi="m">
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="${ADMOB_KEY}"/>
+            android:value="ca-app-pub-8310656376115666~2145315757"/>
 
-        <activity android:name=".SplashActivity">
+        <activity android:name=".SplashActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -29,7 +29,7 @@
             
         </activity>
         <activity android:name=".GiftinAppAuthorityActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="MainActivity"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -38,7 +38,7 @@
 
         <activity android:name=".MerchantActivity" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".SignUpActivity">
+        <activity android:name=".SignUpActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -56,7 +56,7 @@
 
         <meta-data
             android:name="co.paystack.android.PublicKey"
-            android:value="${PSTACK_KEY}" />
+            android:value="pk_live_1cf1d10946b2e92b7bd91a00598febf140d604c3" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
@@ -64,7 +64,7 @@
 
         <service
             android:name=".MyFirebaseInstanceIDService"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
@@ -76,7 +76,7 @@
             />
         <service
             android:name=".MyFirebaseMessagingService"
-            android:permission="com.google.android.c2dm.permission.SEND">
+            android:permission="com.google.android.c2dm.permission.SEND" android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />

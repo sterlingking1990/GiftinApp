@@ -2,10 +2,13 @@ package com.giftinapp.business.model;
 
 import androidx.annotation.Keep;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
 @Keep
- public class MerchantStoryListPojo {
+ public class MerchantStoryListPojo implements Serializable {
 
     public String merchantStatusId;
     public String merchantStatusImageLink;
@@ -15,4 +18,5 @@ import java.util.ArrayList;
     public StatusReachAndWorthPojo statusReachAndWorthPojo;
 
     public MerchantStoryListPojo(){}
+
 }
