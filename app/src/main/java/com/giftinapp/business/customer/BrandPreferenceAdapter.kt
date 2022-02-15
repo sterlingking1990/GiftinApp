@@ -115,6 +115,8 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
                                     isFollowed = true
                                 }
                             }
+                            btnToggleBrandFollowership.text = "FOLLOW"
+                            followingStatus.text = "not following"
                             if(isFollowed){
                                 btnToggleBrandFollowership.text = "UNFOLLOW"
                                 btnToggleBrandFollowership.textSize = 18F

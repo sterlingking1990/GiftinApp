@@ -15,32 +15,28 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class GetBanksViewModel @Inject constructor(private val cashOutApiServiceRepository: CashOutApiServiceRepository, private val networkHelper: NetworkHelper) : ViewModel() {
+class GetBanksViewModel @Inject constructor(private val cashOutApiServiceRepository: CashOutApiServiceRepository) : ViewModel() {
 
-   private var bankListResponse = MutableLiveData<Resource<BankResponse>>()
-       val _bankListObservable:LiveData<Resource<BankResponse>>
-        get() = bankListResponse
+   private var _bankListResponse = MutableLiveData<Resource<BankResponse>>()
+       val bankListObservable:LiveData<Resource<BankResponse>>
+        get() = _bankListResponse
 
-
-    fun getBankList(authorization:String,country:String){
+     fun getBankList(){
         viewModelScope.launch {
-            bankListResponse.postValue(Resource.loading())
-
             try{
-               val bankList = cashOutApiServiceRepository.getBankLists(authorization,country)
+               val bankList = cashOutApiServiceRepository.getBankLists()
 
                 if(bankList.isSuccessful){
-                    bankListResponse.postValue(Resource(Resource.Status.SUCCESS,bankList.body(),null))
+                    _bankListResponse.postValue(Resource(Resource.Status.SUCCESS,bankList.body(),null))
                 }
-                else{
-                    bankListResponse.postValue(Resource.error("Unable to fetch bank list"))
+                if(bankList.errorBody()!=null){
+                    _bankListResponse.postValue(Resource.error("Unable to fetch bank list"))
                 }
             }
             catch (e:Exception){
                 Log.d("Error",e.message.toString())
-                bankListResponse.postValue(Resource.error("Error -> ${e.message}"))
+                _bankListResponse.postValue(Resource.error("Error -> ${e.message}"))
             }
         }
     }
-
 }

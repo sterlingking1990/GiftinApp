@@ -202,7 +202,7 @@ class CustomerRewardStories : Fragment() {
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
                         val result = it.result
-                        val phone = result?.getString("whatsapp")
+                        val phone = result.getString("whatsapp")
                         var msg=""
                         msg = if (statusTag=="promotional"){
                             "Hi, I am a *Brandible Influencer* and am available to help improve your brand visibility. I saw your *$statusTag* request on Brandible"

@@ -24,7 +24,7 @@ android {
         applicationId "com.giftinapp.business"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 56
+        versionCode 61
         versionName "1.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -32,7 +32,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -143,6 +143,8 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:$androidXFragmentKtxVersion"
 
     implementation 'com.google.ads.mediation:facebook:6.8.0.0'
+
+    implementation "com.github.skydoves:elasticviews:2.0.9"
 }
 repositories {
     mavenCentral()

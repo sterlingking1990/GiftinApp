@@ -10,8 +10,8 @@ class CashOutApiServiceRepositoryImpl @Inject constructor(private val cashOutApi
         return cashOutApiServiceMethod.verifyAccountNumber(authorization,account_number,bank_code)
     }
 
-    override suspend fun getBankLists(authorization:String,country: String): Response<BankResponse> {
-        return cashOutApiServiceMethod.getBankLists(authorization,country)
+    override suspend fun getBankLists(): Response<BankResponse> {
+        return cashOutApiServiceMethod.getBankLists()
     }
 
     override suspend fun initiateTransferProcess(authorization:String,transferRequestModel: InitiateTransferRequestModel): Response<InitiateTransferResponseModel> {

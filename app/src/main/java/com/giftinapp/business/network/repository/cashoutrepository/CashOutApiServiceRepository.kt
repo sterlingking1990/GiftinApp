@@ -7,7 +7,7 @@ interface CashOutApiServiceRepository {
 
         suspend fun verifyAccountNumber(authorization:String,account_number:String, bank_code:String): Response<VerifyAccountResponse>
 
-        suspend fun getBankLists(authorization:String,country:String): Response<BankResponse>
+        suspend fun getBankLists(): Response<BankResponse>
 
         suspend fun initiateTransferProcess(authorization:String,transferRequestModel: InitiateTransferRequestModel): Response<InitiateTransferResponseModel>
 

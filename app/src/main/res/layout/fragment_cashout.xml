@@ -52,14 +52,18 @@
             android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <com.skydoves.elasticviews.ElasticButton
         android:id="@+id/btnVerifyAccount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:background="@drawable/rectangle_shaped_button"
+        app:button_cornerRadius="4dp"
+        app:button_duration="250"
+        android:background="@color/cardview_dark_background"
+        android:textColor="@android:color/white"
+        app:button_scale="0.87"
         app:layout_constraintTop_toBottomOf="@id/tl_accountNumber"
         app:layout_constraintStart_toStartOf="@id/tl_accountNumber"
         app:layout_constraintEnd_toEndOf="@id/tl_accountNumber"

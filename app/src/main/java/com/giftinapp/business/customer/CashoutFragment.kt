@@ -18,19 +18,22 @@ import com.giftinapp.business.R
 import com.giftinapp.business.model.InitiateTransactionReceiptPojo
 import com.giftinapp.business.model.RewardPojo
 import com.giftinapp.business.model.TransferReferenceModel
+import com.giftinapp.business.network.cashoutmodel.DataXXX
 import com.giftinapp.business.network.cashoutmodel.InitiateTransferRequestModel
 import com.giftinapp.business.network.cashoutmodel.TransferModel
-import com.giftinapp.business.network.viewmodel.cashoutviewmodel.GetBanksViewModel
-import com.giftinapp.business.network.viewmodel.cashoutviewmodel.InitiateTransferViewModel
-import com.giftinapp.business.network.viewmodel.cashoutviewmodel.TransferViewModel
-import com.giftinapp.business.network.viewmodel.cashoutviewmodel.VerifyAccountViewModel
+import com.giftinapp.business.network.viewmodel.cashoutviewmodel.*
 import com.giftinapp.business.utility.Resource
 import com.giftinapp.business.utility.SessionManager
+import com.giftinapp.business.utility.runOnUiThread
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_cashout.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.floor
 
 @AndroidEntryPoint
@@ -44,6 +47,7 @@ class CashoutFragment : Fragment() {
 
     private lateinit var bankAndCodeList:MutableMap<String, String>
     private var onlyBanks:MutableList<String> = mutableListOf()
+    private var bankData:List<DataXXX> = listOf()
     private lateinit var arrayBankListAdapter:ArrayAdapter<String>
 
     private lateinit var sessionManager: SessionManager
@@ -62,25 +66,37 @@ class CashoutFragment : Fragment() {
         // Inflate the layout for this fragment
 
         val view = inflater.inflate(R.layout.fragment_cashout, container, false)
-        sessionManager = SessionManager(requireContext())
-        sessionManager.setCashoutAmount(0.0)
-        loadAmountToCashOut()
-        handleObservers()
+
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        arrayBankListAdapter = ArrayAdapter(requireContext(),R.layout.single_bank_item,onlyBanks)
+
+        sessionManager = SessionManager(requireContext())
+        sessionManager.setCashoutAmount(0.0)
+        loadAmountToCashOut()
+
+        bankListView.setText("loading banks ...")
 
         builder = AlertDialog.Builder(requireContext())
 
         bankAndCodeList = mutableMapOf()
-        getBanksViewModel.getBankList(BuildConfig.PSTACK_AUTHKEY, "nigeria")
+
+        handleObservers()
 
         disableOnLoad()
 
         handleClicks()
+
+        getBanksViewModel.getBankList()
+
+        bankListView.setOnClickListener {
+            loadBanksToAdapter()
+        }
+
     }
 
     private fun checkIfCanCashOut(){
@@ -115,11 +131,13 @@ class CashoutFragment : Fragment() {
         db.firestoreSettings = settings
 
         //get the gift coin of the user
-        db.collection("users").document(sessionManager.getEmail().toString()).collection("rewards").get()
+        try {
+            db.collection("users").document(sessionManager.getEmail().toString())
+                .collection("rewards").get()
                 .addOnCompleteListener {
-                    if(it.isSuccessful){
+                    if (it.isSuccessful) {
                         var totalCashout = 0.0
-                        for (eachBusinessThatGiftedCustomer in it.result!!){
+                        for (eachBusinessThatGiftedCustomer in it.result!!) {
                             val rewardCoin = eachBusinessThatGiftedCustomer.getDouble("gift_coin")
                             Log.d("reward", rewardCoin.toString())
                             if (rewardCoin != null) {
@@ -129,6 +147,9 @@ class CashoutFragment : Fragment() {
                         sessionManager.setCashoutAmount(totalCashout)
                     }
                 }
+        }catch (e:Exception){
+            Log.d("NoUser",e.message.toString())
+        }
     }
 
     private fun disableOnLoad(){
@@ -280,95 +301,119 @@ class CashoutFragment : Fragment() {
         }
     }
 
+    private fun loadBanksToAdapter(){
+        for (i in bankData) {
+            val key = i.name
+            if(!onlyBanks.contains(key)){
+                onlyBanks.add(key)
+                bankAndCodeList[key] = i.code
+            }
+        }
+        arrayBankListAdapter =
+            ArrayAdapter(requireContext(), R.layout.single_bank_item, onlyBanks)
+        bankListView.setAdapter(arrayBankListAdapter)
+    }
+
 
     private fun handleObservers(){
-        getBanksViewModel._bankListObservable.observe(viewLifecycleOwner, {
+        getBanksViewModel.bankListObservable.observeOnce(viewLifecycleOwner) {
             //Log.d("BankList",it.data.toString())
-            when (it.status) {
-                Resource.Status.LOADING -> {
-                    bankListView.setText("loading bank...")
-                }
-                Resource.Status.SUCCESS -> {
-                    if (it.data != null) {
-                        for (i in it.data.data.indices) {
+            if (it != null) {
+                when (it.status) {
+                    Resource.Status.LOADING -> {
 
-                            val key = it.data.data[i].name
-                            onlyBanks.add(key)
-                            bankAndCodeList[key] = it.data.data[i].code
+                    }
+                    Resource.Status.SUCCESS -> {
+                        bankListView.setText("click to select bank")
+                        if (!it.data?.data.isNullOrEmpty()) {
+                            bankData= it.data?.data?.toList()!!
                         }
-                        bankListView.isEnabled = true
-                        bankListView.setText("select bank")
-                        arrayBankListAdapter = ArrayAdapter(requireContext(), R.layout.single_bank_item, onlyBanks)
-                        bankListView.setAdapter(arrayBankListAdapter)
+                    }
+                    Resource.Status.ERROR -> {
+                        bankListView.setText("unable to load bank")
                     }
                 }
-                Resource.Status.ERROR -> {
-                    bankListView.setText("unable to load bank")
-                }
             }
-        })
+        }
 
-        verifyAccountViewModel._verifyAccountObservable.observe(viewLifecycleOwner, {
-            when (it.status) {
-                Resource.Status.LOADING -> {
-                    btnVerifyAccount.text = "Verifying..."
-                    btnVerifyAccount.isEnabled = false
-                }
+        verifyAccountViewModel.verifyAccountObservable.observe(viewLifecycleOwner) {
+            if(it!=null) {
+                when (it.status) {
+                    Resource.Status.LOADING -> {
+                        btnVerifyAccount.text = "Verifying..."
+                        btnVerifyAccount.isEnabled = false
+                    }
 
-                Resource.Status.SUCCESS -> {
-                    if (it.data != null) {
-                        val accountName = it.data.data.accountName
-                        et_AccountName.setText(accountName)
-                        btnVerifyAccount.text = "Verify Account"
+                    Resource.Status.SUCCESS -> {
+                        if (it.data != null) {
+                            val accountName = it.data.data.accountName
+                            et_AccountName.setText(accountName)
+                            btnVerifyAccount.text = "Verify Account"
+                            btnVerifyAccount.isEnabled = true
+                            checkIfCanCashOut()
+                            if (totalAmountToCashOut.toInt() >= 1000) {
+                                fbProcessCashout.isEnabled = true
+
+                            }
+                        }
+
+                    }
+                    Resource.Status.ERROR -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Unable to verify account number",
+                            Toast.LENGTH_LONG
+                        ).show()
                         btnVerifyAccount.isEnabled = true
-                        checkIfCanCashOut()
-                        if (totalAmountToCashOut.toInt() >= 1000) {
-                            fbProcessCashout.isEnabled = true
-
-                        }
                     }
-
-                }
-
-                else -> {
-                    Toast.makeText(requireContext(), "Unable to verify account number", Toast.LENGTH_LONG).show()
-                    btnVerifyAccount.isEnabled = true
                 }
             }
-        })
+        }
 
 
         //observing initiating transfer
-        initiateTransferViewModel._initiateTransferResponseObservable.observe(viewLifecycleOwner, {
-            when (it.status) {
-                Resource.Status.LOADING -> {
+        initiateTransferViewModel.initiateTransferResponseObservable.observe(viewLifecycleOwner) {
+            if(it!=null) {
+                when (it.status) {
+                    Resource.Status.LOADING -> {
 
-                }
-                Resource.Status.SUCCESS -> {
-                    if (it.data != null) {
-                        recipientCode = it.data.data.recipientCode
-                        //update user record with recipientCode
-                        updateRecordWithRecipientCode()
                     }
-                }
-
-                else -> Toast.makeText(requireContext(), "could not establish payment receipt, please try later", Toast.LENGTH_LONG).show()
-            }
-        })
-
-        transferViewModel._transferResponseObservable.observe(viewLifecycleOwner, {
-            when (it.status) {
-                Resource.Status.LOADING -> {
-
-                }
-                Resource.Status.SUCCESS -> {
-                    if (it.data != null) {
-                        updateRecordWithReferenceCode()
+                    Resource.Status.SUCCESS -> {
+                        if (it.data != null) {
+                            recipientCode = it.data.data.recipientCode
+                            //update user record with recipientCode
+                            updateRecordWithRecipientCode()
+                        }
                     }
+
+                    Resource.Status.ERROR -> Toast.makeText(
+                        requireContext(),
+                        "could not establish payment receipt, please try later",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-                else -> Toast.makeText(requireContext(), "unable to transfer to your account, please try again later", Toast.LENGTH_LONG).show()
             }
-        })
+        }
+
+        transferViewModel.transferResponseObservable.observe(viewLifecycleOwner) {
+            if(it!=null) {
+                when (it.status) {
+                    Resource.Status.LOADING -> {
+
+                    }
+                    Resource.Status.SUCCESS -> {
+                        if (it.data != null) {
+                            updateRecordWithReferenceCode()
+                        }
+                    }
+                    Resource.Status.ERROR -> Toast.makeText(
+                        requireContext(),
+                        "unable to transfer to your account, please try again later",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
 
 
     }
