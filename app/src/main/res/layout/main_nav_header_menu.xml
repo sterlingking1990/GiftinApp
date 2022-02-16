@@ -27,12 +27,19 @@
         android:paddingTop="16dp"
         android:text="@string/influenca_name_and_status"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-    <ImageView
-        android:id="@+id/iv_rating"
-        android:layout_width="match_parent"
-        android:visibility="gone"
-        android:layout_height="wrap_content"
-        android:scaleType="fitStart"
-        app:srcCompat="@drawable/ic_rate_influencer" />
+<!--    -->
+<!--        <TextView-->
+<!--            android:id="@+id/nav_following_label"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:paddingTop="25dp"-->
+<!--            android:text="@string/influenca_name_and_status"-->
+<!--            android:textAppearance="@style/TextAppearance.AppCompat.Small" />-->
+<!--    <ImageView-->
+<!--        android:id="@+id/iv_rating"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:visibility="gone"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:scaleType="fitStart"-->
+<!--        app:srcCompat="@drawable/ic_rate_influencer" />-->
 </LinearLayout>

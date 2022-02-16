@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.*
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
@@ -30,6 +31,8 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.skydoves.elasticviews.ElasticFinishListener
+import com.skydoves.elasticviews.elasticAnimation
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -113,9 +116,10 @@ class CustomerRewardStories : Fragment() {
 
         tvLikeBrandStory = view.findViewById(R.id.tvLikeBrandStory)
 
-
+        val anim = AnimationUtils.loadAnimation(requireContext(),R.anim.text_view_animation)
 
         tvLikeBrandStory.setOnClickListener {
+            tvLikeBrandStory.startAnimation(anim)
             likeStory(mCurrentIndex)
         }
 

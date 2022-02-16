@@ -19,9 +19,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +36,7 @@ import com.giftinapp.business.customer.InfluencerActivityRatingFragment;
 import com.giftinapp.business.customer.MerchantStoryList;
 import com.giftinapp.business.customer.MyGiftHistoryFragment;
 import com.giftinapp.business.customer.SettingsFragment;
+import com.giftinapp.business.utility.RemoteConfigUtil;
 import com.giftinapp.business.utility.SessionManager;
 import com.giftinapp.business.utility.StorySession;
 import com.google.android.gms.ads.MobileAds;
@@ -55,7 +58,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.squareup.picasso.Picasso;
 import com.synnapps.carouselview.CarouselView;
+import com.synnapps.carouselview.ImageClickListener;
+import com.synnapps.carouselview.ImageListener;
 import com.synnapps.carouselview.ViewListener;
 
 import java.util.List;
@@ -73,9 +80,13 @@ public class MainActivity extends AppCompatActivity {
     public TextView navTextView;
     public ImageView ivRating;
 
+    public RemoteConfigUtil remoteConfigUtil;
+
     protected CarouselView carouselView;
 
     protected SparseArray<ReportsViewHolder> holderList = new SparseArray<>();
+
+    protected  SparseArray<ImageView> imageList = new SparseArray<>();
 
     public long totalGiftCoin = 0L;
 
@@ -89,10 +100,15 @@ public class MainActivity extends AppCompatActivity {
 
     public Integer following = 0;
 
+    public Integer posi;
+
     FirebaseAuth mauth;
 
     private DrawerLayout drawer;
     private ActionBarDrawerToggle t;
+
+
+    Button btnExploreBrand;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -102,6 +118,17 @@ public class MainActivity extends AppCompatActivity {
         MobileAds.initialize(this); {
 
         }
+
+        btnExploreBrand = findViewById(R.id.btnExploreBrand);
+
+        remoteConfigUtil = new RemoteConfigUtil();
+
+        btnExploreBrand.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openWebView(remoteConfigUtil.getBrandLink());
+            }
+        });
 
         //MediationTestSuite.launch(MainActivity.this);
         appUpdateManager = AppUpdateManagerFactory.create(this);
@@ -138,16 +165,28 @@ public class MainActivity extends AppCompatActivity {
         carouselView = findViewById(R.id.carouselView);
 
         carouselView.setPageCount(3);
-        carouselView.setViewListener(viewListener);
+        //carouselView.setViewListener(viewListener);
+        carouselView.setViewListener(adViewListener);
+        //carouselView.setImageListener(imageListener);
+        //startImageCarousel(0);
+
+        carouselView.setImageClickListener(new ImageClickListener() {
+            @Override
+            public void onClick(int position) {
+                Toast.makeText(MainActivity.this, "Clicked item: "+ position, Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         carouselView.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                //startImageCarousel(position);
             }
 
             @Override
             public void onPageSelected(int position) {
-                updateCounter(position);
+                //startImageCarousel(position);
             }
 
             @Override
@@ -180,9 +219,8 @@ public class MainActivity extends AppCompatActivity {
         View headerView = nv.getHeaderView(0);
         navTextView = headerView.findViewById(R.id.nav_header_textView);
         ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
-        ImageView ivRating = headerView.findViewById(R.id.iv_rating);
-        ivRating.setVisibility(View.VISIBLE);
-        navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(), "artic"));
+        //ImageView ivRating = headerView.findViewById(R.id.iv_rating);
+        //ivRating.setVisibility(View.VISIBLE);
 
         totalRatingForAllStatus = 0L;
 
@@ -192,7 +230,89 @@ public class MainActivity extends AppCompatActivity {
         computeInfluencerRankBasedOnActivity();
 
         getNumberOfFollowers();
+
+        navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(following),String.valueOf(totalGiftCoin)));
     }
+
+    private void openWebView(String brandLink) {
+        Intent intent = new Intent();
+        intent.setData(Uri.parse(brandLink));
+        intent.setAction(Intent.ACTION_VIEW);
+        startActivity(intent);
+    }
+
+    ViewListener adViewListener = new ViewListener() {
+        @Override
+        public View setViewForPosition(int position) {
+            View customView = getLayoutInflater().inflate(R.layout.single_item_carousel_ad_view,null);
+
+            TextView labelTextView = (TextView) customView.findViewById(R.id.adDescription);
+            ImageView fruitImageView = (ImageView) customView.findViewById(R.id.adImageView);
+
+            switch (position){
+                case 0: {
+                    RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
+                    String imageOne = remoteConfigUtil.getCarouselOneImage();
+                    //labelTextView.setText(sampleTitles[position]);
+                    Picasso.get().load(imageOne).into(fruitImageView);
+
+                    fruitImageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(MainActivity.this,"Hello",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    break;
+                }
+                case 1: {
+                    RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
+                    String imageTwo = remoteConfigUtil.getCarouselTwoImage();
+                    //labelTextView.setText(sampleTitles[position]);
+
+                    Picasso.get().load(imageTwo).into(fruitImageView);
+                    break;
+                }
+                case 2: {
+                    RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
+                    String imageThree = remoteConfigUtil.getCarouselThreeImage();
+                    //labelTextView.setText(sampleTitles[position]);
+                    Picasso.get().load(imageThree).into(fruitImageView);
+                    break;
+                }
+            }
+
+            carouselView.setIndicatorGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP);
+            return customView;
+        }
+    };
+
+
+    ImageListener imageListener = (position, imageView) -> {
+        switch (position){
+            case 0: {
+
+                RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
+                String imageOne = remoteConfigUtil.getCarouselOneImage();
+                Log.d("AmHere",imageOne.toString());
+                Picasso.get().load(imageOne).into(imageView);
+                break;
+            }
+            case 1: {
+                RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
+                String imageTwo = remoteConfigUtil.getCarouselTwoImage();
+                Log.d("AmHere",imageTwo.toString());
+                Picasso.get().load(imageTwo).into(imageView);
+                break;
+            }
+            case 2: {
+                RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
+                String imageThree = remoteConfigUtil.getCarouselThreeImage();
+                Log.d("AmHere",imageThree.toString());
+                Picasso.get().load(imageThree).into(imageView);
+                break;
+            }
+        }
+    };
 
     ViewListener viewListener = position -> {
         @SuppressLint("InflateParams") View customView = getLayoutInflater().inflate(R.layout.single_item_customer_carousel_report, null);
@@ -242,6 +362,7 @@ public class MainActivity extends AppCompatActivity {
     private void selectDrawerItem(MenuItem menuitem) {
         if (menuitem.getItemId() == R.id.navigation_gifting_history) {
             carouselView.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             MyGiftHistoryFragment myGiftHistoryFragment = new MyGiftHistoryFragment();
             openFragment(myGiftHistoryFragment);
         }
@@ -253,6 +374,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (menuitem.getItemId() == R.id.navigation_view_reward_deal) {
             carouselView.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             MerchantStoryList merchantStoryList = new MerchantStoryList();
             openFragment(merchantStoryList);
         }
@@ -265,6 +387,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (menuitem.getItemId() == R.id.navigation_view_brand_preference) {
             carouselView.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             BrandPreferenceFragment brandPreferenceFragment = new BrandPreferenceFragment();
             openFragment(brandPreferenceFragment);
         }
@@ -272,6 +395,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateCounter(int position) {
+
+        switch (position) {
+            case 0: {
+                getTotalGiftCoin();
+                long totalGiftCoinSum = totalGiftCoin == 0L ? 0L : totalGiftCoin;
+                holderList.get(0).reportValue.setText(String.valueOf(totalGiftCoinSum));
+                break;
+            }
+            case 1: {
+                long latestAmount = latestAmountRedeemed == null ? 0L : latestAmountRedeemed;
+                holderList.get(1).reportValue.setText(String.valueOf(latestAmount));
+                break;
+            }
+
+            case 2: {
+                long influencerPoint = totalRatingForAllStatus == null ? 0L : totalRatingForAllStatus;
+                holderList.get(2).reportValue.setText(String.valueOf(influencerPoint));
+                break;
+            }
+        }
+    }
+
+    private void updateImage(int position) {
 
         switch (position) {
             case 0: {
@@ -351,6 +497,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (item.getItemId() == R.id.customer_refresh_page) {
             carouselView.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
@@ -358,21 +505,25 @@ public class MainActivity extends AppCompatActivity {
 
         if (item.getItemId() == R.id.update_info) {
             carouselView.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             SettingsFragment settingsFragment = new SettingsFragment();
             openFragment(settingsFragment);
         }
         if (item.getItemId() == R.id.about_giftin) {
             carouselView.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             AboutFragment aboutFragment = new AboutFragment();
             openFragment(aboutFragment);
         }
         if (item.getItemId() == R.id.referwin) {
             carouselView.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             shareAppLink();
         }
 
         if (item.getItemId() == R.id.cash_out) {
             carouselView.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             CashoutFragment cashoutFragment = new CashoutFragment();
             openFragment(cashoutFragment);
         }
