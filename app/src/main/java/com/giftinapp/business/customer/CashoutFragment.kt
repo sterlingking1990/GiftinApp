@@ -28,6 +28,7 @@ import com.giftinapp.business.utility.runOnUiThread
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.jakewharton.rxbinding2.view.enabled
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_cashout.*
 import kotlinx.coroutines.CoroutineScope
@@ -324,10 +325,11 @@ class CashoutFragment : Fragment() {
 
                     }
                     Resource.Status.SUCCESS -> {
-                        bankListView.setText("click to select bank")
                         if (!it.data?.data.isNullOrEmpty()) {
                             bankData= it.data?.data?.toList()!!
                         }
+                        bankListView.setText("click to select bank")
+                        bankListView.isEnabled = true
                     }
                     Resource.Status.ERROR -> {
                         bankListView.setText("unable to load bank")
