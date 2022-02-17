@@ -14,9 +14,12 @@ import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -37,8 +40,10 @@ import com.giftinapp.business.customer.MerchantStoryList;
 import com.giftinapp.business.customer.MyGiftHistoryFragment;
 import com.giftinapp.business.customer.SettingsFragment;
 import com.giftinapp.business.utility.RemoteConfigUtil;
+import com.giftinapp.business.utility.Resource;
 import com.giftinapp.business.utility.SessionManager;
 import com.giftinapp.business.utility.StorySession;
+import com.github.javiersantos.appupdater.AppUpdater;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -65,18 +70,23 @@ import com.synnapps.carouselview.ImageClickListener;
 import com.synnapps.carouselview.ImageListener;
 import com.synnapps.carouselview.ViewListener;
 
+import org.jsoup.Jsoup;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import kotlinx.coroutines.CoroutineScope;
 
 
-@AndroidEntryPoint
+ @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
     public SessionManager sessionManager;
     public StorySession storySession;
     public AlertDialog.Builder builder;
+     public AlertDialog.Builder builder2;
     public TextView navTextView;
     public ImageView ivRating;
 
@@ -94,8 +104,6 @@ public class MainActivity extends AppCompatActivity {
 
     public Long totalRatingForAllStatus = null;
 
-    AppUpdateManager appUpdateManager;
-
     public Integer counter = 0;
 
     public Integer following = 0;
@@ -110,6 +118,8 @@ public class MainActivity extends AppCompatActivity {
 
     Button btnExploreBrand;
 
+    String imageOne = "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1";
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +128,25 @@ public class MainActivity extends AppCompatActivity {
         MobileAds.initialize(this); {
 
         }
+
+        AppUpdater appUpdater = new AppUpdater(this)
+        .setTitleOnUpdateAvailable("Update available")
+                .setContentOnUpdateAvailable("Check out the latest version available of my app!")
+                .setTitleOnUpdateNotAvailable("Update not available")
+                .setContentOnUpdateNotAvailable("No update available. Check for updates again later!")
+                .setButtonUpdate("Update now?")
+                .setButtonUpdateClickListener((dialogInterface, i) -> MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + MainActivity.this.getPackageName()))))
+                .setButtonDismiss("Maybe later")
+                .setButtonDismissClickListener((dialogInterface, i) -> {
+
+                })
+	            .setButtonDoNotShowAgain("Huh, not interested")
+                .setButtonDoNotShowAgainClickListener((dialogInterface, i) -> {
+
+                })
+	            .setIcon(R.drawable.system_software_update) // Notification icon
+                .setCancelable(false); // Dialog could not be dismissable
+                appUpdater.start();
 
         btnExploreBrand = findViewById(R.id.btnExploreBrand);
 
@@ -131,34 +160,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //MediationTestSuite.launch(MainActivity.this);
-        appUpdateManager = AppUpdateManagerFactory.create(this);
-
-// Returns an intent object that you use to check for an update.
-        com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
-
-// Checks that the platform will allow the specified type of update.
-        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-                    // This example applies an immediate update. To apply a flexible update
-                    // instead, pass in AppUpdateType.FLEXIBLE
-                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-                // Request the update.
-
-                try {
-                    appUpdateManager.startUpdateFlowForResult(
-                            // Pass the intent that is returned by 'getAppUpdateInfo()'.
-                            appUpdateInfo,
-                            // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
-                            AppUpdateType.IMMEDIATE,
-                            // The current activity making the update request.
-                            this,
-                            // Include a request code to later monitor this update request.
-                            1);
-                } catch (IntentSender.SendIntentException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
 
         mauth = FirebaseAuth.getInstance();
@@ -198,7 +199,28 @@ public class MainActivity extends AppCompatActivity {
         drawer = findViewById(R.id.drawer_layout);
         t = new ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
-        drawer.addDrawerListener(t);
+        drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+                getTotalGiftCoin();
+                getNumberOfFollowers();
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
         t.syncState();
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -214,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
 
         storySession = new StorySession(this);
 
-        builder = new AlertDialog.Builder(getApplicationContext());
+        builder = new AlertDialog.Builder(MainActivity.this);
 
         View headerView = nv.getHeaderView(0);
         navTextView = headerView.findViewById(R.id.nav_header_textView);
@@ -227,14 +249,15 @@ public class MainActivity extends AppCompatActivity {
         getTotalGiftCoin();
         getLatestAmountRedeemed();
         getInfluencerPoints();
-        computeInfluencerRankBasedOnActivity();
+        //computeInfluencerRankBasedOnActivity();
 
         getNumberOfFollowers();
+
 
         navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(following),String.valueOf(totalGiftCoin)));
     }
 
-    private void openWebView(String brandLink) {
+     private void openWebView(String brandLink) {
         Intent intent = new Intent();
         intent.setData(Uri.parse(brandLink));
         intent.setAction(Intent.ACTION_VIEW);
@@ -252,9 +275,11 @@ public class MainActivity extends AppCompatActivity {
             switch (position){
                 case 0: {
                     RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
-                    String imageOne = remoteConfigUtil.getCarouselOneImage();
+                    imageOne = remoteConfigUtil.getCarouselOneImage();
                     //labelTextView.setText(sampleTitles[position]);
-                    Picasso.get().load(imageOne).into(fruitImageView);
+                    if(!imageOne.equals("")) {
+                        Picasso.get().load(imageOne).into(fruitImageView);
+                    }
 
                     fruitImageView.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -573,6 +598,7 @@ public class MainActivity extends AppCompatActivity {
                             Double giftCoin = queryDocumentSnapshot.getDouble("gift_coin");
                             totalGiftCoin += giftCoin;
                         }
+                        navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(sessionManager.getFollowingCount()),String.valueOf(totalGiftCoin)));
                     } else {
                         totalGiftCoin = 0L;
                     }
@@ -627,6 +653,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
 
+
                         }
                     }
                 });
@@ -652,7 +679,7 @@ public class MainActivity extends AppCompatActivity {
                             if (documentSnapshot.getBoolean("influencer_first_saw_a_brands_post") != null) {
                                 Boolean influencerFirstSawPost = documentSnapshot.getBoolean("influencer_first_saw_a_brands_post");
                                 if (influencerFirstSawPost) {
-                                    navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(), "pioneer"));
+                                    //navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(), "pioneer"));
                                 }
                             }
 
@@ -683,46 +710,6 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra(Intent.EXTRA_TEXT, mInvitationUrl.toString());
                     startActivity(Intent.createChooser(intent, "Share Brandible With"));
                 });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        appUpdateManager
-                .getAppUpdateInfo()
-                .addOnSuccessListener(appUpdateInfo -> {
-                    // If the update is downloaded but not installed,
-                    // notify the user to complete the update.
-                    if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
-                        popupSnackbarForCompleteUpdate();
-                    }
-                });
-    }
-
-    private void popupSnackbarForCompleteUpdate() {
-        Snackbar snackbar =
-                Snackbar.make(
-                        findViewById(R.id.rl_activity_main),
-                        "An update has just been downloaded.",
-                        Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("RESTART", view -> appUpdateManager.completeUpdate());
-        snackbar.setActionTextColor(
-                getResources().getColor(R.color.tabColorLight));
-        snackbar.show();
-    }
-
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-            if (resultCode != RESULT_OK) {
-                Log.d("UpdateFlowFailed", String.valueOf(resultCode));
-                // If the update is cancelled or fails,
-                // you can request to start the update again.
-            }
-        }
     }
 
 
@@ -759,11 +746,13 @@ public class MainActivity extends AppCompatActivity {
                                                                     following += 1;
                                                                 }
                                                             }
+                                                            Log.d("Followers",following.toString());
 
                                                             if (counter == result.getDocuments().size()) {
                                                                 sessionManager.setFollowingCount(following);
 
                                                             }
+                                                            navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(sessionManager.getFollowingCount()),String.valueOf(totalGiftCoin)));
                                                         }
                                                     }
 

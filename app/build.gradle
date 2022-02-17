@@ -24,7 +24,7 @@ android {
         applicationId "com.giftinapp.business"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 61
+        versionCode 62
         versionName "1.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -153,6 +153,8 @@ dependencies {
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation 'com.google.firebase:firebase-config-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
+
+    implementation 'com.github.javiersantos:AppUpdater:2.7'
 }
 repositories {
     mavenCentral()

@@ -84,4 +84,6 @@
     <string name="rated_by">Rated By: %1$s</string>
 
     <string name="amount_to_cashout">cashout\namount-\n#%1$s</string>
+    <string name="youAreNotUpdatedMessage">There are new features now available to explore and enjoy</string>
+    <string name="youAreNotUpdatedMessage1">update now</string>
 </resources>
