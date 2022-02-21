@@ -378,12 +378,12 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                                 for ((key, value) in map) {
                                     if (key == "statusReachAndWorthPojo") {
                                        val data:Map<String, Int> = value as Map<String, Int>
-                                       for((key2, value2) in data) {
-                                           if(key2 =="status_worth"){
-                                               statusWorth = value2
+                                       for((eachKey,eachValue) in data.entries) {
+                                           if(eachKey =="status_worth"){
+                                               statusWorth = eachValue
                                            }
-                                           if(key2 == "status_reach"){
-                                               statusReach = value2
+                                           if(eachKey == "status_reach"){
+                                               statusReach = eachValue
                                            }
 
                                            totalStatusWorthAndReachProduct += (statusWorth * statusReach)
@@ -435,6 +435,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         //check if wallet balance is higher than proposed advert cost( status_worth*num_of_reach for all status )
 
         if (merchantWallet > totalStatusWorthAndReachProduct) {
+
             val db = FirebaseFirestore.getInstance()
             // [END get_firestore_instance]
 

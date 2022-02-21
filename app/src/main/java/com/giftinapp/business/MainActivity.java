@@ -385,12 +385,12 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void selectDrawerItem(MenuItem menuitem) {
-        if (menuitem.getItemId() == R.id.navigation_gifting_history) {
-            carouselView.setVisibility(View.GONE);
-            btnExploreBrand.setVisibility(View.GONE);
-            MyGiftHistoryFragment myGiftHistoryFragment = new MyGiftHistoryFragment();
-            openFragment(myGiftHistoryFragment);
-        }
+//        if (menuitem.getItemId() == R.id.navigation_gifting_history) {
+//            carouselView.setVisibility(View.GONE);
+//            btnExploreBrand.setVisibility(View.GONE);
+//            MyGiftHistoryFragment myGiftHistoryFragment = new MyGiftHistoryFragment();
+//            openFragment(myGiftHistoryFragment);
+//        }
 //        if (menuitem.getItemId() == R.id.navigation_gifting_merchant) {
 //            carouselView.setVisibility(View.GONE);
 //            GiftingMerchantFragment giftingMerchantFragment = new GiftingMerchantFragment();

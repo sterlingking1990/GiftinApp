@@ -15,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.*
-import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
@@ -23,7 +22,6 @@ import com.giftinapp.business.R
 import com.giftinapp.business.model.*
 import com.giftinapp.business.utility.*
 import com.google.android.gms.ads.*
-import com.google.android.gms.ads.initialization.AdapterStatus
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.gms.tasks.OnCompleteListener
@@ -31,8 +29,6 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.skydoves.elasticviews.ElasticFinishListener
-import com.skydoves.elasticviews.elasticAnimation
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -588,11 +584,15 @@ class CustomerRewardStories : Fragment() {
                                 val bonusFromDb = referrerDoc["gift_coin"] as Long
                                 val totalBonus = bonusFromDb + rewardAmount
                                 db.collection("users").document(sessionManager.getEmail().toString()).collection("rewards").document("GiftinAppBonus").update("gift_coin", totalBonus, "isRedeemed", false)
-                                numberOfTimeUserGotRewardOnABrandStatus+=1
-                                updateInfluencerActivityForFirstToSeeBrandParticularStatus()
-                                playCongratulationsMusic()
-                                storyWorth = 0
-
+                                    .addOnCompleteListener {
+                                        if(it.isSuccessful){
+                                            numberOfTimeUserGotRewardOnABrandStatus+=1
+                                            updateInfluencerActivityForFirstToSeeBrandParticularStatus()
+                                            updateStoryOwnerWalletBasedOnView(rewardAmount)
+                                            playCongratulationsMusic()
+                                            storyWorth = 0
+                                        }
+                                    }
                             } else {
                                 //does not have so we create it newly
 
@@ -612,6 +612,59 @@ class CustomerRewardStories : Fragment() {
 
                         //logic to handle when user does not have a giftinBonus
                     })
+    }
+
+    private fun updateStoryOwnerWalletBasedOnView(rewardAmount: Int) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        //get wallet balance
+        db.collection("merchants").document(storyOwner.toString()).collection("reward_wallet").document("deposit").get()
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    val result = it.result
+                    val walletAmount = result.get("merchant_wallet_amount")
+
+                    val totalAmount = walletAmount as Long - rewardAmount.toLong()
+                    Log.d("totalAmount",totalAmount.toString())
+                    updateTotalAmount(totalAmount)
+
+                }
+            }
+
+    }
+
+    private fun updateTotalAmount(totalAmount: Long) {
+
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        val merchantWalletPojo = MerchantWalletPojo()
+        merchantWalletPojo.merchant_wallet_amount = totalAmount
+
+        Log.d("TOTALAMOUNTUpdate",totalAmount.toString())
+
+        //get wallet balance
+        db.collection("merchants").document(storyOwner.toString()).collection("reward_wallet").document("deposit").set(merchantWalletPojo)
+
     }
 
     private fun updateInfluencerActivityForFirstToSeeBrandParticularStatus() {

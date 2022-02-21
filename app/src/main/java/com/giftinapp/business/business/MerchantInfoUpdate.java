@@ -35,6 +35,8 @@ public class MerchantInfoUpdate extends Fragment {
     public EditText etAddress;
     public TextView tvGiftorId;
 
+    EditText etBrandname;
+
     public Button btnUpdateMerchantInfo;
 
     public SessionManager sessionManager;
@@ -58,14 +60,14 @@ public class MerchantInfoUpdate extends Fragment {
         etFacebook=view.findViewById(R.id.et_facebook);
         etInstagram=view.findViewById(R.id.et_instagram);
         etWhatsApp=view.findViewById(R.id.et_whatsapp);
-        etAddress=view.findViewById(R.id.et_address);
+        etBrandname=view.findViewById(R.id.et_brandname);
         tvGiftorId = view.findViewById(R.id.tv_giftor_id);
 
         builder = new AlertDialog.Builder(requireContext());
 
         btnUpdateMerchantInfo=view.findViewById(R.id.btn_update_merchant_info);
 
-        String[] giftorId = new String[]{"use my email", "use my facebook", "use my instagram", "use my whatsapp"};
+        String[] giftorId = new String[]{"use my email", "use my facebook", "use my instagram", "use my whatsapp", "use brand name"};
         ArrayAdapter<String> spGiftorAdapter = new ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, giftorId);
         spGiftorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -93,6 +95,8 @@ public class MerchantInfoUpdate extends Fragment {
                         break;
                     case "use my whatsapp":
                         selectedGiftorId = etWhatsApp.getText().toString();
+                    case "use brand name":
+                        selectedGiftorId = etBrandname.getText().toString();
                         break;
                 }
             }
@@ -119,7 +123,7 @@ public class MerchantInfoUpdate extends Fragment {
 
         btnUpdateMerchantInfo.setOnClickListener(v->{
             updateUserInfo(etFacebook.getText().toString(),etInstagram.getText().toString(),etWhatsApp.getText().toString(),
-                    etAddress.getText().toString(),selectedGiftorId);
+                    etBrandname.getText().toString(),selectedGiftorId);
         });
 
     }
@@ -149,6 +153,7 @@ public class MerchantInfoUpdate extends Fragment {
         merchantInfoUpdatePojo.whatsapp=whatsAppInput;
         merchantInfoUpdatePojo.address=addressInput;
 
+        assert email != null;
         db.collection("merchants").document(email).update("facebook",facebookInput,"instagram",instagramInput,
                 "whatsapp",whatsAppInput,"address",addressInput,"giftorId", giftorIdInput)
                 .addOnCompleteListener(task -> {
@@ -179,7 +184,7 @@ public class MerchantInfoUpdate extends Fragment {
                             etFacebook.setText(documentSnapshot.get("facebook").toString());
                             etInstagram.setText(documentSnapshot.get("instagram").toString());
                             etWhatsApp.setText(documentSnapshot.get("whatsapp").toString());
-                            etAddress.setText(documentSnapshot.get("address").toString());
+                            etBrandname.setText(documentSnapshot.get("address").toString());
                             String giftorText = documentSnapshot.get("giftorId") != null ? "brand Id" + "<b><p>" +  "* " + documentSnapshot.get("giftorId").toString() + "</p></b> " : "brand Id" + "<b><p>" +  "* " + documentSnapshot.getId() + "</p></b> ";
                             tvGiftorId.setText(Html.fromHtml(giftorText));
 

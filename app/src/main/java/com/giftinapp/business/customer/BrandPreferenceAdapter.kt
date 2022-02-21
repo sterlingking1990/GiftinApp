@@ -139,13 +139,19 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val charSearch = constraint.toString()
                 val filteredList:MutableList<GiftingMerchantViewPojo> = ArrayList()
+
                 if (charSearch.isEmpty()) {
                     filteredList.addAll(giftinMerchantListAll)
                 } else {
                     for (row in giftinMerchantListAll) {
-                        if (row.giftingMerchantId.toString().contains(constraint.toString().toLowerCase(Locale.ROOT))) {
-                            filteredList.add(row)
-                        }
+                        val isContain = row.giftingMerchantId.toLowerCase().replace(" ","").contains(charSearch.toLowerCase(
+                            Locale.ROOT
+                        )
+                        )
+                        if(isContain) filteredList.add(row)
+//                        if (row.giftingMerchantId.contains(constraint.toString().toLowerCase(Locale.ROOT))) {
+//                            filteredList.add(row)
+//                        }
                     }
                 }
                 val filterResults = FilterResults()

@@ -1,14 +1,21 @@
 package com.giftinapp.business.customer
 
 import android.content.DialogInterface
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
+import android.text.Html
 import android.text.TextWatcher
+import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,7 +28,9 @@ import com.giftinapp.business.utility.SessionManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import java.net.URLEncoder
 import java.util.*
+
 
 class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon {
     private var brandPreferenceAdapter: BrandPreferenceAdapter? = null
@@ -100,7 +109,7 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val giftingMerchantViewPojos = ArrayList<GiftingMerchantViewPojo>()
-                        for (document in Objects.requireNonNull(task.result)!!) {
+                        for (document in Objects.requireNonNull(task.result)) {
 
                             val giftingMerchantViewPojo = GiftingMerchantViewPojo()
 
@@ -114,7 +123,9 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
                             }
                             giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo
                             giftingMerchantViewPojo.numberOfCustomerGifted = 0
-                            giftingMerchantViewPojo.giftingMerchantId = document.id
+                            giftingMerchantViewPojo.giftingMerchantId =    if (document.getString("giftorId") != null) document.getString(
+                                "giftorId"
+                            ) else document.id
                             if (giftingMerchantViewPojo.giftingMerchantId != sessionManager?.getEmail()) {
                                 pgLoading?.visibility = View.GONE
                                 giftingMerchantViewPojos.add(giftingMerchantViewPojo)
@@ -141,15 +152,49 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
     }
 
     override fun openMerchantFacebookDetail(facebookHandle: String) {
-
+        try {
+            if(facebookHandle.isNotEmpty() && facebookHandle!="not provided"){
+            val url = "https://facebook.com/$facebookHandle"
+            val i = Intent(Intent.ACTION_VIEW)
+            i.data = Uri.parse(url)
+            startActivity(i)
+        }
+        }catch (e: Exception) {
+            Toast.makeText(requireContext(), "Please Install Instagram to continue chat", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun openMerchantInstagramDetail(instagramHandle: String) {
+        try {
+            if(instagramHandle.isNotEmpty() && instagramHandle!="not provided") {
+                val url = "https://instagram.com/$instagramHandle"
+                val i = Intent(Intent.ACTION_VIEW)
+                i.data = Uri.parse(url)
+                startActivity(i)
+            }
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Please Install Instagram to continue chat", Toast.LENGTH_SHORT).show()
+        }
 
     }
 
     override fun openMerchantWhatsApp(whatsApp: String) {
-
+        try {
+            if(whatsApp.isNotEmpty() && whatsApp!="not provided") {
+                val msg = "Hi, I am chatting you up from *Brandible*"
+                val url = "https://api.whatsapp.com/send?phone=${
+                    "+234$whatsApp" + "&text=" + URLEncoder.encode(
+                        msg,
+                        "UTF-8"
+                    )
+                }"
+                val i = Intent(Intent.ACTION_VIEW)
+                i.data = Uri.parse(url)
+                startActivity(i)
+            }
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Please Install WhatsApp to continue chat", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun togglePreference(brandId: String, btnToggleBrandStatus: String) {
