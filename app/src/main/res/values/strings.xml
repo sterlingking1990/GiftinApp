@@ -51,7 +51,7 @@
     <string name="giftinapp_link">https://giftinapp.page.link/getgifts</string>
     <string name="share_link">Share</string>
     <string name="about_giftin">With Brandible, you earn for every time your favourite brand promotes their product, service or any deal and wishes you to make first impression (viewing and/or liking) about it. Stay up and active on Brandible to always be among those who earn.</string>
-    <string name="about_brandible">Brandible is your market first impression tool. 1. Create a product, promotion, service or any deal story, 2. set reward for when users make impression(view and/or like), 3. Relax and see how users react to it. Brandible aids you to make market decisions as fast and as cheap as possible.</string>
+    <string name="about_brandible">Brandible is your market first impression tool.\n 1. Create and upload your brand product story.\n 2. Set reward for when Influencers make impression(view and/or like) on them, \n 3. Get DM from interested Influencers to close deals.\n \n get audible as fast and as cheap as possible.</string>
     <string name="navigation_drawer_open">open</string>
     <string name="navigation_drawer_close">close</string>
     <string name="default_notification_channel_id">GIFTINAPPMESSAGING</string>
@@ -80,10 +80,14 @@
     <string name="number_of_reach">number of reach(%1$s)</string>
     <string name="influenca_name_and_status">%1$s\nbrands following (%2$s)\ncredits (%3$s)</string>
     <string name="rate_influencer">Rate Influencer</string>
-
+    <string name="brand_name_and_status">%1$s\nFollowers (%2$s)</string>
     <string name="rated_by">Rated By: %1$s</string>
 
     <string name="amount_to_cashout">cashout\namount-\n#%1$s</string>
     <string name="youAreNotUpdatedMessage">There are new features now available to explore and enjoy</string>
     <string name="youAreNotUpdatedMessage1">update now</string>
+
+    <string name="terms_and_condition"><a href="https://www.notion.so/Brandible-Terms-and-Condition-98b33ae92a73480591b64e2046095d92">Terms and Condition</a></string>
+    <string name="terms_and_condition_link">https://www.notion.so/Brandible-Terms-and-Condition-98b33ae92a73480591b64e2046095d92</string>
+
 </resources>

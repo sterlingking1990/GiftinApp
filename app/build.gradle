@@ -24,8 +24,8 @@ android {
         applicationId "com.giftinapp.business"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 62
-        versionName "1.6"
+        versionCode 64
+        versionName "1.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -110,7 +110,7 @@ public class MerchantInfoUpdate extends Fragment {
         tvGiftorId.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                builder.setMessage("This appears in the email sent when you reward influencer. " +
+                builder.setMessage("This is the name influencers will search for when they want to follow your brand. " +
                         "Make sure you select an option you are known by generally")
                         .setCancelable(true)
                         .setPositiveButton("OK", (dialog, id) -> {

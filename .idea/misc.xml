@@ -5,14 +5,17 @@
       <map>
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1598731884057971" />
+        <entry key="app/src/main/res/layout/activity_merchant.xml" value="0.29791666666666666" />
         <entry key="app/src/main/res/layout/activity_signup.xml" value="0.15217391304347827" />
         <entry key="app/src/main/res/layout/fragment_about.xml" value="0.15217391304347827" />
         <entry key="app/src/main/res/layout/fragment_brand_preference.xml" value="0.15217391304347827" />
         <entry key="app/src/main/res/layout/fragment_cashout.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_customer_reward_stories.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_gift_a_customer.xml" value="0.21105072463768115" />
+        <entry key="app/src/main/res/layout/fragment_giftin_about_for_merchant.xml" value="0.5" />
         <entry key="app/src/main/res/layout/fragment_merchant_gift_stats.xml" value="0.14488348530901723" />
-        <entry key="app/src/main/res/layout/fragment_merchant_info_update.xml" value="0.15217391304347827" />
+        <entry key="app/src/main/res/layout/fragment_merchant_info_update.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/fragment_rate_influencer.xml" value="0.17447916666666666" />
         <entry key="app/src/main/res/layout/fragment_set_reward_deal.xml" value="0.18478260869565216" />
         <entry key="app/src/main/res/layout/main_nav_header_menu.xml" value="0.33" />
         <entry key="app/src/main/res/layout/single_item_brand_preference.xml" value="0.21" />

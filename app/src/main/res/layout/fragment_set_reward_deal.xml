@@ -59,24 +59,15 @@
 
             </FrameLayout>
 
-    <ImageView
-        android:id="@+id/btnChoosePhoto"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_below="@+id/viewImage"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="25dp"
-        android:layout_weight="1"
-        android:elevation="10dp"
-        android:src="@drawable/ic_insert_photo"/>
-
         <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/ll_take_photos"
+            android:id="@+id/ll_brand_statistics"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_marginStart="10dp"
             android:orientation="horizontal"
-            android:weightSum="4"
+            android:layout_gravity="center"
+            android:visibility="visible"
+            android:weightSum="3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/viewImage">
@@ -85,8 +76,8 @@
                 android:id="@+id/tvNumberOfViewers"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_weight="2"
+                android:layout_weight="1"
+                android:visibility="invisible"
                 android:drawableTint="@color/black"
                 android:padding="20dp"
                 android:text="0"
@@ -94,12 +85,21 @@
                 android:textSize="20sp"
                 app:drawableStartCompat="@drawable/ic_number_of_viewers" />
 
+            <com.skydoves.elasticviews.ElasticImageView
+                android:id="@+id/btnChoosePhoto"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="10dp"
+                android:elevation="10dp"
+                android:src="@drawable/ic_insert_photo"/>
+
             <TextView
                 android:id="@+id/tvNumberOfLikes"
-                android:layout_width="253dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
                 android:layout_weight="1"
+                android:visibility="invisible"
                 android:drawableTint="@color/black"
                 android:padding="20dp"
                 android:text="0"
@@ -113,7 +113,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/ll_take_photos"
+        app:layout_constraintTop_toBottomOf="@id/ll_brand_statistics"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:weightSum="1"

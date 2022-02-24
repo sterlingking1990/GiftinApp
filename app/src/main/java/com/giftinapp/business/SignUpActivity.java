@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.giftinapp.business.model.UserPojo;
@@ -59,6 +60,8 @@ public class SignUpActivity extends AppCompatActivity {
 
     public Boolean isPasswordVisible = false;
 
+    TextView tvTermsAndCondition;
+
     @Override
     @SuppressLint("ClickableViewAccessibility")
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +74,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(getApplicationContext());
 
+        tvTermsAndCondition = findViewById(R.id.tvTermsAndCondition);
 
         String[] loginMode = new String[]{"As Influencer", "As Brand"};
         ArrayAdapter<String> loginModeAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, loginMode);
@@ -91,6 +95,10 @@ public class SignUpActivity extends AppCompatActivity {
         spInterest.setAdapter(loginModeAdapter);
 
 
+
+        tvTermsAndCondition.setOnClickListener(v-> {
+            startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(getString(R.string.terms_and_condition_link))));
+        });
 
         btnSignUp.setOnClickListener(v -> {
             if(etFirstname.getText().toString().isEmpty() || etLastname.getText().toString().isEmpty()){

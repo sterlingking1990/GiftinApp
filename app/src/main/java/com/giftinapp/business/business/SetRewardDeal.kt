@@ -21,6 +21,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -599,6 +600,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 .addOnCompleteListener {
                     if(it.isSuccessful){
                         val result = it.result
+                        tvNumberOfLikes.isVisible = true
                         tvNumberOfLikes.text = result?.size().toString()?:"0"
                     }
                 }
@@ -607,6 +609,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 .addOnCompleteListener {
                     if(it.isSuccessful){
                         val result = it.result
+                        tvNumberOfViewers.isVisible = true
                         tvNumberOfViewers.text = result?.size().toString()?:"0"
                     }
                 }

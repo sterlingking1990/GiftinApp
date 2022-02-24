@@ -223,6 +223,23 @@
 
     </LinearLayout>
 
+    <com.skydoves.elasticviews.ElasticLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:flow_horizontalAlign="center"
+        app:layout_constraintTop_toBottomOf="@id/ll_signin_notice"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        >
+        <TextView
+            android:id="@+id/tvTermsAndCondition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/terms_and_condition"
+            />
+    </com.skydoves.elasticviews.ElasticLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

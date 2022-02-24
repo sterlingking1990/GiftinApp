@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
         AppUpdater appUpdater = new AppUpdater(this)
         .setTitleOnUpdateAvailable("Update available")
-                .setContentOnUpdateAvailable("Check out the latest version available of my app!")
+                .setContentOnUpdateAvailable("Check out the latest version for Brandible!")
                 .setTitleOnUpdateNotAvailable("Update not available")
                 .setContentOnUpdateNotAvailable("No update available. Check for updates again later!")
                 .setButtonUpdate("Update now?")

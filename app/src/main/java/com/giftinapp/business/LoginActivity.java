@@ -277,8 +277,8 @@ public class LoginActivity extends AppCompatActivity {
                                                         }
                                                         else{
                                                             //Toast.makeText(getApplicationContext(),"This account might not exist as a business or is not yet a verified business by giftinApp",Toast.LENGTH_LONG).show();
-                                                            builder.setMessage("This account is not a verified brand account." +
-                                                                    "If you have signed up as a brand, please contact Brandible on +2348060456301 for quick verification.")
+                                                            builder.setMessage("This account is not yet a verified brand account." +
+                                                                    "If you have signed up as a brand, please contact Brandible on brandibleinc@gmail.com for quick verification.")
                                                                     .setCancelable(false)
                                                                     .setPositiveButton("OK", (dialog, id) -> {
                                                                     });

@@ -13,14 +13,18 @@ import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.giftinapp.business.business.GiftACustomerFragment;
 import com.giftinapp.business.business.GiftinAboutForMerchant;
@@ -31,7 +35,9 @@ import com.giftinapp.business.business.SetRewardDeal;
 import com.giftinapp.business.business.WalletInfo;
 import com.giftinapp.business.customer.BrandPreferenceFragment;
 import com.giftinapp.business.customer.MerchantStoryList;
+import com.giftinapp.business.utility.RemoteConfigUtil;
 import com.giftinapp.business.utility.SessionManager;
+import com.github.javiersantos.appupdater.AppUpdater;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -69,6 +75,12 @@ public class MerchantActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
+    public RemoteConfigUtil remoteConfigUtil;
+
+    Button btnExploreBrand;
+
+    String imageOne = "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1";
+
     protected CarouselView carouselViewMerchant;
 
     protected SparseArray<MerchantReportsViewHolder> holderListMerchant = new SparseArray<>();
@@ -81,11 +93,10 @@ public class MerchantActivity extends AppCompatActivity {
     private ActionBarDrawerToggle t;
     private NavigationView nv;
 
-    AppUpdateManager appUpdateManager;
-
     public Integer counter = 0;
 
     public Integer following = 0;
+    TextView navTextView;
 
 
     @Override
@@ -95,36 +106,28 @@ public class MerchantActivity extends AppCompatActivity {
 
         MobileAds.initialize(this); {}
 
-        appUpdateManager = AppUpdateManagerFactory.create(this);
-
         PaystackSdk.initialize(getApplicationContext());
         // Returns an intent object that you use to check for an update.
-        com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
 
-        // Checks that the platform will allow the specified type of update.
-        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-                    // This example applies an immediate update. To apply a flexible update
-                    // instead, pass in AppUpdateType.FLEXIBLE
-                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-                // Request the update.
+        AppUpdater appUpdater = new AppUpdater(this)
+                .setTitleOnUpdateAvailable("Update available")
+                .setContentOnUpdateAvailable("Check out the latest version for Brandible!")
+                .setTitleOnUpdateNotAvailable("Update not available")
+                .setContentOnUpdateNotAvailable("No update available. Check for updates again later!")
+                .setButtonUpdate("Update now?")
+                .setButtonUpdateClickListener((dialogInterface, i) -> MerchantActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + MerchantActivity.this.getPackageName()))))
+                .setButtonDismiss("Maybe later")
+                .setButtonDismissClickListener((dialogInterface, i) -> {
 
-                try {
-                    appUpdateManager.startUpdateFlowForResult(
-                            // Pass the intent that is returned by 'getAppUpdateInfo()'.
-                            appUpdateInfo,
-                            // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
-                            AppUpdateType.IMMEDIATE,
-                            // The current activity making the update request.
-                            this,
-                            // Include a request code to later monitor this update request.
-                            1);
-                } catch (IntentSender.SendIntentException e) {
-                    e.printStackTrace();
-                }
+                })
+                .setButtonDoNotShowAgain("Huh, not interested")
+                .setButtonDoNotShowAgainClickListener((dialogInterface, i) -> {
 
-            }
-        });
+                })
+                .setIcon(R.drawable.system_software_update) // Notification icon
+                .setCancelable(false); // Dialog could not be dismissable
+                appUpdater.start();
+
 
         sessionManager = new SessionManager(getApplicationContext());
 
@@ -146,15 +149,16 @@ public class MerchantActivity extends AppCompatActivity {
         });
 
         View headerView = nv.getHeaderView(0);
-        TextView navTextView = headerView.findViewById(R.id.nav_header_textView);
+        navTextView = headerView.findViewById(R.id.nav_header_textView);
         ImageView navImageView = headerView.findViewById(R.id.nav_header_imageView);
 //        Picasso.get().load(R.drawable.ic_brandible_icon).into(navImageView);
-        navTextView.setText(Objects.requireNonNull(mAuth.getCurrentUser()).getEmail());
+        navTextView.setText(getResources().getString(R.string.brand_name_and_status, Objects.requireNonNull(mAuth.getCurrentUser()).getEmail(),String.valueOf(following)));
 
         carouselViewMerchant = findViewById(R.id.carouselView);
 
         carouselViewMerchant.setPageCount(3);
-        carouselViewMerchant.setViewListener(viewListener);
+        //carouselViewMerchant.setViewListener(viewListener);
+        carouselViewMerchant.setViewListener(adViewListener);
 
         carouselViewMerchant.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -163,7 +167,7 @@ public class MerchantActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                updateCounter(position);
+                //updateCounter(position);
             }
 
             @Override
@@ -171,7 +175,70 @@ public class MerchantActivity extends AppCompatActivity {
 
             }
         });
+
+        btnExploreBrand = findViewById(R.id.btnExploreBrand);
+        remoteConfigUtil = new RemoteConfigUtil();
+        btnExploreBrand.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openWebView(remoteConfigUtil.getBrandLink());
+            }
+        });
     }
+
+    private void openWebView(String brandLink) {
+        Intent intent = new Intent();
+        intent.setData(Uri.parse(brandLink));
+        intent.setAction(Intent.ACTION_VIEW);
+        startActivity(intent);
+    }
+
+    ViewListener adViewListener = new ViewListener() {
+        @Override
+        public View setViewForPosition(int position) {
+            View customView = getLayoutInflater().inflate(R.layout.single_item_carousel_ad_view,null);
+
+            TextView labelTextView = (TextView) customView.findViewById(R.id.adDescription);
+            ImageView merchantBrandImageView = (ImageView) customView.findViewById(R.id.adImageView);
+
+            switch (position){
+                case 0: {
+                    RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
+                    imageOne = remoteConfigUtil.getCarouselOneImage();
+                    //labelTextView.setText(sampleTitles[position]);
+                    if(!imageOne.equals("")) {
+                        Picasso.get().load(imageOne).into(merchantBrandImageView);
+                    }
+
+                    merchantBrandImageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(MerchantActivity.this,"Hello",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    break;
+                }
+                case 1: {
+                    RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
+                    String imageTwo = remoteConfigUtil.getCarouselTwoImage();
+                    //labelTextView.setText(sampleTitles[position]);
+
+                    Picasso.get().load(imageTwo).into(merchantBrandImageView);
+                    break;
+                }
+                case 2: {
+                    RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
+                    String imageThree = remoteConfigUtil.getCarouselThreeImage();
+                    //labelTextView.setText(sampleTitles[position]);
+                    Picasso.get().load(imageThree).into(merchantBrandImageView);
+                    break;
+                }
+            }
+
+            carouselViewMerchant.setIndicatorGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP);
+            return customView;
+        }
+    };
 
     ViewListener viewListener = position -> {
         @SuppressLint("InflateParams") View customView = getLayoutInflater().inflate(R.layout.single_item_merchant_carousel_report,null);
@@ -232,10 +299,12 @@ public class MerchantActivity extends AppCompatActivity {
 
         switch (position) {
             case 0: {
-                getNumberOfCustomersGifted();
-                long totalGiftCoinSum= numberOfCustomerGifted==null ? 0L : numberOfCustomerGifted;
-                holderListMerchant.get(0).reportValue.setText(String.valueOf(totalGiftCoinSum));
-                break;
+//                getNumberOfCustomersGifted();
+//                long totalGiftCoinSum= numberOfCustomerGifted==null ? 0L : numberOfCustomerGifted;
+//                holderListMerchant.get(0).reportValue.setText(String.valueOf(totalGiftCoinSum));
+//                break;
+
+                //getBrandImpressionCount();
             }
 //            case 1: {
 //                getTotalAmountGifted();
@@ -258,6 +327,12 @@ public class MerchantActivity extends AppCompatActivity {
                 break;
             }
         }
+    }
+
+    private void getBrandImpressionCount() {
+        //brand impression count is the total number of brand stories that have gotten impressions i.e views, or likes or dms
+        //usually gotten views
+
     }
 
     public static class MerchantReportsViewHolder {
@@ -343,7 +418,7 @@ public class MerchantActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             numberOfCustomerGifted=0;
                             for (QueryDocumentSnapshot queryDocumentSnapshot:task.getResult()){
-                               numberOfCustomerGifted+=1;
+                                numberOfCustomerGifted+=1;
                             }
                         }
                         else{
@@ -381,12 +456,14 @@ public class MerchantActivity extends AppCompatActivity {
                 return true;
             case R.id.merchant_update_info:
                 carouselViewMerchant.setVisibility(View.GONE);
+                btnExploreBrand.setVisibility(View.GONE);
                 MerchantInfoUpdate merchantInfoUpdate = new MerchantInfoUpdate();
                 openFragment(merchantInfoUpdate);
                 return true;
 
             case R.id.merchant_about_giftin:
                 carouselViewMerchant.setVisibility(View.GONE);
+                btnExploreBrand.setVisibility(View.GONE);
                 GiftinAboutForMerchant giftinAboutForMerchant = new GiftinAboutForMerchant();
                 openFragment(giftinAboutForMerchant);
                 return true;
@@ -427,6 +504,7 @@ public class MerchantActivity extends AppCompatActivity {
 //        }
         if(menuitem.getItemId() == R.id.navigation_wallet_info){
             carouselViewMerchant.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             WalletInfo walletInfo = new WalletInfo();
             openFragment(walletInfo);
         }
@@ -438,11 +516,13 @@ public class MerchantActivity extends AppCompatActivity {
 
         else if(menuitem.getItemId() == R.id.navigation_set_reward_deal) {
             carouselViewMerchant.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             SetRewardDeal setRewardDeal = new SetRewardDeal();
             openFragment(setRewardDeal);
         }
         else if(menuitem.getItemId() == R.id.navigation_view_reward_deal) {
             carouselViewMerchant.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             MerchantStoryList merchantStoryList = new MerchantStoryList();
             openFragment(merchantStoryList);
         }
@@ -454,6 +534,7 @@ public class MerchantActivity extends AppCompatActivity {
 
         else if(menuitem.getItemId() == R.id.navigation_merchant_follow_brands){
             carouselViewMerchant.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
             BrandPreferenceFragment brandPreferenceFragment = new BrandPreferenceFragment();
             openFragment(brandPreferenceFragment);
         }
@@ -489,42 +570,13 @@ public class MerchantActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        appUpdateManager
-                .getAppUpdateInfo()
-                .addOnSuccessListener(appUpdateInfo -> {
-                    // If the update is downloaded but not installed,
-                    // notify the user to complete the update.
-                    if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
-                        popupSnackbarForCompleteUpdate();
-                    }
-                });
     }
 
-
-    private void popupSnackbarForCompleteUpdate() {
-        Snackbar snackbar =
-                Snackbar.make(
-                        findViewById(R.id.cl_activity_main_merchant),
-                        "An update has just been downloaded.",
-                        Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("RESTART", view -> appUpdateManager.completeUpdate());
-        snackbar.setActionTextColor(
-                getResources().getColor(R.color.tabColorLight));
-        snackbar.show();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(data!=null){
             Log.d("Data",data.toString());
-        }
-        if (requestCode == 1) {
-            if (resultCode != RESULT_OK) {
-                Log.d("UpdateFlowFailed", String.valueOf(resultCode));
-                // If the update is cancelled or fails,
-                // you can request to start the update again.
-            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -540,42 +592,20 @@ public class MerchantActivity extends AppCompatActivity {
                 .build();
         db.setFirestoreSettings(settings);
 
-        db.collection("merchants").get()
+        db.collection("merchants").document(sessionManager.getEmail()).collection("followers").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            QuerySnapshot result = task.getResult();
-                            if (result != null) {
-                                List<DocumentSnapshot> eachRes = result.getDocuments();
-                                for (int i = 0; i < eachRes.size(); i++) {
-                                    counter += 1;
-                                    db.collection("merchants").document(eachRes.get(i).getId()).collection("followers").get()
-                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<QuerySnapshot> followersTask) {
-                                                    if (followersTask.isSuccessful()) {
-                                                        QuerySnapshot followersQuerry = followersTask.getResult();
-                                                        if (followersQuerry != null) {
-                                                            List<DocumentSnapshot> eachFollower = followersQuerry.getDocuments();
-                                                            for (int j = 0; j < eachFollower.size(); j++) {
-                                                                if (eachFollower.get(j).getId().equals(sessionManager.getEmail())) {
-                                                                    following += 1;
-                                                                }
-                                                            }
+                    public void onComplete(@NonNull Task<QuerySnapshot> followersTask) {
+                        if (followersTask.isSuccessful()) {
+                            QuerySnapshot followersQuerry = followersTask.getResult();
+                            if (followersQuerry != null) {
+                                following = followersQuerry.size();
+                                sessionManager.setFollowingCount(following);
 
-                                                            if (counter == result.getDocuments().size()) {
-                                                                sessionManager.setFollowingCount(following);
-
-                                                            }
-                                                        }
-                                                    }
-
-                                                }
-                                            });
-                                }
+                                navTextView.setText(getResources().getString(R.string.brand_name_and_status, Objects.requireNonNull(mAuth.getCurrentUser()).getEmail(),String.valueOf(following)));
                             }
                         }
+
                     }
                 });
     }
