@@ -26,7 +26,7 @@
             android:layout_weight="1"
             android:enabled="false"
             android:inputType="none"
-            android:text="" />
+            android:text="Click to select bank" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout

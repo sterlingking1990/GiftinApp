@@ -47,7 +47,6 @@ class CashoutFragment : Fragment() {
     private val transferViewModel:TransferViewModel by viewModels()
 
     private lateinit var bankAndCodeList:MutableMap<String, String>
-    private var onlyBanks:MutableList<String> = mutableListOf()
     private var bankData:List<DataXXX> = listOf()
     private lateinit var arrayBankListAdapter:ArrayAdapter<String>
 
@@ -74,13 +73,14 @@ class CashoutFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        arrayBankListAdapter = ArrayAdapter(requireContext(),R.layout.single_bank_item,onlyBanks)
+//        arrayBankListAdapter = ArrayAdapter(requireContext(),R.layout.single_bank_item,onlyBanks)
 
         sessionManager = SessionManager(requireContext())
         sessionManager.setCashoutAmount(0.0)
         loadAmountToCashOut()
+        bankListView.isEnabled = true
 
-        bankListView.setText("loading banks ...")
+       // bankListView.setText("loading banks ...")
 
         builder = AlertDialog.Builder(requireContext())
 
@@ -92,11 +92,6 @@ class CashoutFragment : Fragment() {
 
         handleClicks()
 
-        getBanksViewModel.getBankList()
-
-        bankListView.setOnClickListener {
-            loadBanksToAdapter()
-        }
 
     }
 
@@ -161,6 +156,11 @@ class CashoutFragment : Fragment() {
 
 
     private fun handleClicks(){
+        bankListView.setOnClickListener {
+            getBanksViewModel.getBankList()
+            //loadBanksToAdapter()
+        }
+
         btnVerifyAccount.setOnClickListener {
             val bankSelected = bankListView.text.toString()
             bankCode = bankAndCodeList[bankSelected].toString()
@@ -303,6 +303,7 @@ class CashoutFragment : Fragment() {
     }
 
     private fun loadBanksToAdapter(){
+        val onlyBanks:MutableList<String> = mutableListOf()
         for (i in bankData) {
             val key = i.name
             if(!onlyBanks.contains(key)){
@@ -310,15 +311,17 @@ class CashoutFragment : Fragment() {
                 bankAndCodeList[key] = i.code
             }
         }
-        arrayBankListAdapter =
-            ArrayAdapter(requireContext(), R.layout.single_bank_item, onlyBanks)
-        bankListView.setAdapter(arrayBankListAdapter)
+        if(onlyBanks.size>0) {
+            arrayBankListAdapter =
+                ArrayAdapter(requireContext(), R.layout.single_bank_item, onlyBanks)
+            bankListView.setAdapter(arrayBankListAdapter)
+        }
     }
 
 
     private fun handleObservers(){
         getBanksViewModel.bankListObservable.observeOnce(viewLifecycleOwner) {
-            //Log.d("BankList",it.data.toString())
+
             if (it != null) {
                 when (it.status) {
                     Resource.Status.LOADING -> {
@@ -327,9 +330,9 @@ class CashoutFragment : Fragment() {
                     Resource.Status.SUCCESS -> {
                         if (!it.data?.data.isNullOrEmpty()) {
                             bankData= it.data?.data?.toList()!!
+                            loadBanksToAdapter()
                         }
-                        bankListView.setText("click to select bank")
-                        bankListView.isEnabled = true
+
                     }
                     Resource.Status.ERROR -> {
                         bankListView.setText("unable to load bank")
