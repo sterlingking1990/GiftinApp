@@ -1,5 +1,6 @@
 package com.giftinapp.business.network.services.cashoutservices
 
+import com.giftinapp.business.model.FetchBanksResponse
 import com.giftinapp.business.network.cashoutmodel.*
 import retrofit2.Response
 import retrofit2.http.*
@@ -11,7 +12,7 @@ interface CashOutApiService {
                                     @Query("bank_code") bank_code:String): Response<VerifyAccountResponse>
 
     @GET("/bank?country=nigeria")
-    suspend fun getBankLists():Response<BankResponse>
+    suspend fun getBankLists():FetchBanksResponse
 
     @POST("transferrecipient")
     suspend fun initiateTransferProcess(@Header("Authorization") authorization: String, @Body transferRequestModel: InitiateTransferRequestModel):Response<InitiateTransferResponseModel>

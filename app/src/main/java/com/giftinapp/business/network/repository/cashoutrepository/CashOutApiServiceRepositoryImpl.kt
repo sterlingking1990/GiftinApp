@@ -1,5 +1,6 @@
 package com.giftinapp.business.network.repository.cashoutrepository
 
+import com.giftinapp.business.model.FetchBanksResponse
 import com.giftinapp.business.network.cashoutmodel.*
 import com.giftinapp.business.network.services.cashoutservices.CashOutApiServiceMethod
 import retrofit2.Response
@@ -10,7 +11,7 @@ class CashOutApiServiceRepositoryImpl @Inject constructor(private val cashOutApi
         return cashOutApiServiceMethod.verifyAccountNumber(authorization,account_number,bank_code)
     }
 
-    override suspend fun getBankLists(): Response<BankResponse> {
+    override suspend fun getBankLists(): FetchBanksResponse {
         return cashOutApiServiceMethod.getBankLists()
     }
 

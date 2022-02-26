@@ -1,5 +1,6 @@
 package com.giftinapp.business.network.services.cashoutservices
 
+import com.giftinapp.business.model.FetchBanksResponse
 import com.giftinapp.business.network.cashoutmodel.*
 import com.giftinapp.business.network.services.cashoutservices.CashOutApiService
 import com.giftinapp.business.network.services.cashoutservices.CashOutApiServiceMethod
@@ -11,7 +12,7 @@ class CashOutServiceMethodImpl @Inject constructor(private val cashOutApiService
         return cashOutApiService.verifyAccountNumber(authorization,account_number,bank_code)
     }
 
-    override suspend fun getBankLists(): Response<BankResponse> {
+    override suspend fun getBankLists(): FetchBanksResponse {
         return cashOutApiService.getBankLists()
     }
 

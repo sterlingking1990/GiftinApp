@@ -119,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
     Button btnExploreBrand;
 
     String imageOne = "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1";
+    String imageTwo = "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1";
+    String imageThree = "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1";
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -291,7 +293,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 case 1: {
                     RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
-                    String imageTwo = remoteConfigUtil.getCarouselTwoImage();
+                    imageTwo = remoteConfigUtil.getCarouselTwoImage();
                     //labelTextView.setText(sampleTitles[position]);
 
                     Picasso.get().load(imageTwo).into(fruitImageView);
@@ -299,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 case 2: {
                     RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
-                    String imageThree = remoteConfigUtil.getCarouselThreeImage();
+                    imageThree = remoteConfigUtil.getCarouselThreeImage();
                     //labelTextView.setText(sampleTitles[position]);
                     Picasso.get().load(imageThree).into(fruitImageView);
                     break;
@@ -764,4 +766,4 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-}
+ }

@@ -29,6 +29,11 @@ fun View.show() {
     if (this.visibility != View.VISIBLE)
         this.visibility = View.VISIBLE
 }
+
+fun View.visible() {
+    this.visibility = View.VISIBLE
+}
+
 fun View.gone() {
     if (this.visibility != View.GONE)
         this.visibility = View.GONE

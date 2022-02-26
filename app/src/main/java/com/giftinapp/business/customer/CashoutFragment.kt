@@ -7,28 +7,27 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.giftinapp.business.BuildConfig
 import com.giftinapp.business.MainActivity
 import com.giftinapp.business.R
-import com.giftinapp.business.model.InitiateTransactionReceiptPojo
-import com.giftinapp.business.model.RewardPojo
-import com.giftinapp.business.model.TransferReferenceModel
+import com.giftinapp.business.model.*
 import com.giftinapp.business.network.cashoutmodel.DataXXX
 import com.giftinapp.business.network.cashoutmodel.InitiateTransferRequestModel
 import com.giftinapp.business.network.cashoutmodel.TransferModel
 import com.giftinapp.business.network.viewmodel.cashoutviewmodel.*
-import com.giftinapp.business.utility.Resource
-import com.giftinapp.business.utility.SessionManager
-import com.giftinapp.business.utility.runOnUiThread
+import com.giftinapp.business.utility.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.jakewharton.rxbinding2.view.enabled
+import com.synnapps.carouselview.CarouselView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_cashout.*
 import kotlinx.coroutines.CoroutineScope
@@ -38,7 +37,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.floor
 
 @AndroidEntryPoint
-class CashoutFragment : Fragment() {
+class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
 
     private val getBanksViewModel:GetBanksViewModel by viewModels()
@@ -46,17 +45,17 @@ class CashoutFragment : Fragment() {
     private val initiateTransferViewModel:InitiateTransferViewModel by viewModels()
     private val transferViewModel:TransferViewModel by viewModels()
 
-    private lateinit var bankAndCodeList:MutableMap<String, String>
-    private var bankData:List<DataXXX> = listOf()
-    private lateinit var arrayBankListAdapter:ArrayAdapter<String>
+    private var bankNameAndCode = ArrayList<BankItem>()
 
     private lateinit var sessionManager: SessionManager
+
+    private var bankName: String? = null
+    private var bankCode: String? = null
 
     private lateinit var totalAmountToCashOut:String
 
     var builder: AlertDialog.Builder? = null
 
-    private lateinit var bankCode:String
     private lateinit var accountNumber:String
     private lateinit var recipientCode:String
 
@@ -75,16 +74,19 @@ class CashoutFragment : Fragment() {
 
 //        arrayBankListAdapter = ArrayAdapter(requireContext(),R.layout.single_bank_item,onlyBanks)
 
+
         sessionManager = SessionManager(requireContext())
         sessionManager.setCashoutAmount(0.0)
         loadAmountToCashOut()
-        bankListView.isEnabled = true
+
+        bank_spinner.onItemSelectedListener = this
+        //bankListView.isEnabled = true
 
        // bankListView.setText("loading banks ...")
 
         builder = AlertDialog.Builder(requireContext())
 
-        bankAndCodeList = mutableMapOf()
+        fetchBanks()
 
         handleObservers()
 
@@ -93,6 +95,10 @@ class CashoutFragment : Fragment() {
         handleClicks()
 
 
+    }
+
+    private fun fetchBanks() {
+        getBanksViewModel.getBankList()
     }
 
     private fun checkIfCanCashOut(){
@@ -156,21 +162,11 @@ class CashoutFragment : Fragment() {
 
 
     private fun handleClicks(){
-        bankListView.setOnClickListener {
-            getBanksViewModel.getBankList()
-            //loadBanksToAdapter()
-        }
 
         btnVerifyAccount.setOnClickListener {
-            val bankSelected = bankListView.text.toString()
-            bankCode = bankAndCodeList[bankSelected].toString()
             accountNumber = et_account_number.text.toString()
-
-            if(bankSelected == "select bank"){
-                Toast.makeText(requireContext(), "Please select your bank before verification", Toast.LENGTH_LONG).show()
-            }
-            else if(accountNumber.isEmpty()){
-                Toast.makeText(requireContext(), "Please enter your account number", Toast.LENGTH_LONG).show()
+            if(accountNumber.isEmpty() || bankCode.isNullOrEmpty()){
+                Toast.makeText(requireContext(), "Bank and Account Number must be provided", Toast.LENGTH_LONG).show()
             }
             else {
                 verifyAccountViewModel.verifyAccountNumber("Bearer ${BuildConfig.PSTACK_AUTHKEY}", accountNumber, bankCode.toString())
@@ -188,8 +184,13 @@ class CashoutFragment : Fragment() {
     }
 
     private fun initiateTransfer(){
-        val initiateTransferRequest = InitiateTransferRequestModel("nuban", et_AccountName.text.toString(), et_account_number.text.toString(), bankCode, "NGN")
-        initiateTransferViewModel.initiateTransferProcess("Bearer ${BuildConfig.PSTACK_AUTHKEY}", initiateTransferRequest)
+        val initiateTransferRequest = bankCode?.let {
+            InitiateTransferRequestModel("nuban", et_AccountName.text.toString(), et_account_number.text.toString(),
+                it, "NGN")
+        }
+        if (initiateTransferRequest != null) {
+            initiateTransferViewModel.initiateTransferProcess("Bearer ${BuildConfig.PSTACK_AUTHKEY}", initiateTransferRequest)
+        }
     }
 
     private fun updateInfluencerBalance(){
@@ -302,40 +303,27 @@ class CashoutFragment : Fragment() {
         }
     }
 
-    private fun loadBanksToAdapter(){
-        val onlyBanks:MutableList<String> = mutableListOf()
-        for (i in bankData) {
-            val key = i.name
-            if(!onlyBanks.contains(key)){
-                onlyBanks.add(key)
-                bankAndCodeList[key] = i.code
-            }
-        }
-        if(onlyBanks.size>0) {
-            arrayBankListAdapter =
-                ArrayAdapter(requireContext(), R.layout.single_bank_item, onlyBanks)
-            bankListView.setAdapter(arrayBankListAdapter)
-        }
-    }
-
 
     private fun handleObservers(){
-        getBanksViewModel.bankListObservable.observeOnce(viewLifecycleOwner) {
-
+        getBanksViewModel.bankListResponse.observe(viewLifecycleOwner) {
             if (it != null) {
                 when (it.status) {
                     Resource.Status.LOADING -> {
-
+                        progress_bar.visible()
+                        dropdown.gone()
                     }
                     Resource.Status.SUCCESS -> {
-                        if (!it.data?.data.isNullOrEmpty()) {
-                            bankData= it.data?.data?.toList()!!
-                            loadBanksToAdapter()
-                        }
-
+                        dropdown.visible()
+                        progress_bar.gone()
+                        loadBankSpinner(it.data)
                     }
                     Resource.Status.ERROR -> {
-                        bankListView.setText("unable to load bank")
+                        progress_bar.gone()
+                        Toast.makeText(
+                            requireContext(),
+                            "Unable to fetch banks",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -370,6 +358,7 @@ class CashoutFragment : Fragment() {
                             Toast.LENGTH_LONG
                         ).show()
                         btnVerifyAccount.isEnabled = true
+                        btnVerifyAccount.text = "Verify Account"
                     }
                 }
             }
@@ -506,5 +495,48 @@ class CashoutFragment : Fragment() {
         transferViewModel.transferToBank(BuildConfig.PSTACK_AUTHKEY, transferRequest)
     }
 
+    private fun getBankCode(bankName: String): String? {
+        var code: String? = null
+        bankNameAndCode.forEach { bank ->
+            if (bank.name == bankName) {
+                code = bank.code
+            }
+        }
+        return code
+    }
+
+    private fun loadBankSpinner(data: FetchBanksResponse?) {
+        bankNameAndCode = getBanksViewModel.sortBanks(data)
+        val list = arrayListOf<String>()
+        list.add("")
+        bankNameAndCode.forEach {
+            it.name?.let { it1 -> list.add(it1) }
+        }
+        bankNameAndCode
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            list.distinct()
+        )
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        bank_spinner.adapter = adapter
+    }
+
+    override fun onItemSelected(parent: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+        bankName = parent?.getItemAtPosition(position).toString()
+
+        bankCode = getBankCode(bankName!!)
+    }
+
+    override fun onNothingSelected(p0: AdapterView<*>?) {
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val carousel = activity?.findViewById<CarouselView>(R.id.carouselView)
+        carousel?.isVisible= false
+
+    }
 
 }
