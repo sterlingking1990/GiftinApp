@@ -161,6 +161,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                                             eachList.getBoolean("seen")
                                                                         merchantStoryListPojo.storyTag =
                                                                             eachList.getString("storyTag")
+                                                                        merchantStoryListPojo.storyAudioLink = eachList.getString("storyAudioLink")
                                                                         merchantStoryListPojo.merchantStatusImageLink =
                                                                             eachList.getString("merchantStatusImageLink")
                                                                         //val merchantStoryListPojo = eachList.toObject(MerchantStoryListPojo::class.java)
@@ -245,7 +246,6 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
     }
 
     private fun checkFollowingRate(){
-        Log.d("NumNum",sessionManager.getFollowingCount().toString())
         if(sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="customer"){
             pgLoading.visibility = View.GONE
                     builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
@@ -272,7 +272,6 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
     }
 
     override fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, storyOwner: String) {
-        Log.d("StoryOwner",storyOwner)
 
             val fragment = CustomerRewardStories()
             val fm = fragmentManager

@@ -67,7 +67,9 @@ import java.util.List;
 import java.util.Objects;
 
 import co.paystack.android.PaystackSdk;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class MerchantActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigation;
 

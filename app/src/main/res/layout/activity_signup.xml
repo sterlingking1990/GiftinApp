@@ -216,8 +216,8 @@
             app:button_cornerRadius="4dp"
             app:button_duration="250"
             app:button_scale="0.87"
-            android:textColor="@android:color/white"
-            android:background="@color/cardview_dark_background"
+            android:textColor="?attr/actionButtonTextColor"
+            android:background="?attr/actionButtonsColor"
             android:layout_weight="1"
             android:text="@string/sign_in" />
 

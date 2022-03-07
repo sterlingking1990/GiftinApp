@@ -12,6 +12,15 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+
+        <item name="actionButtonsColor">@color/cardview_dark_background</item>
+        <item name="actionButtonTextColor">@color/whitesmoke</item>
+        <item name="cardBackground">@color/tabColorLight</item>
+        <item name="followingButton">@color/tabColorLight</item>
+        <item name="textColorForInputEdit">@color/tabColorLight</item>
+        <item name="inputEditBackground">@color/cardview_dark_background</item>
+        <item name="hintColorForTextInput">@color/tabColor</item>
+        <item name="drawerBackground">@color/drawerBackgroundLight</item>
     </style>
 
     <!-- Dark Buttons -->
@@ -58,4 +67,9 @@
 <!--        &lt;!&ndash; The color of the label when it is collapsed and the text field is active &ndash;&gt;-->
 <!--    </style>-->
 
+    <style name="TextInputStyling" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+        <item name="boxStrokeColor">@color/tabColor</item>
+    </style>
+
+    
 </resources>

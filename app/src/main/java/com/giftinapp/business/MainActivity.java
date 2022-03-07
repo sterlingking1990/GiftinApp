@@ -80,7 +80,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import kotlinx.coroutines.CoroutineScope;
 
 
- @AndroidEntryPoint
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
     public SessionManager sessionManager;

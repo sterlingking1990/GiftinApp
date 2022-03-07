@@ -16,6 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Brandible"
+        android:textColor="@color/black"
         android:textSize="20sp"
         />
 
@@ -26,6 +27,7 @@
         android:padding="5dp"
         android:text="@string/about_giftin"
         android:gravity="center_vertical"
+        android:textColor="@color/black"
         android:lineSpacingExtra="4dp"
         android:layout_gravity="center"/>
     <!-- This adds a border between the TextViews -->

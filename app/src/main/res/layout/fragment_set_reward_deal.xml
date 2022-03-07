@@ -56,6 +56,17 @@
                     android:textColor="@color/whitesmoke"
                     android:textSize="18sp" />
 
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    app:backgroundTint="@color/whitesmoke"
+                    android:id="@+id/playAudioBtn"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/play_back_icon"
+                    android:contentDescription="Play Audio" />
 
             </FrameLayout>
 
@@ -139,6 +150,36 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="20dp"
+            android:gravity="center"
+            android:weightSum="4"
+            >
+
+            <ImageView
+                android:id="@+id/cancelAudioButton"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_height="60dp"
+                android:visibility="gone"
+                app:srcCompat="@drawable/cancel_record"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/recordAudioBtn"
+                android:layout_width="wrap_content"
+                android:layout_weight="2"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/mic_icon"
+                android:contentDescription="Record button" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/ll_selectStatusViewWorth"
@@ -292,6 +333,15 @@
                 android:autoLink="web"
                 style="@style/TextAppearance.AppCompat.Headline"/>
 
+            <TextView
+                android:id="@+id/tv_audio_download_uri"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/tv_download_uri"
+                android:textAlignment="center"
+                android:text=""
+                style="@style/TextAppearance.AppCompat.Headline"/>
+
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
@@ -308,7 +358,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
-
 
     </LinearLayout>
 </ScrollView>

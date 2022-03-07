@@ -9,6 +9,7 @@ import android.graphics.Canvas
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
@@ -19,6 +20,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
 import androidx.core.view.isVisible
@@ -29,7 +32,10 @@ import com.giftinapp.business.R
 import com.giftinapp.business.model.BannerPojo
 import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.StatusReachAndWorthPojo
+import com.giftinapp.business.utility.AudioRecorderPlayer
 import com.giftinapp.business.utility.SessionManager
+import com.giftinapp.business.utility.gone
+import com.giftinapp.business.utility.visible
 import com.google.android.material.slider.Slider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -38,13 +44,16 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageMetadata
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.fragment_set_reward_deal.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.util.*
+import javax.inject.Inject
 import kotlin.collections.ArrayList
 
-
+@AndroidEntryPoint
 class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUploadedStory, BannerAdapter.ClickableBanner {
 
     private lateinit var imageContainer: ImageView
@@ -58,6 +67,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
     private lateinit var storage: FirebaseStorage
 
     private lateinit var tvDownloadUri: TextView
+    private lateinit var tvAudioDownloadUri:TextView
 
     private lateinit var uploadedStoryRecyclerView: RecyclerView
 
@@ -100,6 +110,19 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
     private lateinit var tvNumberOfViewers:TextView
     private lateinit var tvNumberOfLikes:TextView
 
+    private var isRecording:Boolean = false
+    private var isPlayerInstantiated = false
+    private var isPlaying = false
+
+    private var currentIdx = -1
+    private val fileNameList: MutableList<String> = mutableListOf()
+    private val fileList: MutableList<File?> = mutableListOf()
+    private val mediaUrls: MutableList<String> = mutableListOf()
+
+    private val MICROPHONE_PERMISSION_CODE = 200
+
+    @Inject
+    lateinit var audioRecorderPlayer: AudioRecorderPlayer
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -124,6 +147,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         uploadGalleryImageButton = view.findViewById(R.id.btnChoosePhoto)
 
         tvDownloadUri = view.findViewById(R.id.tv_download_uri)
+        tvAudioDownloadUri = view.findViewById(R.id.tv_audio_download_uri)
 
         uploadedStoryRecyclerView = view.findViewById(R.id.rv_uploaded_stories)
 
@@ -150,6 +174,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         sessionManager = SessionManager(requireContext())
 
         tvDownloadUri.visibility = View.GONE
+        tvAudioDownloadUri.visibility = View.GONE
 
         imageEditText.addTextChangedListener(imageEditTextWatcher)
 
@@ -168,7 +193,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
 
         uploadButton.setOnClickListener {
-            uploadRewardMeme()
+            uploadRewardMemeAndAudioIfProvided()
         }
 
         uploadGalleryImageButton.setOnClickListener {
@@ -210,6 +235,121 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
         }
 
+        if(isMicrophonePresent() == true){
+            getMicrophonePermission()
+        }
+
+        recordAudioBtn.setOnClickListener {
+            if(!isRecording){
+                isPlayerInstantiated = true
+                recordAudio()
+            }else{
+                stopRecordAudio()
+            }
+        }
+
+        playAudioBtn.setOnClickListener {
+            if(tvAudioDownloadUri.text!=""){
+                isPlaying = if (!isPlaying) {
+                    playAudio()
+                    true
+                } else {
+                    stopPlayingAudio()
+                    false
+                }
+            }else {
+                if (currentIdx > -1) {
+                    isPlaying = if (!isPlaying) {
+                        playAudio()
+                        true
+                    } else {
+                        stopPlayingAudio()
+                        false
+                    }
+                } else {
+                    Toast.makeText(
+                        context,
+                        "You need to record before you can play",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+
+        cancelAudioButton.setOnClickListener {
+            cancelAudioButton.gone()
+            recordAudioBtn.visible()
+            playAudioBtn.gone()
+            recordAudioBtn.setImageResource(R.drawable.mic_icon)
+            fileNameList.clear()
+            fileList.clear()
+            currentIdx = -1
+            Toast.makeText(context, "Audio cancelled", Toast.LENGTH_LONG).show()
+        }
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (isPlayerInstantiated) audioRecorderPlayer.releasePlayer()
+    }
+
+    private fun recordAudio(){
+        tvAudioDownloadUri.text = ""
+        context?.let {
+            val fileName = UUID.randomUUID().toString() + ".3gp"
+            val file =
+                File(it.getExternalFilesDir(Environment.DIRECTORY_PODCASTS), fileName)
+            currentIdx += 1
+            fileList.add(file)
+            fileNameList.add(fileName)
+            audioRecorderPlayer.recordAudio(file)
+            isRecording = true
+            recordAudioBtn.setImageResource(R.drawable.stop_icon)
+        }
+    }
+
+    private fun stopRecordAudio(){
+        audioRecorderPlayer.stopRecordingAudio()
+        isRecording = false
+        recordAudioBtn.gone()
+        cancelAudioButton.visible()
+        playAudioBtn.visible()
+    }
+
+    private fun playAudio(){
+        if(tvAudioDownloadUri.text!="") {
+            context?.let {
+                playAudioBtn.setImageResource(R.drawable.stop_icon)
+                audioRecorderPlayer.playRecordingFromFirebase(tvAudioDownloadUri.text.toString())
+            }
+        }else{
+        val currentFileName = fileNameList[currentIdx]
+        Log.d("CurrentFile",currentFileName)
+        context?.let {
+            playAudioBtn.setImageResource(R.drawable.stop_icon)
+            val file =
+                File(it.getExternalFilesDir(Environment.DIRECTORY_PODCASTS), currentFileName)
+            Log.d("FileFile",file.absolutePath)
+            audioRecorderPlayer.playRecording(file)
+            }
+        }
+    }
+
+    private fun stopPlayingAudio(){
+        playAudioBtn.setImageResource(R.drawable.play_back_icon)
+        audioRecorderPlayer.stopPlayingRecording()
+    }
+
+    private fun isMicrophonePresent(): Boolean? {
+        return context?.packageManager?.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
+    }
+
+    private fun getMicrophonePermission(){
+        if(context?.let { ContextCompat.checkSelfPermission(it,android.Manifest.permission.RECORD_AUDIO) } ==PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(requireActivity(),
+                listOf(android.Manifest.permission.RECORD_AUDIO).toTypedArray(),MICROPHONE_PERMISSION_CODE)
+        }
     }
 
     private fun loadImagesToList(){
@@ -283,7 +423,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
     }
 
 
-    fun uploadRewardMeme() {
+    fun uploadRewardMemeAndAudioIfProvided() {
 
         //check if the user has money in his wallet worth more than or e
         val bitmap = Bitmap.createBitmap(imageContainer.width, imageContainer.height, Bitmap.Config.ARGB_8888);
@@ -333,11 +473,55 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
             if (task.isSuccessful) {
                 val downloadUri = task.result
                 tvDownloadUri.text = downloadUri.toString()
-                uploadUriAndStoryTagToFireStore()
+                if(!fileList.isNullOrEmpty()){
+                    fileList[currentIdx]?.let { uploadAudio(it) }
+                }else {
+                    uploadUriAndStoryTagToFireStore()
+                }
             } else {
                 // Handle failures
                 // ...
                 Toast.makeText(requireContext(), "Could not get uri of image, please try uploading again", Toast.LENGTH_LONG).show()
+                pgUploading.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun uploadAudio(file: File) {
+        val audioPath = "rewardmemes/" + UUID.randomUUID() + ".3gp"
+        val reference = storage.getReference(audioPath)
+        val uploadTask = reference.putFile(Uri.fromFile(file))
+
+        pgUploading.visibility = View.VISIBLE
+
+        uploadTask.addOnCompleteListener(requireActivity()) { it ->
+
+            if (it.isSuccessful) {
+                Log.d("RM", "successfullyUploaded")
+                pgUploading.visibility = View.GONE
+                uploadButton.isEnabled = true
+
+
+            }
+
+        }
+
+        uploadTask.continueWithTask{ task ->
+            if (!task.isSuccessful) {
+                task.exception?.let {
+                    throw it
+                }
+            }
+            reference.downloadUrl
+        }.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val downloadUri = task.result
+                tvAudioDownloadUri.text = downloadUri.toString()
+                uploadUriAndStoryTagToFireStore()
+            } else {
+                // Handle failures
+                // ...
+                Toast.makeText(requireContext(), "Could not get uri of audio, please try uploading again", Toast.LENGTH_LONG).show()
                 pgUploading.visibility = View.GONE
             }
         }
@@ -368,6 +552,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                             for (eachStatus in it.result!!) {
                                 val merchantStoryListPojo = MerchantStoryListPojo()
                                 merchantStoryListPojo.merchantStatusImageLink = eachStatus.getString("merchantStatusImageLink")
+                                merchantStoryListPojo.storyAudioLink = eachStatus.getString("storyAudioLink") ?: ""
                                 merchantStoryListPojo.storyTag = eachStatus.getString("storyTag")
                                 merchantStoryListPojo.seen = eachStatus.getBoolean("seen")
                                 merchantStoryListPojo.merchantStatusId = eachStatus.id
@@ -456,6 +641,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 val merchantStoryListPojo = MerchantStoryListPojo()
                 merchantStoryListPojo.seen = false
                 merchantStoryListPojo.storyTag = if(imageText.visibility == View.GONE) "promotional" else imageText.text.toString()
+                merchantStoryListPojo.storyAudioLink = tvAudioDownloadUri.text.toString()
                 merchantStoryListPojo.merchantStatusId = null
                 merchantStoryListPojo.merchantStatusImageLink = tvDownloadUri.text.toString()
                 statusReachAndWorthPojo.status_worth = statusWorthSlider.value.toInt()
@@ -521,8 +707,9 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
     }
 
-    override fun deleteLink(link: String, id: String, positionId: Int) {
+    override fun deleteLink(link: String, audioLink:String, id: String, positionId: Int) {
         pgUploading.visibility = View.VISIBLE
+        playAudioBtn.visibility = View.GONE
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
 
@@ -544,6 +731,8 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                             if (task.isSuccessful) {
                                 //delete from firebase storage
                                 val photoRef: StorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(link)
+                                val audioRef = FirebaseStorage.getInstance().getReference(audioLink)
+                                audioRef.delete()
                                 photoRef.delete().addOnSuccessListener { // Fil // e deleted successfully
 
                                     uploadedStoryAdapter.clear(positionId)
@@ -568,8 +757,13 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
     }
 
-    override fun displayImage(url: String, tag: String, status_worth: Int?, status_reach: Int?, status_id:String?) {
+    override fun displayImage(url: String, audioLink:String, tag: String, status_worth: Int?, status_reach: Int?, status_id:String?) {
         Picasso.get().load(url).into(imageContainer)
+        if(audioLink != ""){
+            playAudioBtn.visibility= View.VISIBLE
+            tvAudioDownloadUri.text = audioLink
+        }
+
         if(tag=="promotional") {
             with(imageText){
                 visibility = View.GONE

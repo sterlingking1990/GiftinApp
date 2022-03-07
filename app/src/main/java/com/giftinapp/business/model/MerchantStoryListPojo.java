@@ -10,9 +10,10 @@ import java.util.ArrayList;
 @Keep
  public class MerchantStoryListPojo implements Serializable {
 
-    public String merchantStatusId;
-    public String merchantStatusImageLink;
-    public String storyTag;
+    public String merchantStatusId = "";
+    public String merchantStatusImageLink = "";
+    public String storyTag = "";
+    public String storyAudioLink = "";
     public Boolean seen;
     public ArrayList<String> viewers;
     public StatusReachAndWorthPojo statusReachAndWorthPojo;

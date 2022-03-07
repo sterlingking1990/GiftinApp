@@ -58,13 +58,17 @@
                 app:layout_constraintStart_toEndOf="@id/tv_balance"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <Button
+            <com.skydoves.elasticviews.ElasticButton
                 android:id="@+id/btn_refresh_wallet"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                app:button_cornerRadius="4dp"
+                app:button_duration="250"
+                app:button_scale="0.87"
+                android:background="@color/cardview_dark_background"
+                android:textColor="@android:color/white"
                 android:text="refresh"
-                android:background="@drawable/rectangle_shaped_button"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -155,16 +159,18 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <androidx.appcompat.widget.AppCompatButton
+    <com.skydoves.elasticviews.ElasticButton
         android:id="@+id/btn_process_payment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:imeOptions="actionDone"
         android:text="Process Payment"
-        android:background="@drawable/rectangle_shaped_button"
+        app:button_cornerRadius="4dp"
+        app:button_duration="250"
+        app:button_scale="0.87"
+        android:background="@color/cardview_dark_background"
         android:textColor="#ffffff"
-        app:backgroundTint="@color/design_default_color_on_secondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sp_container" />

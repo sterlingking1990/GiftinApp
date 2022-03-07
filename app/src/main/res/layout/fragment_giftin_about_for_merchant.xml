@@ -16,6 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="3dp"
+        android:textColor="@color/black"
         android:paddingEnd="3dp"
         android:text="Brandible"
         android:textSize="20sp"
@@ -29,6 +30,7 @@
         android:text="@string/about_brandible"
         android:gravity="center_vertical"
         android:lineSpacingExtra="4dp"
+        android:textColor="@color/black"
         android:layout_gravity="center"/>
     <!-- This adds a border between the TextViews -->
     <View
