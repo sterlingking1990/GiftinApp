@@ -14,6 +14,7 @@ import java.util.ArrayList;
     public String merchantStatusImageLink = "";
     public String storyTag = "";
     public String storyAudioLink = "";
+    public String mediaDuration = "0";
     public Boolean seen;
     public ArrayList<String> viewers;
     public StatusReachAndWorthPojo statusReachAndWorthPojo;

@@ -162,6 +162,8 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                                         merchantStoryListPojo.storyTag =
                                                                             eachList.getString("storyTag")
                                                                         merchantStoryListPojo.storyAudioLink = eachList.getString("storyAudioLink")
+                                                                        merchantStoryListPojo.mediaDuration =
+                                                                            eachList.getString("mediaDuration")
                                                                         merchantStoryListPojo.merchantStatusImageLink =
                                                                             eachList.getString("merchantStatusImageLink")
                                                                         //val merchantStoryListPojo = eachList.toObject(MerchantStoryListPojo::class.java)

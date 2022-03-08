@@ -1,6 +1,9 @@
 package com.giftinapp.business.utility
 
+import android.content.Context
 import android.media.AudioManager
+import android.media.MediaMetadataRetriever
+import android.media.MediaMetadataRetriever.METADATA_KEY_DURATION
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.util.Log
@@ -25,14 +28,10 @@ class AudioRecorderPlayerImpl @Inject constructor(
     }
 
     override fun stopRecordingAudio() {
-        try {
             mediaRecorder.apply {
                 stop()
                 release()
             }
-        }catch (e:Exception){
-            Log.d("ErrorStopping",e.message.toString())
-        }
     }
 
     override fun playRecording(file: File) {
@@ -44,6 +43,7 @@ class AudioRecorderPlayerImpl @Inject constructor(
                 prepare()
                 start()
             }
+
         }catch (e:Exception){
             Log.d("ErrorPlayRecording",e.message.toString())
         }
@@ -79,4 +79,16 @@ class AudioRecorderPlayerImpl @Inject constructor(
             Log.d("ErrorReleasing",e.message.toString())
         }
     }
+
+    override fun returnMediaLength(): Int {
+        return mediaPlayer.duration
+    }
+
+    override fun pausePlayer() {
+        if(mediaPlayer.isPlaying){
+            mediaPlayer.pause()
+        }
+    }
+
+
 }

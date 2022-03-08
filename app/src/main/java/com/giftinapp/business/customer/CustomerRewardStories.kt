@@ -18,6 +18,7 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
+import com.facebook.ads.AdSettings
 import com.giftinapp.business.R
 import com.giftinapp.business.model.*
 import com.giftinapp.business.utility.*
@@ -57,6 +58,7 @@ class CustomerRewardStories : Fragment() {
     var mDisposable: Disposable? = null
     var mCurrentProgress: Long = 0
     var mCurrentIndex: Int = 0
+    var indexPos:Int = 0
     var startTime: Long = System.currentTimeMillis()
 
     private lateinit var tvRewardStoryTag:TextView
@@ -144,8 +146,8 @@ class CustomerRewardStories : Fragment() {
         sessionManager.setCurrentFragment("CustomerRewardStoriesFragment")
 
         setImageStatusData()
-        startViewing()
         setProgressData()
+        startViewing()
     }
 
     private fun likeStory(mCurrentIndex: Int) {
@@ -269,12 +271,10 @@ class CustomerRewardStories : Fragment() {
                         if(result!=null) {
                             val allAdOwners = result.documents
                             allAdOwners.forEach {
-                                if(it.get("merchant_email")==storyOwner){
-                                    var adUnit: String? = it.getString("ad_unit")
-                                    if(adUnit==null) {
-                                        adUnit = "ca-app-pub-3940256099942544/5224354917"
-                                    }
+                                if(it.getString("merchant_email")==storyOwner){
+                                    val adUnit: String = it.getString("ad_unit")?:""
                                     //load the ad
+                                    AdSettings.addTestDevice("1a40ceb6-2f05-4581-84d9-b5a0c2f45fb5")
                                     val adRequest = AdRequest.Builder().build()
                                     RewardedAd.load(requireContext(), adUnit, adRequest, object : RewardedAdLoadCallback() {
                                         override fun onAdFailedToLoad(adError: LoadAdError) {
@@ -298,6 +298,7 @@ class CustomerRewardStories : Fragment() {
 
     private fun setImageStatusData() {
         loadAd()
+        audioLinks.clear()
         imagesList?.forEach { imageUrl ->
             val imageView: ImageView = ImageView(requireContext())
             imageView.layoutParams = ViewGroup.LayoutParams(
@@ -379,14 +380,16 @@ class CustomerRewardStories : Fragment() {
             val params = LinearLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.WRAP_CONTENT, 1.0f)
-            params.height = requireContext().convertDpToPixel(8f).toInt()
-            params.marginEnd = requireContext().convertDpToPixel(10f).toInt()
+            params.height = requireContext().convertDpToPixel(4f).toInt()
+            params.marginEnd = requireContext().convertDpToPixel(5f).toInt()
 
             progressBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.tabColor))
 
             progressBar.layoutParams = params
-            progressBar.max = if(audioLinks[mCurrentIndex]=="empty") 40 else 300 // max progress i am using is 40 for
+            progressBar.max = getProgressBarMax(index)
+             // max progress i am using is 40 for
             //each progress bar you can modify it
+            progressMax.add(index,progressBar.max)
             progressBar.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.whitesmoke))
 
             progressBar.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
@@ -395,9 +398,16 @@ class CustomerRewardStories : Fragment() {
         }
     }
 
+    private fun getProgressBarMax(index:Int): Int {
+        return if (imagesList?.get(index)?.mediaDuration.toString()=="0"){
+            40
+        }else{
+            imagesList?.get(index)?.mediaDuration?.toInt()?.div(100) ?: 40
+        }
+    }
+
     private fun emitStatusProgress() {
-        Log.d("ProgressLength",progressLength.toString())
-        mDisposable = Observable.intervalRange(mCurrentProgress, progressLength - mCurrentProgress, 0, 100, TimeUnit.MILLISECONDS)
+        mDisposable = Observable.intervalRange(mCurrentProgress, progressMax[indexPos] - mCurrentProgress, 0, 100, TimeUnit.MILLISECONDS)
                 .observeOn(Schedulers.computation())
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {
@@ -420,13 +430,12 @@ class CustomerRewardStories : Fragment() {
                 ll_status[mCurrentIndex].gone()
                 mCurrentIndex++
                 ll_status[mCurrentIndex].show()
+                indexPos = mCurrentIndex
                 playAudio(audioLinks[mCurrentIndex])
-                Log.d("CurrentIndx",mCurrentIndex.toString())
-                Log.d("AudioLinkOne",audioLinks[mCurrentIndex])
-                progressLength = if(audioLinks[mCurrentIndex] =="empty") 40 else 200
                 //showStatusTag(mCurrentIndex)
             }
             if (mCurrentIndex != imagesList?.size!! - 1) {
+                progressLength = if(audioLinks[mCurrentIndex] =="empty") 40 else 230
                 emitStatusProgress()
             }
         } else {
@@ -463,6 +472,10 @@ class CustomerRewardStories : Fragment() {
                     imagesList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList
 
                     }
+
+                    indexPos = 0
+
+
                     storyOwner =  currentStoryPos?.let { allStories?.get(it)?.storyOwner
 
                     }
@@ -901,7 +914,7 @@ class CustomerRewardStories : Fragment() {
 
     private fun updateProgress(progress: Long) {
         mCurrentProgress = progress
-        progressLength = if(imagesList?.get(mCurrentIndex)?.storyAudioLink=="empty") 40 else 200
+        progressLength = if(audioLinks[0] =="empty") 40 else 230
         runOnUiThread {
             (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = progress.toInt()
             tvRewardStoryTag.text = imagesList?.get(mCurrentIndex)?.storyTag
@@ -911,6 +924,7 @@ class CustomerRewardStories : Fragment() {
             tvNumberOfViewers.text = numberOfStatusView.toString()
             tvLikeBrandStory.text = numberOfLikes.toString()
             statusTag = imagesList?.get(mCurrentIndex)?.storyTag
+            indexPos=mCurrentIndex+1
         }
 
     }
@@ -947,10 +961,10 @@ class CustomerRewardStories : Fragment() {
 
     private fun startViewing() {
         ll_status[0].show()
-        runBlocking {
-            playAudio(audioLinks[0])
+        progressLength = if(audioLinks[0] =="empty") 40 else 230
+        runOnUiThread {
+            playAudio(audioLinks[mCurrentIndex])
         }
-        progressLength = if(audioLinks[mCurrentIndex] =="empty") 40 else 200
         emitStatusProgress()
     }
 
@@ -982,10 +996,11 @@ class CustomerRewardStories : Fragment() {
     private fun pauseStatus() {
         mDisposable?.dispose()
         mDisposable = null
+        audioRecorderPlayer.pausePlayer()
     }
 
     private fun resumeStatus() {
-        val duration = if(audioLinks[mCurrentIndex]=="empty") 40 else 300
+        playAudio(audioLinks[mCurrentIndex])
         emitStatusProgress()
     }
 
@@ -1004,9 +1019,10 @@ class CustomerRewardStories : Fragment() {
                 (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = 0
                 ll_status[mCurrentIndex].gone()
                 mCurrentIndex--
+                indexPos = mCurrentIndex
                 ll_status[mCurrentIndex].show()
                 if (mCurrentIndex != imagesList?.size!!-1) {
-                    val duration = if (audioLinks[mCurrentIndex] == "empty") 40 else 300
+                    playAudio(audioLinks[mCurrentIndex])
                     emitStatusProgress()
                 }
 
@@ -1014,7 +1030,8 @@ class CustomerRewardStories : Fragment() {
                 mCurrentIndex = 0
                 (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = 0
                 ll_status[mCurrentIndex].show()
-                val duration = if(audioLinks[mCurrentIndex]=="empty") 40 else 300
+                indexPos = mCurrentIndex
+                playAudio(audioLinks[mCurrentIndex])
                 emitStatusProgress()
 
             }
@@ -1025,13 +1042,14 @@ class CustomerRewardStories : Fragment() {
         mCurrentProgress = 0
         runOnUiThread {
             if (mCurrentIndex != imagesList?.size!!-1) {
-                val durationOne = if(audioLinks[mCurrentIndex]=="empty") 40 else 300
+                val durationOne = if(audioLinks[mCurrentIndex]=="empty") 40 else 230
                 (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = durationOne
                 ll_status[mCurrentIndex].gone()
                 mCurrentIndex++
                 ll_status[mCurrentIndex].show()
+                indexPos=mCurrentIndex
                 (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = 0
-                val duration = if(audioLinks[mCurrentIndex]=="empty") 40 else 300
+                playAudio(audioLinks[mCurrentIndex])
                 emitStatusProgress()
             }
         }
@@ -1047,6 +1065,11 @@ class CustomerRewardStories : Fragment() {
                 ?.replace(fragmentType, fragment!!)
                 ?.addToBackStack(null)
                 ?.commit()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        audioRecorderPlayer.stopPlayingRecording()
     }
 
 }

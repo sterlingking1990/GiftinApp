@@ -10,4 +10,6 @@ interface AudioRecorderPlayer {
     fun playRecordingFromFirebase(audioLink:String)
     fun stopPlayingRecording()
     fun releasePlayer()
+    fun returnMediaLength():Int
+    fun pausePlayer()
 }

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -32,10 +33,7 @@ import com.giftinapp.business.R
 import com.giftinapp.business.model.BannerPojo
 import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.StatusReachAndWorthPojo
-import com.giftinapp.business.utility.AudioRecorderPlayer
-import com.giftinapp.business.utility.SessionManager
-import com.giftinapp.business.utility.gone
-import com.giftinapp.business.utility.visible
+import com.giftinapp.business.utility.*
 import com.google.android.material.slider.Slider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -52,6 +50,7 @@ import java.io.IOException
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
+import kotlin.concurrent.timerTask
 
 @AndroidEntryPoint
 class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUploadedStory, BannerAdapter.ClickableBanner {
@@ -120,6 +119,8 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
     private val mediaUrls: MutableList<String> = mutableListOf()
 
     private val MICROPHONE_PERMISSION_CODE = 200
+
+    private var mediaDuration:Int = 0
 
     @Inject
     lateinit var audioRecorderPlayer: AudioRecorderPlayer
@@ -243,6 +244,15 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
             if(!isRecording){
                 isPlayerInstantiated = true
                 recordAudio()
+                Timer().schedule(timerTask {
+                    runOnUiThread {
+                        run {
+                            if(isRecording) {
+                                stopRecordAudio()
+                            }
+                        }
+                    }
+                },30000)
             }else{
                 stopRecordAudio()
             }
@@ -282,6 +292,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
             playAudioBtn.gone()
             recordAudioBtn.setImageResource(R.drawable.mic_icon)
             fileNameList.clear()
+            isRecording = false
             fileList.clear()
             currentIdx = -1
             Toast.makeText(context, "Audio cancelled", Toast.LENGTH_LONG).show()
@@ -325,13 +336,12 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
             }
         }else{
         val currentFileName = fileNameList[currentIdx]
-        Log.d("CurrentFile",currentFileName)
         context?.let {
             playAudioBtn.setImageResource(R.drawable.stop_icon)
             val file =
                 File(it.getExternalFilesDir(Environment.DIRECTORY_PODCASTS), currentFileName)
-            Log.d("FileFile",file.absolutePath)
             audioRecorderPlayer.playRecording(file)
+            mediaDuration = audioRecorderPlayer.returnMediaLength()
             }
         }
     }
@@ -642,6 +652,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 merchantStoryListPojo.seen = false
                 merchantStoryListPojo.storyTag = if(imageText.visibility == View.GONE) "promotional" else imageText.text.toString()
                 merchantStoryListPojo.storyAudioLink = tvAudioDownloadUri.text.toString()
+                merchantStoryListPojo.mediaDuration = mediaDuration.toString()
                 merchantStoryListPojo.merchantStatusId = null
                 merchantStoryListPojo.merchantStatusImageLink = tvDownloadUri.text.toString()
                 statusReachAndWorthPojo.status_worth = statusWorthSlider.value.toInt()
@@ -730,20 +741,34 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 //delete from firebase storage
-                                val photoRef: StorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(link)
+                                val photoRef: StorageReference =
+                                    FirebaseStorage.getInstance().getReferenceFromUrl(link)
                                 val audioRef = FirebaseStorage.getInstance().getReference(audioLink)
-                                audioRef.delete()
-                                photoRef.delete().addOnSuccessListener { // Fil // e deleted successfully
+                                try {
+                                    audioRef.delete()
+                                    photoRef.delete()
+                                        .addOnSuccessListener { // Fil // e deleted successfully
 
-                                    uploadedStoryAdapter.clear(positionId)
-                                    uploadedStoryAdapter.notifyDataSetChanged()
+                                            uploadedStoryAdapter.clear(positionId)
+                                            uploadedStoryAdapter.notifyDataSetChanged()
 
-                                    Toast.makeText(requireContext(), "You have successfully removed reward story", Toast.LENGTH_SHORT).show()
-                                }.addOnFailureListener { // Uh-oh, an error occurred!
-                                    Toast.makeText(requireContext(), "Could not delete, try again later", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                requireContext(),
+                                                "You have successfully removed reward story",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }.addOnFailureListener { // Uh-oh, an error occurred!
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Could not delete, try again later",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    pgUploading.visibility = View.GONE
+                                }catch (e:Exception){
+
                                 }
-
-                                pgUploading.visibility = View.GONE
                             }
                         }
             }
