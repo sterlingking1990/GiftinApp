@@ -39,6 +39,7 @@ import com.giftinapp.business.customer.GiftingMerchantFragment;
 import com.giftinapp.business.customer.InfluencerActivityRatingFragment;
 import com.giftinapp.business.customer.MerchantStoryList;
 import com.giftinapp.business.customer.MyGiftHistoryFragment;
+import com.giftinapp.business.customer.MyReferralDealFragment;
 import com.giftinapp.business.customer.SettingsFragment;
 import com.giftinapp.business.utility.RemoteConfigUtil;
 import com.giftinapp.business.utility.Resource;
@@ -421,6 +422,14 @@ public class MainActivity extends AppCompatActivity {
             BrandPreferenceFragment brandPreferenceFragment = new BrandPreferenceFragment();
             openFragment(brandPreferenceFragment);
         }
+
+        if (menuitem.getItemId() == R.id.navigation_referral_deal) {
+            carouselView.setVisibility(View.GONE);
+            btnExploreBrand.setVisibility(View.GONE);
+            MyReferralDealFragment myReferralDealFragment = new MyReferralDealFragment();
+            openFragment(myReferralDealFragment);
+        }
+
         drawer.close();
     }
 

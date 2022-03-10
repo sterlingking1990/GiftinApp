@@ -78,6 +78,8 @@
     <string name="publish_reward_deal">Publish Reward Deal</string>
     <string name="status_worth">status worth(#%1$s)</string>
     <string name="number_of_reach">number of reach(%1$s)</string>
+    <string name="reward_to_get_when_referral_reached">You will receive referral reward token when (%1$s) people sign up through your referral link</string>
+    <string name="total_referred">Set Referral Target (%1$s) referred so far</string>
     <string name="influenca_name_and_status">%1$s\nbrands following (%2$s)\ncredits (%3$s)</string>
     <string name="rate_influencer">Rate Influencer</string>
     <string name="brand_name_and_status">%1$s\nFollowers (%2$s)</string>
