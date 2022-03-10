@@ -223,22 +223,28 @@
 
     </LinearLayout>
 
-    <com.skydoves.elasticviews.ElasticLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        app:flow_horizontalAlign="center"
-        app:layout_constraintTop_toBottomOf="@id/ll_signin_notice"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        >
         <TextView
+            app:layout_constraintTop_toBottomOf="@id/ll_signin_notice"
+            app:layout_constraintStart_toStartOf="parent"
             android:id="@+id/tvTermsAndCondition"
             android:layout_width="wrap_content"
+            android:layout_marginStart="20dp"
+            app:layout_constraintEnd_toStartOf="@id/tvPrivacyPolicy"
+            android:gravity="center"
+            android:layout_marginTop="20dp"
             android:layout_height="wrap_content"
             android:text="@string/terms_and_condition"
             />
-    </com.skydoves.elasticviews.ElasticLayout>
+        <TextView
+            android:id="@+id/tvPrivacyPolicy"
+            android:layout_width="wrap_content"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintStart_toEndOf="@id/tvTermsAndCondition"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/tvTermsAndCondition"
+            android:layout_height="wrap_content"
+            android:text="@string/privacy_policy"
+            />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

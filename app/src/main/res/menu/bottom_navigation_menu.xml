@@ -22,6 +22,11 @@
             android:icon="@drawable/ic_view_reward_deal"
             android:title="Brand Stories"/>
 
+        <item android:id="@+id/navigation_referral_deal"
+            android:icon="@drawable/ic_referral_deal"
+            android:title="My Referral Deal" />
+
+
 <!--        <item-->
 <!--            android:id="@+id/navigation_view_activity_rating"-->
 <!--            android:icon="@drawable/ic_rate_influencer"-->

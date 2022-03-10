@@ -3,7 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="src/main/res/layout/activity_signup.xml" value="0.1" />
+        <entry key="src/main/res/layout/activity_signup.xml" value="0.22" />
         <entry key="src/main/res/layout/fragment_brand_preference.xml" value="0.1" />
         <entry key="src/main/res/layout/fragment_cashout.xml" value="0.20018115942028986" />
         <entry key="src/main/res/layout/fragment_customer_reward_stories.xml" value="0.13779128672745694" />
@@ -14,6 +14,7 @@
         <entry key="src/main/res/layout/fragment_settings.xml" value="0.22" />
         <entry key="src/main/res/layout/fragment_wallet_info.xml" value="0.20018115942028986" />
         <entry key="src/main/res/layout/single_item_brand_preference.xml" value="0.15" />
+        <entry key="src/main/res/menu/bottom_navigation_menu.xml" value="0.14375" />
       </map>
     </option>
   </component>

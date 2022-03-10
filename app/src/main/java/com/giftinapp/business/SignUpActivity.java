@@ -61,6 +61,7 @@ public class SignUpActivity extends AppCompatActivity {
     public Boolean isPasswordVisible = false;
 
     TextView tvTermsAndCondition;
+    TextView tvPrivacyPolicy;
 
     @Override
     @SuppressLint("ClickableViewAccessibility")
@@ -75,6 +76,7 @@ public class SignUpActivity extends AppCompatActivity {
         sessionManager = new SessionManager(getApplicationContext());
 
         tvTermsAndCondition = findViewById(R.id.tvTermsAndCondition);
+        tvPrivacyPolicy = findViewById(R.id.tvPrivacyPolicy);
 
         String[] loginMode = new String[]{"As Influencer", "As Brand"};
         ArrayAdapter<String> loginModeAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, loginMode);
@@ -98,6 +100,10 @@ public class SignUpActivity extends AppCompatActivity {
 
         tvTermsAndCondition.setOnClickListener(v-> {
             startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(getString(R.string.terms_and_condition_link))));
+        });
+
+        tvPrivacyPolicy.setOnClickListener(v->{
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.privacy_policy_link))));
         });
 
         btnSignUp.setOnClickListener(v -> {

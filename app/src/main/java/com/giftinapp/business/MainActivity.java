@@ -26,6 +26,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -130,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
         MobileAds.initialize(this); {
 
         }
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         AppUpdater appUpdater = new AppUpdater(this)
         .setTitleOnUpdateAvailable("Update available")
@@ -479,12 +482,10 @@ public class MainActivity extends AppCompatActivity {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             try {
-                if (sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")) {
-                    super.onBackPressed();
-                } else {
+                if (!sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")) {
                     startActivity(new Intent(MainActivity.this, MainActivity.class));
-                    super.onBackPressed();
                 }
+                super.onBackPressed();
             } catch (Exception e) {
                 //mauth.signOut();
                 //sessionManager.clearData();
@@ -766,4 +767,18 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
- }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        }
+    }
+}

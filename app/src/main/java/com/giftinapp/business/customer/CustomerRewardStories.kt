@@ -115,6 +115,8 @@ class CustomerRewardStories : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+
         ll_status = view.findViewById(R.id.ll_status)
         ll_progress_bar = view.findViewById(R.id.ll_progress_bar)
 
