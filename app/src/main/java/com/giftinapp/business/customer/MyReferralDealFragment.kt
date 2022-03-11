@@ -3,7 +3,6 @@ package com.giftinapp.business.customer
 import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,11 +11,15 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
 import com.giftinapp.business.R
 import com.giftinapp.business.model.ReferralRewardPojo
+import com.giftinapp.business.model.RewardPojo
 import com.giftinapp.business.utility.SessionManager
+import com.google.android.gms.tasks.Task
 import com.google.android.material.slider.Slider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 
@@ -69,18 +72,137 @@ class MyReferralDealFragment : Fragment() {
         sessionManager = SessionManager(requireContext())
 
         getTotalReferred()
-       // getReferralTarget()
 
         btnSetReferralTarget.setOnClickListener {
             setReferralTarget()
         }
-        //redeemReferralReward()
+        btnGetReferralReward.setOnClickListener {
+            if(!etReferralRewardToken.text.isNullOrEmpty()) {
+                redeemReferralReward()
+            }else{
+                Toast.makeText(requireContext(),"Please enter referral reward token to redeem rework",Toast.LENGTH_LONG).show()
+            }
+        }
 
         referralTargetIndicator.addOnChangeListener { slider, value, fromUser ->
             REFERAL_TARGET = value.toInt()
             tvReferralNote.text = resources.getString(R.string.reward_to_get_when_referral_reached,value.toString())
         }
 
+    }
+
+    private fun redeemReferralReward() {
+        //reward user if referral token is valid
+        //1. get the referral token,amount of the user
+        //2. compare with the one been entered
+        //3. if same reward the user with the am
+
+
+        val db = FirebaseFirestore.getInstance()
+
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        try {
+            db.collection("referral_reward").document(sessionManager.getEmail().toString()).get()
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        val document = it.getResult();
+                        val referralToken = document.getString("referralRewardToken")
+                        val amountToReward = document.get("referralRewardAmount") as Long
+                        val referralTokenEntered = etReferralRewardToken.text.toString()
+                        if (referralTokenEntered == referralToken) {
+                            updateUserReward(amountToReward.toInt())
+                        } else {
+                            Toast.makeText(
+                                requireContext(),
+                                "Referral Reward Token is Invalid or already used, please try again",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                }
+        }catch (e:Exception){
+
+        }
+    }
+
+    private fun updateUserReward(amountToReward: Int?) {
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+
+        //check if this referrer has something in her StatusViewBonus so we update it
+        try {
+            db.collection("users").document(sessionManager.getEmail().toString())
+                .collection("rewards").document("GiftinAppBonus").get()
+                .addOnCompleteListener { task2 ->
+                    if (task2.isSuccessful) {
+                        val referrerDoc = task2.result
+                        if (referrerDoc!!.exists()) {
+                            val bonusFromDb = referrerDoc["gift_coin"] as Long
+                            val totalBonus = bonusFromDb + 0 + amountToReward!!
+                            db.collection("users").document(sessionManager.getEmail().toString())
+                                .collection("rewards").document("GiftinAppBonus")
+                                .update("gift_coin", totalBonus, "isRedeemed", false)
+                                .addOnCompleteListener {
+                                    if (it.isSuccessful) {
+                                        updateRewardTokenToEmpty(amountToReward)
+                                    }
+                                }
+                        } else {
+                            //does not have so we create it newly
+
+                            //reward the referrer
+                            val rewardPojo = RewardPojo()
+                            rewardPojo.email = "StatusViewBonus"
+                            rewardPojo.referrer = ""
+                            rewardPojo.firstName = ""
+                            rewardPojo.gift_coin = amountToReward?.toLong()!!
+                            //recreate it
+                            db.collection("users").document(sessionManager.getEmail().toString())
+                                .collection("rewards").document("GiftinAppBonus").set(rewardPojo)
+                                .addOnCanceledListener(requireActivity()) {
+                                    updateRewardTokenToEmpty(amountToReward)
+                                }
+                        }
+                    }
+
+                    //logic to handle when user does not have a giftinBonus
+                }
+        }catch (e:Exception){
+
+        }
+    }
+
+    private fun updateRewardTokenToEmpty(amount:Int) {
+        val db = FirebaseFirestore.getInstance()
+
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("referral_reward").document(sessionManager.getEmail().toString())
+            .update("referralRewardToken", "expired")
+            .addOnCompleteListener {
+                Toast.makeText(
+                    requireContext(),
+                    "You have been credited with #$amount successfully",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
     }
 
     private fun setReferralTarget(){
@@ -91,11 +213,15 @@ class MyReferralDealFragment : Fragment() {
             .build()
         db.firestoreSettings = settings
 
-        val referralReward = ReferralRewardPojo(REFERAL_TARGET,"",0)
+        val referralReward = ReferralRewardPojo()
+        referralReward.targetToReach = REFERAL_TARGET
+        referralReward.referralRewardAmount =0
+        referralReward.referralRewardToken= ""
 
         if(FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
             Log.d("TotalReferred",total_referred.toString())
             if (REFERAL_TARGET > total_referred) {
+
                 db.collection("referral_reward").document(sessionManager.getEmail().toString())
                     .set(referralReward)
                     .addOnCompleteListener {
@@ -145,33 +271,6 @@ class MyReferralDealFragment : Fragment() {
                 }
             }
     }
-//
-//    private fun getReferralTarget(){
-//        val db = FirebaseFirestore.getInstance()
-//
-//        val settings = FirebaseFirestoreSettings.Builder()
-//            .setPersistenceEnabled(true)
-//            .build()
-//        db.firestoreSettings = settings
-//
-//            db.collection("users").document(sessionManager.getEmail().toString()).get()
-//                .addOnCompleteListener {
-//                    if(it.isSuccessful){
-//                        val referralTarget =
-//                    }
-//                }
-//
-//        }
 
 
 }
-
-//
-//if(FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
-//else{
-//    builder!!.setMessage("You need to verify your account to be able to set referral target or redeem referral reward")
-//        .setCancelable(false)
-//        .setPositiveButton("OK") { dialog: DialogInterface?, id: Int -> FirebaseAuth.getInstance().currentUser!!.sendEmailVerification() }
-//    val alert = builder!!.create()
-//    alert.show()
-//}

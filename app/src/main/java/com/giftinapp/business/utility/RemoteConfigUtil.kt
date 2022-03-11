@@ -4,6 +4,8 @@ import android.util.Log
 import com.giftinapp.business.BuildConfig
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigValue
+import com.google.firebase.remoteconfig.ktx.get
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 
@@ -17,6 +19,7 @@ class RemoteConfigUtil{
     private val BRAND_LINK = "brand_link"
     private val UPDATE_TITLE = "update_title"
     private val UPDATE_MESSAGE = "update_message"
+    private val REFERRAL_REWARD_BASE = "referral_reward_base"
 
     private val DEFAULTS: HashMap<String, Any> =
         hashMapOf(
@@ -25,7 +28,8 @@ class RemoteConfigUtil{
             CAROUSEL_THREE to "https://i.pinimg.com/564x/61/8d/7b/618d7b2041c923d1d422fc9b40c4d17a.jpg",
             BRAND_LINK to "https://zuri.health/",
             UPDATE_TITLE  to "Update Brandible",
-            UPDATE_MESSAGE  to "New features available, update to enjoy and explore them all"
+            UPDATE_MESSAGE  to "New features available, update to enjoy and explore them all",
+            REFERRAL_REWARD_BASE  to 20
         )
 
     //private lateinit var remoteConfig: FirebaseRemoteConfig
@@ -61,4 +65,6 @@ class RemoteConfigUtil{
          fun getBrandLink():String = getFirebaseRemoteConfig().getString(BRAND_LINK)
         fun getUpdateTitle():String = getFirebaseRemoteConfig().getString(UPDATE_TITLE)
         fun getUpdateMessage():String = getFirebaseRemoteConfig().getString(UPDATE_MESSAGE)
+
+    fun getReferralRewardBase(): String = getFirebaseRemoteConfig().getString(REFERRAL_REWARD_BASE)
     }

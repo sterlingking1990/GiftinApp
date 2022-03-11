@@ -13,13 +13,9 @@ import androidx.viewpager.widget.ViewPager;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -35,14 +31,11 @@ import android.widget.Toast;
 import com.giftinapp.business.customer.AboutFragment;
 import com.giftinapp.business.customer.BrandPreferenceFragment;
 import com.giftinapp.business.customer.CashoutFragment;
-import com.giftinapp.business.customer.GiftingMerchantFragment;
-import com.giftinapp.business.customer.InfluencerActivityRatingFragment;
 import com.giftinapp.business.customer.MerchantStoryList;
-import com.giftinapp.business.customer.MyGiftHistoryFragment;
 import com.giftinapp.business.customer.MyReferralDealFragment;
 import com.giftinapp.business.customer.SettingsFragment;
+import com.giftinapp.business.model.ReferralRewardPojo;
 import com.giftinapp.business.utility.RemoteConfigUtil;
-import com.giftinapp.business.utility.Resource;
 import com.giftinapp.business.utility.SessionManager;
 import com.giftinapp.business.utility.StorySession;
 import com.github.javiersantos.appupdater.AppUpdater;
@@ -50,13 +43,6 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.play.core.appupdate.AppUpdateInfo;
-import com.google.android.play.core.appupdate.AppUpdateManager;
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
-import com.google.android.play.core.install.model.AppUpdateType;
-import com.google.android.play.core.install.model.InstallStatus;
-import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
@@ -65,24 +51,22 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.firestore.Source;
 import com.squareup.picasso.Picasso;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ImageClickListener;
 import com.synnapps.carouselview.ImageListener;
 import com.synnapps.carouselview.ViewListener;
 
-import org.jsoup.Jsoup;
-
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import kotlinx.coroutines.CoroutineScope;
+import java.util.Random;
 
 
-@AndroidEntryPoint
+ @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
     public SessionManager sessionManager;
@@ -111,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
     public Integer following = 0;
 
     public Integer posi;
+
+    public Integer totalReferred = 0;
 
     FirebaseAuth mauth;
 
@@ -261,6 +247,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(following),String.valueOf(totalGiftCoin)));
+
+        getTotalReferred();
+
+        if(totalReferred>=5) {
+            compareTotalReferredAgainstTarget();
+        }
     }
 
      private void openWebView(String brandLink) {
@@ -790,4 +782,73 @@ public class MainActivity extends AppCompatActivity {
             drawer.closeDrawer(GravityCompat.START);
         }
     }
+
+    private void getTotalReferred(){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("users").get().addOnCompleteListener(task -> {
+
+            if(task.isSuccessful()){
+                QuerySnapshot result = task.getResult();
+                List<DocumentSnapshot> eachRes = result.getDocuments();
+                int total_referred = 0;
+                for(int i =0;i<eachRes.size();i++){
+                    if(eachRes.get(i).get("referral")==sessionManager.getEmail()){
+                        total_referred+=1;
+                    }
+                }
+                totalReferred = total_referred;
+            }
+
+        });
+    }
+
+    private void compareTotalReferredAgainstTarget() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+            db.collection("referral_reward").document(sessionManager.getEmail()).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot resultDoc = task.getResult();
+                    if (resultDoc.exists()) {
+                        Integer target = ((Number) Objects.requireNonNull(resultDoc.get("targetToReach"))).intValue();
+                        String referralRewardToken = (String) resultDoc.get("referralRewardToken");
+                        if (totalReferred >= target) {
+                            assert referralRewardToken != null;
+                            if (referralRewardToken.equals("")) {
+                                Random random = new Random();
+                                int token = random.nextInt(999999);
+
+                                ReferralRewardPojo referralRewardPojo = new ReferralRewardPojo();
+                                referralRewardPojo.referralRewardToken = String.format("%06d",token);
+                                referralRewardPojo.referralRewardAmount = Integer.parseInt(remoteConfigUtil.getReferralRewardBase()) * target;
+                                referralRewardPojo.targetToReach = target;
+
+                                db.collection("referral_reward").document(sessionManager.getEmail()).set(referralRewardPojo)
+                                        .addOnCompleteListener(task1 -> {
+                                            if (task1.isSuccessful()) {
+                                                Toast.makeText(this, "You reward token will be sent to you via mail, please check in few minutes", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                            }
+                        }
+                    }
+                }
+            });
+    }
+
+
 }

@@ -32,9 +32,9 @@
         app:layout_constraintTop_toBottomOf="@id/tvGetReferralRewardHeader"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:maxLength="105"
+        android:maxLength="6"
         android:layout_margin="10dp"
-        android:inputType="text"
+        android:inputType="number"
         android:maxLines="1"
         android:textSize="16sp" />
 
@@ -79,7 +79,7 @@
             android:layout_marginTop="40dp"
             android:layout_marginStart="20dp"
             style="@style/TextAppearance.AppCompat.Subhead"
-            android:textSize="18sp"
+            android:textSize="16sp"
             />
 
         <com.google.android.material.slider.Slider
@@ -89,7 +89,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="0.5"
             android:value="5.0"
             android:valueTo="100.0"
