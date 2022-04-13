@@ -20,7 +20,7 @@ android {
         applicationId "com.giftinapp.business"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 69
+        versionCode 71
         versionName "1.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -60,6 +60,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
     implementation 'com.google.android.play:core:1.10.0'
+    implementation 'com.google.firebase:firebase-auth:20.0.3'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.2.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -69,16 +70,16 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxkotlin:2.2.0"
     implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.1.1'
     implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation "com.google.gms:google-services:4.3.10"
 
     //Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'com.google.firebase:firebase-firestore'
-
     implementation 'com.google.android.material:material:1.4.0-rc01'
 
-    implementation 'com.google.firebase:firebase-auth'
 
+    implementation 'com.google.firebase:firebase-auth'
     implementation 'co.paystack.android:paystack:3.1.2'
 
     implementation 'com.synnapps:carouselview:0.1.5'
@@ -90,7 +91,6 @@ dependencies {
     //crash analytics
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
-
     //reward story
     implementation 'com.github.shts:StoriesProgressView:3.0.0'
 
@@ -161,4 +161,10 @@ dependencies {
 }
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://repo.spring.io/release")
+    }
+    maven {
+        url = uri("https://repository.jboss.org/maven2")
+    }
 }

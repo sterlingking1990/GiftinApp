@@ -4,6 +4,9 @@
       <root url="jar://$USER_HOME$/Library/Android/sdk/caches/transforms-3/46059450f1e1ac0870e11e68c165a77a/transformed/jetified-AppUpdater-2.7/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/46059450f1e1ac0870e11e68c165a77a/transformed/jetified-AppUpdater-2.7/res" />
       <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/46059450f1e1ac0870e11e68c165a77a/transformed/jetified-AppUpdater-2.7/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/aca6fa8ea27075ab7bb30aa023825810/transformed/jetified-AppUpdater-2.7/res" />
+      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/transforms-3/aca6fa8ea27075ab7bb30aa023825810/transformed/jetified-AppUpdater-2.7/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/aca6fa8ea27075ab7bb30aa023825810/transformed/jetified-AppUpdater-2.7/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

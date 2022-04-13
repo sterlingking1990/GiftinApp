@@ -98,13 +98,17 @@ class CustomerRewardStories : Fragment() {
 
         super.onCreate(savedInstanceState)
         arguments?.let {
-            imagesList = it.get("storyList") as ArrayList<MerchantStoryListPojo>
+           // imagesList = it.get("storyList") as ArrayList<MerchantStoryListPojo>
             allStories = it.get("allStory") as ArrayList<MerchantStoryPojo>
             currentStoryPos = it.getInt("currentStoryPos")
             storyOwner = it.getString("storyOwner")
             hasHeader = it.getBoolean("hasHeader")
 
         }
+
+        imagesList = allStories!![0].merchantStoryList ?: arrayListOf()
+
+        Log.d("ImageListSize", imagesList!!.size.toString())
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -309,7 +313,7 @@ class CustomerRewardStories : Fragment() {
             )
             imageView.gone()
             imageUrl.merchantStatusImageLink?.let { imageView.loadImage(it) }
-            val audioLink = if(imageUrl.storyAudioLink=="") "empty" else imageUrl.storyAudioLink
+            val audioLink = if(imageUrl.storyAudioLink.isNullOrEmpty()) "empty" else imageUrl.storyAudioLink
             audioLinks.add(audioLink)
             ll_status.addView(imageView)
             //playmusic
@@ -391,7 +395,7 @@ class CustomerRewardStories : Fragment() {
             progressBar.max = getProgressBarMax(index)
              // max progress i am using is 40 for
             //each progress bar you can modify it
-            progressMax.add(index,progressBar.max)
+            progressMax.add(index,getProgressBarMax(index))
             progressBar.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.whitesmoke))
 
             progressBar.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
@@ -401,7 +405,7 @@ class CustomerRewardStories : Fragment() {
     }
 
     private fun getProgressBarMax(index:Int): Int {
-        return if (imagesList?.get(index)?.mediaDuration.toString()=="0"){
+        return if (imagesList?.get(index)?.mediaDuration=="0"){
             40
         }else{
             imagesList?.get(index)?.mediaDuration?.toInt()?.div(100) ?: 40
@@ -409,6 +413,7 @@ class CustomerRewardStories : Fragment() {
     }
 
     private fun emitStatusProgress() {
+        Log.d("IndexPos",indexPos.toString())
         mDisposable = Observable.intervalRange(mCurrentProgress, progressMax[indexPos] - mCurrentProgress, 0, 100, TimeUnit.MILLISECONDS)
                 .observeOn(Schedulers.computation())
                 .subscribeOn(AndroidSchedulers.mainThread())
@@ -425,6 +430,7 @@ class CustomerRewardStories : Fragment() {
     private fun moveToNextStatus() {
         if ( mCurrentIndex < imagesList?.size!!-1) {
             mCurrentProgress = 0
+           // indexPos = mCurrentIndex
             mDisposable?.dispose()
             mDisposable = null
             runOnUiThread {
@@ -432,14 +438,16 @@ class CustomerRewardStories : Fragment() {
                 ll_status[mCurrentIndex].gone()
                 mCurrentIndex++
                 ll_status[mCurrentIndex].show()
-                indexPos = mCurrentIndex
                 playAudio(audioLinks[mCurrentIndex])
                 //showStatusTag(mCurrentIndex)
             }
-            if (mCurrentIndex != imagesList?.size!! - 1) {
-                progressLength = if(audioLinks[mCurrentIndex] =="empty") 40 else 230
-                emitStatusProgress()
-            }
+            indexPos+=1
+            emitStatusProgress()
+           // if (mCurrentIndex != imagesList?.size!! - 1) {
+                //progressLength = if(audioLinks[mCurrentIndex] =="empty") 40 else 230
+               // indexPos = mCurrentIndex
+
+            //}
         } else {
             //we just finished displaying last status story of the first brand, now we are checking if its actually the last brand or not
             runOnUiThread {
@@ -469,13 +477,16 @@ class CustomerRewardStories : Fragment() {
                 compareNumberOfTimesUserGotRewardOnTotalBrandStatusAgainstTotalBrandStatusList(numberOfTimeUserGotRewardOnABrandStatus,totalStoryList)
                 if(currentSlide) {
 
-
+                    imagesList?.clear()
                     currentStoryPos = currentStoryPos!! +1
                     imagesList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList
 
                     }
 
                     indexPos = 0
+
+                    progressMax.clear()
+                    audioLinks.clear()
 
 
                     storyOwner =  currentStoryPos?.let { allStories?.get(it)?.storyOwner
@@ -504,6 +515,7 @@ class CustomerRewardStories : Fragment() {
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
                 Log.d("CustomerRewardStoriesAd", "Ad failed to show.")
+                indexPos=0
 
             }
 
@@ -528,11 +540,18 @@ class CustomerRewardStories : Fragment() {
             compareNumberOfTimesUserGotRewardOnTotalBrandStatusAgainstTotalBrandStatusList(numberOfTimeUserGotRewardOnABrandStatus,totalStoryList)
             if(currentSlide) {
 
+                imagesList?.clear()
 
                 currentStoryPos = currentStoryPos!! +1
                 imagesList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList
 
                 }
+
+                indexPos = 0
+
+                progressMax.clear()
+                audioLinks.clear()
+
                 storyOwner =  currentStoryPos?.let { allStories?.get(it)?.storyOwner
 
                 }
@@ -915,8 +934,9 @@ class CustomerRewardStories : Fragment() {
     }
 
     private fun updateProgress(progress: Long) {
+        Log.d("CurrentProgress",progress.toString())
         mCurrentProgress = progress
-        progressLength = if(audioLinks[0] =="empty") 40 else 230
+        //progressLength = if(audioLinks[0] =="empty") 40 else 230
         runOnUiThread {
             (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = progress.toInt()
             tvRewardStoryTag.text = imagesList?.get(mCurrentIndex)?.storyTag
@@ -926,8 +946,8 @@ class CustomerRewardStories : Fragment() {
             tvNumberOfViewers.text = numberOfStatusView.toString()
             tvLikeBrandStory.text = numberOfLikes.toString()
             statusTag = imagesList?.get(mCurrentIndex)?.storyTag
-            indexPos=mCurrentIndex+1
         }
+        //indexPos=mCurrentIndex+1
 
     }
 
@@ -963,7 +983,7 @@ class CustomerRewardStories : Fragment() {
 
     private fun startViewing() {
         ll_status[0].show()
-        progressLength = if(audioLinks[0] =="empty") 40 else 230
+        //progressLength = if(audioLinks[0] =="empty") 40 else 230
         runOnUiThread {
             playAudio(audioLinks[mCurrentIndex])
         }
@@ -1045,7 +1065,7 @@ class CustomerRewardStories : Fragment() {
         runOnUiThread {
             if (mCurrentIndex != imagesList?.size!!-1) {
                 val durationOne = if(audioLinks[mCurrentIndex]=="empty") 40 else 230
-                (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = durationOne
+                (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = progressMax[mCurrentIndex]
                 ll_status[mCurrentIndex].gone()
                 mCurrentIndex++
                 ll_status[mCurrentIndex].show()

@@ -4,6 +4,9 @@
       <root url="jar://$USER_HOME$/Library/Android/sdk/caches/transforms-3/464327aacfb6ed5094d2c8b28380afb7/transformed/jetified-rxbinding-kotlin-2.1.1/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/464327aacfb6ed5094d2c8b28380afb7/transformed/jetified-rxbinding-kotlin-2.1.1/res" />
       <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/464327aacfb6ed5094d2c8b28380afb7/transformed/jetified-rxbinding-kotlin-2.1.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/transforms-3/ebcf4e407f9e29414ece136d42bce938/transformed/jetified-rxbinding-kotlin-2.1.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/ebcf4e407f9e29414ece136d42bce938/transformed/jetified-rxbinding-kotlin-2.1.1/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/ebcf4e407f9e29414ece136d42bce938/transformed/jetified-rxbinding-kotlin-2.1.1/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/Library/Android/sdk/caches/modules-2/files-2.1/com.jakewharton.rxbinding2/rxbinding-kotlin/2.1.1/b42766727516eb903bc0a1688c6a4299144e48f5/rxbinding-kotlin-2.1.1-javadoc.jar!/" />

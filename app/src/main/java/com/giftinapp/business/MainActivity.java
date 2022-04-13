@@ -696,11 +696,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void shareAppLink() {
 
-        String link = "https://giftinapp.page.link/xEYL/?link=brandible-app.com/?invitedBy=" + sessionManager.getEmail();
+        String link = "https://giftinappdev.page.link/amTC/?link=brandible-app.com/?invitedBy=" + sessionManager.getEmail();
 
         FirebaseDynamicLinks.getInstance().createDynamicLink()
                 .setLink(Uri.parse(link))
-                .setDomainUriPrefix("https://giftinapp.page.link")
+                .setDomainUriPrefix("https://giftinappdev.page.link")
                 .setAndroidParameters(
                         new DynamicLink.AndroidParameters.Builder("com.giftinapp.business")
                                 .build())
@@ -820,6 +820,8 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         db.setFirestoreSettings(settings);
 
+
+
             db.collection("referral_reward").document(sessionManager.getEmail()).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot resultDoc = task.getResult();
@@ -837,11 +839,17 @@ public class MainActivity extends AppCompatActivity {
                                 referralRewardPojo.referralRewardAmount = Integer.parseInt(remoteConfigUtil.getReferralRewardBase()) * target;
                                 referralRewardPojo.targetToReach = target;
 
-                                db.collection("referral_reward").document(sessionManager.getEmail()).set(referralRewardPojo)
-                                        .addOnCompleteListener(task1 -> {
-                                            if (task1.isSuccessful()) {
-                                                Toast.makeText(this, "You reward token will be sent to you via mail, please check in few minutes", Toast.LENGTH_LONG).show();
-                                            }
+                                db.collection("referral_reward").document(sessionManager.getEmail()).delete()
+                                        .addOnCompleteListener(task12 -> {
+                                           if(task12.isSuccessful()){
+
+                                               db.collection("referral_reward").document(sessionManager.getEmail()).set(referralRewardPojo)
+                                                       .addOnCompleteListener(task1 -> {
+                                                           if (task1.isSuccessful()) {
+                                                               Toast.makeText(this, "You reward token will be sent to you via mail, please check in few minutes", Toast.LENGTH_LONG).show();
+                                                           }
+                                                       });
+                                           }
                                         });
                             }
                         }

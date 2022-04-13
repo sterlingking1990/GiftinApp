@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="src/main/res/layout-v28/fragment_my_referral_deal.xml" value="0.14375" />
+        <entry key="src/main/res/layout/activity_main.xml" value="0.15260416666666668" />
         <entry key="src/main/res/layout/activity_signup.xml" value="0.22" />
         <entry key="src/main/res/layout/fragment_brand_preference.xml" value="0.1" />
         <entry key="src/main/res/layout/fragment_cashout.xml" value="0.20018115942028986" />

@@ -493,6 +493,7 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 // ...
                 Toast.makeText(requireContext(), "Could not get uri of image, please try uploading again", Toast.LENGTH_LONG).show()
                 pgUploading.visibility = View.GONE
+                uploadButton.isEnabled = true
             }
         }
     }
