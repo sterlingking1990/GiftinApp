@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">Brandible</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string-array name="months">
         <item>Month</item>
         <item>01</item>
@@ -18,18 +16,15 @@
         <item>11</item>
         <item>12</item>
     </string-array>
-
     <string-array name="interest">
         <item>As Influencer</item>
         <item>As Brand</item>
     </string-array>
-
     <string-array name="giftorId">
         <item>Use my facebook</item>
         <item>Use my Instagram</item>
         <item>Use my whatsApp</item>
     </string-array>
-
     <string-array name="wallet_range">
         <item>1000</item>
         <item>2000</item>
@@ -37,8 +32,6 @@
         <item>10000</item>
         <item>50000</item>
     </string-array>
-
-
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -56,7 +49,6 @@
     <string name="navigation_drawer_close">close</string>
     <string name="default_notification_channel_id">GIFTINAPPMESSAGING</string>
     <string name="msg_token_fmt">Token is $s</string>
-
     <string name="naira">#%1$s</string>
     <string name="enter_email">Enter Email</string>
     <string name="enter_password">Enter Password</string>
@@ -84,14 +76,11 @@
     <string name="rate_influencer">Rate Influencer</string>
     <string name="brand_name_and_status">%1$s\nFollowers (%2$s)</string>
     <string name="rated_by">Rated By: %1$s</string>
-
     <string name="amount_to_cashout">cashout\namount-\n#%1$s</string>
     <string name="youAreNotUpdatedMessage">There are new features now available to explore and enjoy</string>
     <string name="youAreNotUpdatedMessage1">update now</string>
-
     <string name="terms_and_condition"><a href="https://www.notion.so/Brandible-Terms-and-Condition-98b33ae92a73480591b64e2046095d92">Terms and Condition</a></string>
     <string name="terms_and_condition_link">https://stirring-laborer-7fd.notion.site/Brandible-Terms-and-Condition-98b33ae92a73480591b64e2046095d92</string>
     <string name="privacy_policy"><a href="https://www.notion.so/Privacy-Policy-1e6ae4bb84fb46979026a1a1281c610b">Privacy Policy</a></string>
     <string name="privacy_policy_link">https://stirring-laborer-7fd.notion.site/Privacy-Policy-1e6ae4bb84fb46979026a1a1281c610b</string>
-
 </resources>
