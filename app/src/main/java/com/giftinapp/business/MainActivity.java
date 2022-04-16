@@ -695,25 +695,28 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void shareAppLink() {
+        try {
+            String link = "https://giftinapp.page.link/xEYL/?link=brandible-app.com/?invitedBy=" + sessionManager.getEmail();
+//
+//            FirebaseDynamicLinks.getInstance().createDynamicLink()
+//                    .setLink(Uri.parse(link))
+//                    .setDomainUriPrefix("https://giftinappdev.page.link")
+//                    .setAndroidParameters(
+//                            new DynamicLink.AndroidParameters.Builder("com.giftinapp.business")
+//                                    .build())
+//                    .buildShortDynamicLink()
+//                    .addOnSuccessListener(shortDynamicLink -> {
+//                        Uri mInvitationUrl = shortDynamicLink.getShortLink();
 
-        String link = "https://giftinappdev.page.link/amTC/?link=brandible-app.com/?invitedBy=" + sessionManager.getEmail();
+                        // ...
+                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        intent.setType("text/plain");
+                        intent.putExtra(Intent.EXTRA_TEXT, link);
+                        startActivity(Intent.createChooser(intent, "Share Brandible With"));
+                    //});
+        }catch (Exception e){
 
-        FirebaseDynamicLinks.getInstance().createDynamicLink()
-                .setLink(Uri.parse(link))
-                .setDomainUriPrefix("https://giftinappdev.page.link")
-                .setAndroidParameters(
-                        new DynamicLink.AndroidParameters.Builder("com.giftinapp.business")
-                                .build())
-                .buildShortDynamicLink()
-                .addOnSuccessListener(shortDynamicLink -> {
-                    Uri mInvitationUrl = shortDynamicLink.getShortLink();
-
-                    // ...
-                    Intent intent = new Intent(Intent.ACTION_SEND);
-                    intent.setType("text/plain");
-                    intent.putExtra(Intent.EXTRA_TEXT, mInvitationUrl.toString());
-                    startActivity(Intent.createChooser(intent, "Share Brandible With"));
-                });
+        }
     }
 
 

@@ -162,13 +162,8 @@ public class SignUpActivity extends AppCompatActivity {
                 .getDynamicLink(getIntent())
                 .addOnSuccessListener(this, pendingDynamicLinkData -> {
                     // Get deep link from result (may be null if no link is found)
-                    Uri deepLink = null;
                     if (pendingDynamicLinkData != null) {
-                        deepLink=pendingDynamicLinkData.getLink();
-
-                    }
-                    if (deepLink != null) {
-                        String fullLink = deepLink.toString();
+                        String fullLink = pendingDynamicLinkData.getLink().toString();
                         ArrayList<String> emails = new ArrayList<>();
 
                         Matcher matcher = Pattern.compile("[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}").matcher(fullLink);
