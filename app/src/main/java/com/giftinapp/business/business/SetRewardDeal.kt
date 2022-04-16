@@ -1,12 +1,13 @@
 package com.giftinapp.business.business
 
+import android.Manifest
 import android.app.Activity.RESULT_OK
+import android.content.ContentValues
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,6 +20,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.app.ActivityCompat
@@ -49,8 +51,9 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 import javax.inject.Inject
-import kotlin.collections.ArrayList
 import kotlin.concurrent.timerTask
+
+private const val RECORD_AUDIO_REQUEST_CODE = 13
 
 @AndroidEntryPoint
 class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUploadedStory, BannerAdapter.ClickableBanner {
@@ -116,11 +119,40 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
     private var currentIdx = -1
     private val fileNameList: MutableList<String> = mutableListOf()
     private val fileList: MutableList<File?> = mutableListOf()
-    private val mediaUrls: MutableList<String> = mutableListOf()
 
     private val MICROPHONE_PERMISSION_CODE = 200
 
     private var mediaDuration:Int = 0
+
+    private var audioFromFile:Boolean = false
+
+    private var uploadedAudioUri: Uri? = null
+
+    val resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            // There are no request codes
+            val data: Intent? = result.data
+            Log.d("Data",data?.data.toString())
+            val audioUriData  = data?.data
+
+            if (audioUriData != null) {
+                context?.contentResolver?.openInputStream(audioUriData)
+            }
+
+            uploadedAudioUri = audioUriData
+
+            Log.d("FileUploaded",audioUriData.toString())
+
+            currentIdx += 1
+
+            isRecording = false
+            recordAudioBtn.gone()
+            cancelAudioButton.visible()
+            playAudioBtn.visible()
+
+
+        }
+    }
 
     @Inject
     lateinit var audioRecorderPlayer: AudioRecorderPlayer
@@ -135,7 +167,6 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
 
         storage = FirebaseStorage.getInstance()
 
@@ -241,42 +272,17 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         }
 
         recordAudioBtn.setOnClickListener {
-            if(!isRecording){
-                isPlayerInstantiated = true
-                recordAudio()
-                Timer().schedule(timerTask {
-                    runOnUiThread {
-                        run {
-                            if(isRecording) {
-                                stopRecordAudio()
-                            }
-                        }
-                    }
-                },30000)
-            }else{
+            if (!isRecording) {
+                checkWhatAudioTypeToUpload()
+            } else {
                 stopRecordAudio()
             }
         }
 
         playAudioBtn.setOnClickListener {
-            if(tvAudioDownloadUri.text!=""){
-                isPlaying = if (!isPlaying) {
-                    playAudio()
-                    true
-                } else {
-                    stopPlayingAudio()
-                    false
-                }
+            if(tvAudioDownloadUri.text!="" || uploadedAudioUri!=null || currentIdx > -1){
+                playOrStopPlayingAudio()
             }else {
-                if (currentIdx > -1) {
-                    isPlaying = if (!isPlaying) {
-                        playAudio()
-                        true
-                    } else {
-                        stopPlayingAudio()
-                        false
-                    }
-                } else {
                     Toast.makeText(
                         context,
                         "You need to record before you can play",
@@ -284,9 +290,12 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                     ).show()
                 }
             }
-        }
 
         cancelAudioButton.setOnClickListener {
+            if(isPlaying){
+                stopPlayingAudio()
+                isPlaying = false
+            }
             cancelAudioButton.gone()
             recordAudioBtn.visible()
             playAudioBtn.gone()
@@ -298,6 +307,30 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
             Toast.makeText(context, "Audio cancelled", Toast.LENGTH_LONG).show()
         }
 
+    }
+
+    private fun playOrStopPlayingAudio() {
+        isPlaying = if (!isPlaying) {
+            playAudio()
+            true
+        } else {
+            stopPlayingAudio()
+            false
+        }
+    }
+
+    private fun audioFromRecording() {
+            isPlayerInstantiated = true
+            recordAudio()
+            Timer().schedule(timerTask {
+                runOnUiThread {
+                    run {
+                        if (isRecording) {
+                            stopRecordAudio()
+                        }
+                    }
+                }
+            }, 30000)
     }
 
     override fun onStop() {
@@ -320,6 +353,37 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         }
     }
 
+    private fun checkWhatAudioTypeToUpload(){
+        builder!!.setMessage("What would you like to do?")
+            .setCancelable(false)
+            .setPositiveButton("Record a jingle") { dialog: DialogInterface?, id: Int ->
+                audioFromFile = false
+                audioFromRecording()
+            }
+            .setNegativeButton("Upload Jingle") { dialog2: DialogInterface?, id:Int->
+                audioFromFile = true
+                if(isPermissionAlreadyGiven()) {
+                    audioFromMusicFile()
+                }else{
+                    requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO),
+                        RECORD_AUDIO_REQUEST_CODE)
+                }
+            }
+        val alert = builder!!.create()
+        alert.show()
+    }
+
+    private fun audioFromMusicFile(){
+        val audioIntent = Intent()
+        audioIntent.addCategory(Intent.CATEGORY_OPENABLE)
+        audioIntent.type = "audio/*"
+        audioIntent.action = Intent.ACTION_OPEN_DOCUMENT
+
+
+
+        resultLauncher.launch(audioIntent)
+    }
+
     private fun stopRecordAudio(){
         audioRecorderPlayer.stopRecordingAudio()
         isRecording = false
@@ -335,13 +399,32 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 audioRecorderPlayer.playRecordingFromFirebase(tvAudioDownloadUri.text.toString())
             }
         }else{
-        val currentFileName = fileNameList[currentIdx]
-        context?.let {
-            playAudioBtn.setImageResource(R.drawable.stop_icon)
-            val file =
-                File(it.getExternalFilesDir(Environment.DIRECTORY_PODCASTS), currentFileName)
-            audioRecorderPlayer.playRecording(file)
-            mediaDuration = audioRecorderPlayer.returnMediaLength()
+            if(audioFromFile){
+                //val currentFileName = fileList[currentIdx]
+                context?.let {context->
+                    playAudioBtn.setImageResource(R.drawable.stop_icon)
+                   // if (currentFileName != null) {
+                    uploadedAudioUri?.let { it1 -> audioRecorderPlayer.playRecordingFromUri(context,it1) }
+                    //}
+                    mediaDuration = audioRecorderPlayer.returnMediaLength()
+                    if(mediaDuration==0){
+                        mediaDuration = 29824
+                    }
+                }
+            }else {
+                val currentFileName = fileNameList[currentIdx]
+                Log.d("FileUploaded", currentFileName)
+                context?.let {
+                    playAudioBtn.setImageResource(R.drawable.stop_icon)
+                    val file =
+                        File(
+                            it.getExternalFilesDir(Environment.DIRECTORY_PODCASTS),
+                            currentFileName
+                        )
+                    Log.d("FileIs", file.toString())
+                    audioRecorderPlayer.playRecording(file)
+                    mediaDuration = audioRecorderPlayer.returnMediaLength()
+                }
             }
         }
     }
@@ -484,8 +567,10 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                 val downloadUri = task.result
                 tvDownloadUri.text = downloadUri.toString()
                 if(!fileList.isNullOrEmpty()){
-                    fileList[currentIdx]?.let { uploadAudio(it) }
-                }else {
+                    fileList[currentIdx]?.let { uploadAudio(it,null) }
+                }else if(uploadedAudioUri!=null){
+                   uploadAudio(null,uploadedAudioUri)
+                }  else{
                     uploadUriAndStoryTagToFireStore()
                 }
             } else {
@@ -498,11 +583,14 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         }
     }
 
-    private fun uploadAudio(file: File) {
+    private fun uploadAudio(file: File?,uri:Uri?) {
         val audioPath = "rewardmemes/" + UUID.randomUUID() + ".3gp"
         val reference = storage.getReference(audioPath)
-        val uploadTask = reference.putFile(Uri.fromFile(file))
-
+        val uploadTask = if(file!=null){
+            reference.putFile(Uri.fromFile(file))}
+            else{
+                reference.putFile(uri!!)
+            }
         pgUploading.visibility = View.VISIBLE
 
         uploadTask.addOnCompleteListener(requireActivity()) { it ->
@@ -744,31 +832,46 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                                 //delete from firebase storage
                                 val photoRef: StorageReference =
                                     FirebaseStorage.getInstance().getReferenceFromUrl(link)
-                                val audioRef = FirebaseStorage.getInstance().getReference(audioLink)
-                                try {
-                                    audioRef.delete()
-                                    photoRef.delete()
-                                        .addOnSuccessListener { // Fil // e deleted successfully
 
-                                            uploadedStoryAdapter.clear(positionId)
-                                            uploadedStoryAdapter.notifyDataSetChanged()
+                                try{
+                                    photoRef.delete().addOnCompleteListener { photoDel->
+                                        if(photoDel.isSuccessful){
+                                            try {
+                                                val audioRef = FirebaseStorage.getInstance().getReferenceFromUrl(audioLink)
+                                                audioRef.delete().addOnCompleteListener {audioDel->
+                                                    if(audioDel.isSuccessful) {
+                                                        pgUploading.visibility = View.GONE
+                                                        uploadedStoryAdapter.clear(positionId)
+                                                        uploadedStoryAdapter.notifyDataSetChanged()
 
+                                                        Toast.makeText(
+                                                            requireContext(),
+                                                            "You have successfully removed reward story",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    }
+                                                }
+                                            }catch (e:Exception){
+                                                pgUploading.visibility = View.GONE
+                                                uploadedStoryAdapter.clear(positionId)
+                                                uploadedStoryAdapter.notifyDataSetChanged()
+
+                                                Toast.makeText(
+                                                    requireContext(),
+                                                    "You have successfully removed reward story",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }else{
                                             Toast.makeText(
                                                 requireContext(),
-                                                "You have successfully removed reward story",
+                                                "Could not delete, try again later",
                                                 Toast.LENGTH_SHORT
                                             ).show()
-                                        }.addOnFailureListener { // Uh-oh, an error occurred!
-                                        Toast.makeText(
-                                            requireContext(),
-                                            "Could not delete, try again later",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        }
                                     }
-
-                                    pgUploading.visibility = View.GONE
                                 }catch (e:Exception){
-
+                                    Toast.makeText(requireContext(),e.message,Toast.LENGTH_LONG).show()
                                 }
                             }
                         }
@@ -886,6 +989,15 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
                     Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
                 }
             }
+            RECORD_AUDIO_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    checkWhatAudioTypeToUpload()
+                } else {
+                    Toast.makeText(context, "You need to enable permissions!", Toast.LENGTH_SHORT)
+                        .show()
+                }
+                return
+            }
         }
     }
 
@@ -911,4 +1023,14 @@ class SetRewardDeal : Fragment(), UploadedRewardStoryListAdapter.ClickableUpload
         imageText.visibility = View.GONE
     }
 
+    private fun isPermissionAlreadyGiven(): Boolean {
+        context?.let {
+            val result: Int = ContextCompat.checkSelfPermission(
+                it,
+                Manifest.permission.RECORD_AUDIO
+            )
+            return result == PackageManager.PERMISSION_GRANTED
+        }
+        return false
+    }
 }

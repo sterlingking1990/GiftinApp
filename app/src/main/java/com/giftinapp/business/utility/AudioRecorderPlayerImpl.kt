@@ -1,11 +1,8 @@
 package com.giftinapp.business.utility
 
 import android.content.Context
-import android.media.AudioManager
-import android.media.MediaMetadataRetriever
-import android.media.MediaMetadataRetriever.METADATA_KEY_DURATION
-import android.media.MediaPlayer
-import android.media.MediaRecorder
+import android.media.*
+import android.net.Uri
 import android.util.Log
 import java.io.File
 import javax.inject.Inject
@@ -35,6 +32,9 @@ class AudioRecorderPlayerImpl @Inject constructor(
     }
 
     override fun playRecording(file: File) {
+
+        Log.d("FileAbs",file.canRead().toString())
+        mediaPlayer = mediaRecorderPlayerFactory.getMediaPlayer()
         try {
             mediaPlayer.apply {
                 reset()
@@ -44,6 +44,25 @@ class AudioRecorderPlayerImpl @Inject constructor(
                 start()
             }
 
+        }catch (e:Exception){
+
+            Log.d("ErrorPlayRecording",e.message.toString())
+        }
+    }
+
+    override fun playRecordingFromUri(context: Context, uri: Uri) {
+        mediaPlayer = mediaRecorderPlayerFactory.getMediaPlayer()
+        Log.d("mediaPl",mediaPlayer.toString())
+        mediaPlayer.setAudioAttributes(AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .build())
+        try {
+            mediaPlayer.apply {
+                setDataSource(context,uri)
+                prepare()
+                start()
+            }
         }catch (e:Exception){
             Log.d("ErrorPlayRecording",e.message.toString())
         }
@@ -65,8 +84,11 @@ class AudioRecorderPlayerImpl @Inject constructor(
     }
 
     override fun stopPlayingRecording() {
+        Log.d("mediaP",mediaPlayer.toString())
         try {
-            mediaPlayer.stop()
+            if(mediaPlayer.isPlaying) {
+                mediaPlayer.stop()
+            }
         }catch (e:Exception){
             Log.d("ErrorStopping",e.message.toString())
         }

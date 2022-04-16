@@ -1,11 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: co.paystack.android.design.widget:pinpad:1.0.4@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/transforms-3/ccc1f074a5766734fd2ae580e3dc8c38/transformed/jetified-pinpad-1.0.4/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/ccc1f074a5766734fd2ae580e3dc8c38/transformed/jetified-pinpad-1.0.4/res" />
-      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/ccc1f074a5766734fd2ae580e3dc8c38/transformed/jetified-pinpad-1.0.4/AndroidManifest.xml" />
-      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/b2d3715abbd0431b7726a95c59f968b7/transformed/jetified-pinpad-1.0.4/res" />
       <root url="jar://$USER_HOME$/Library/Android/sdk/caches/transforms-3/b2d3715abbd0431b7726a95c59f968b7/transformed/jetified-pinpad-1.0.4/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/b2d3715abbd0431b7726a95c59f968b7/transformed/jetified-pinpad-1.0.4/res" />
       <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/b2d3715abbd0431b7726a95c59f968b7/transformed/jetified-pinpad-1.0.4/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />

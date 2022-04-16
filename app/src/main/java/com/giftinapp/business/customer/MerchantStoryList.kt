@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -215,7 +216,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                                     }
                                                                 } catch (e: Exception) {
                                                                     Log.d(
-                                                                        "NO STATUS",
+                                                                        "NOSTATUS",
                                                                         "Can't find record for no status"
                                                                     )
                                                                 }
@@ -227,6 +228,10 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
 
                                         }
                                     }
+                            }
+                            if (merchantStoryPojos.size==0){
+                                pgLoading.visibility = View.GONE
+                                Toast.makeText(requireContext(),"No status available, help us get brands",Toast.LENGTH_LONG).show()
                             }
 
 
