@@ -1,9 +1,10 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.skydoves:whatif:1.0.4@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/transforms-3/fc6cb042ab3a11b9f3591a655805c4c0/transformed/jetified-whatif-1.0.4/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/fc6cb042ab3a11b9f3591a655805c4c0/transformed/jetified-whatif-1.0.4/res" />
+      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/dc9f56cd666111a0224ab6f4f77573d8/transformed/jetified-whatif-1.0.4/res" />
       <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/fc6cb042ab3a11b9f3591a655805c4c0/transformed/jetified-whatif-1.0.4/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/transforms-3/fc6cb042ab3a11b9f3591a655805c4c0/transformed/jetified-whatif-1.0.4/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/Library/Android/sdk/caches/modules-2/files-2.1/com.github.skydoves/whatif/1.0.4/c4fef84843c0c40e321d0bf777df4dbe96884f84/whatif-1.0.4-javadoc.jar!/" />

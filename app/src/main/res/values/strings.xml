@@ -1,37 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Brandible</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string-array name="months">
-        <item>Month</item>
-        <item>01</item>
-        <item>02</item>
-        <item>03</item>
-        <item>04</item>
-        <item>05</item>
-        <item>06</item>
-        <item>07</item>
-        <item>08</item>
-        <item>09</item>
-        <item>10</item>
-        <item>11</item>
-        <item>12</item>
-    </string-array>
-    <string-array name="interest">
-        <item>As Influencer</item>
-        <item>As Brand</item>
-    </string-array>
-    <string-array name="giftorId">
-        <item>Use my facebook</item>
-        <item>Use my Instagram</item>
-        <item>Use my whatsApp</item>
-    </string-array>
-    <string-array name="wallet_range">
-        <item>1000</item>
-        <item>2000</item>
-        <item>5000</item>
-        <item>10000</item>
-        <item>50000</item>
-    </string-array>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -83,4 +53,37 @@
     <string name="terms_and_condition_link">https://stirring-laborer-7fd.notion.site/Brandible-Terms-and-Condition-98b33ae92a73480591b64e2046095d92</string>
     <string name="privacy_policy"><a href="https://www.notion.so/Privacy-Policy-1e6ae4bb84fb46979026a1a1281c610b">Privacy Policy</a></string>
     <string name="privacy_policy_link">https://stirring-laborer-7fd.notion.site/Privacy-Policy-1e6ae4bb84fb46979026a1a1281c610b</string>
+    <string name="deeplink">https://giftinappdev.page.link/amTC/?link=brandible-app.com/?invitedBy=%1$s</string>
+    <string name="deeplinkonly">https://giftinappdev.page.link</string>
+    <string-array name="months">
+        <item>Month</item>
+        <item>01</item>
+        <item>02</item>
+        <item>03</item>
+        <item>04</item>
+        <item>05</item>
+        <item>06</item>
+        <item>07</item>
+        <item>08</item>
+        <item>09</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </string-array>
+    <string-array name="interest">
+        <item>As Influencer</item>
+        <item>As Brand</item>
+    </string-array>
+    <string-array name="giftorId">
+        <item>Use my facebook</item>
+        <item>Use my Instagram</item>
+        <item>Use my whatsApp</item>
+    </string-array>
+    <string-array name="wallet_range">
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>50000</item>
+    </string-array>
 </resources>
