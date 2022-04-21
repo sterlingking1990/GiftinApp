@@ -12,8 +12,27 @@ apply plugin: 'kotlin-kapt'
 
 apply plugin: 'dagger.hilt.android.plugin'
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
+    signingConfigs {
+        debug {
+            storeFile file('/Users/macuser/Documents/giftinappks')
+            storePassword '#Gking1990'
+            keyAlias 'MERCHANT_KEY_ALIAS'
+            keyPassword '#Gking1990'
+        }
+        release {
+            storeFile file('/Users/macuser/Documents/giftinappks')
+            storePassword '#Gking1990'
+            keyAlias 'MERCHANT_KEY_ALIAS'
+            keyPassword '#Gking1990'
+        }
+    }
     compileSdkVersion 31
+    flavorDimensions "default"
     buildToolsVersion "30.0.2"
 
     defaultConfig {
@@ -29,7 +48,21 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    productFlavors {
+        flavors.each { name, flavor ->
+            "$name" {
+
+            }
         }
     }
 
@@ -159,6 +192,7 @@ dependencies {
     def whatIf_version = "1.0.4"
     implementation "com.github.skydoves:whatif:$whatIf_version"
 }
+
 repositories {
     mavenCentral()
     maven {
