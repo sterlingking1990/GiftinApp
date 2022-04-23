@@ -96,8 +96,6 @@ public class MainActivity extends AppCompatActivity {
 
     public Integer posi;
 
-    public Integer totalReferred = 0;
-
     FirebaseAuth mauth;
 
     private DrawerLayout drawer;
@@ -249,10 +247,6 @@ public class MainActivity extends AppCompatActivity {
         navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(following),String.valueOf(totalGiftCoin)));
 
         getTotalReferred();
-
-        if(totalReferred>=5) {
-            compareTotalReferredAgainstTarget();
-        }
     }
 
      private void openWebView(String brandLink) {
@@ -802,18 +796,26 @@ public class MainActivity extends AppCompatActivity {
                 QuerySnapshot result = task.getResult();
                 List<DocumentSnapshot> eachRes = result.getDocuments();
                 int total_referred = 0;
-                for(int i =0;i<eachRes.size();i++){
-                    if(eachRes.get(i).get("referral")==sessionManager.getEmail()){
-                        total_referred+=1;
+                for(int i =0;i<eachRes.size();i++) {
+                    if (!(eachRes.get(i).get("referrer") == null)) {
+                        try {
+                            if (Objects.equals(eachRes.get(i).get("referrer"), sessionManager.getEmail())) {
+                                total_referred += 1;
+                            }
+                        } catch (Exception e) {
+
+                        }
                     }
                 }
-                totalReferred = total_referred;
+                compareTotalReferredAgainstTarget(total_referred);
+
             }
 
         });
     }
 
-    private void compareTotalReferredAgainstTarget() {
+    private void compareTotalReferredAgainstTarget(Integer totalReferred) {
+        Log.d("TotalReffered",totalReferred.toString());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
 
