@@ -15,27 +15,32 @@
         <item
             android:id="@+id/navigation_view_brand_preference"
             android:icon="@drawable/ic_baseline_filter_tilt_shift_24"
-            android:title="Brand Preference"/>
+            android:title="Brands"/>
 
         <item
             android:id="@+id/navigation_view_reward_deal"
             android:icon="@drawable/ic_view_reward_deal"
-            android:title="Brand Deals"/>
+            android:title="Brand Stories"/>
 
-        <item
-            android:id="@+id/navigation_view_activity_rating"
-            android:icon="@drawable/ic_rate_influencer"
-            android:title="My Activity Ratings"/>
+        <item android:id="@+id/navigation_referral_deal"
+            android:icon="@drawable/ic_referral_deal"
+            android:title="My Referral Deal" />
 
-        <item
-            android:id="@+id/navigation_gifting_history"
-            android:icon="@drawable/merchants_care"
-            android:title="My Rewards" />
 
-        <item
-            android:id="@+id/navigation_gifting_merchant"
-            android:icon="@drawable/ic_gifting_merchant"
-            android:title="Brands Pay Log"/>
+<!--        <item-->
+<!--            android:id="@+id/navigation_view_activity_rating"-->
+<!--            android:icon="@drawable/ic_rate_influencer"-->
+<!--            android:title="My Activity Ratings"/>-->
+
+<!--        <item-->
+<!--            android:id="@+id/navigation_gifting_history"-->
+<!--            android:icon="@drawable/merchants_care"-->
+<!--            android:title="My Rewards" />-->
+
+<!--        <item-->
+<!--            android:id="@+id/navigation_gifting_merchant"-->
+<!--            android:icon="@drawable/ic_gifting_merchant"-->
+<!--            android:title="Brands Pay Log"/>-->
 
     </group>
 

@@ -2,6 +2,8 @@ package com.giftinapp.business;
 
 import android.app.Application;
 
+import com.giftinapp.business.utility.RemoteConfigUtil;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.appcheck.FirebaseAppCheck;
 import com.google.firebase.appcheck.safetynet.SafetyNetAppCheckProviderFactory;
@@ -12,7 +14,13 @@ import dagger.hilt.android.HiltAndroidApp;
 
 
 @HiltAndroidApp
-public class PaymentApp extends Application{}
+public class PaymentApp extends Application{
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+    }
+}
 //    @Override
 //    public void onCreate() {
 //

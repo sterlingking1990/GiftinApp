@@ -19,28 +19,28 @@ import javax.inject.Inject
 @HiltViewModel
 class InitiateTransferViewModel @Inject constructor(private val cashOutApiServiceRepository: CashOutApiServiceRepository, private val networkHelper: NetworkHelper) : ViewModel() {
 
-    private var initiateTransferResponse = MutableLiveData<Resource<InitiateTransferResponseModel>>()
-    val _initiateTransferResponseObservable: LiveData<Resource<InitiateTransferResponseModel>>
-        get() = initiateTransferResponse
+    private var _initiateTransferResponse = MutableLiveData<Resource<InitiateTransferResponseModel>>()
+    val initiateTransferResponseObservable: LiveData<Resource<InitiateTransferResponseModel>>
+        get() = _initiateTransferResponse
 
 
     fun initiateTransferProcess(authorization:String,initiateTransferRequestModel: InitiateTransferRequestModel){
         viewModelScope.launch {
-            initiateTransferResponse.postValue(Resource.loading())
+            _initiateTransferResponse.postValue(Resource.loading())
 
             try{
                 val transferRecieptResponse = cashOutApiServiceRepository.initiateTransferProcess(authorization,initiateTransferRequestModel)
                 Log.d("verified",transferRecieptResponse.toString())
                 if(transferRecieptResponse.isSuccessful){
-                    initiateTransferResponse.postValue(Resource(Resource.Status.SUCCESS,transferRecieptResponse.body(),null))
+                    _initiateTransferResponse.postValue(Resource(Resource.Status.SUCCESS,transferRecieptResponse.body(),null))
                 }
                 else{
-                    initiateTransferResponse.postValue(Resource.error("Unable to verify account"))
+                    _initiateTransferResponse.postValue(Resource.error("Unable to verify account"))
                 }
             }
             catch (e:Exception){
                 Log.d("Error",e.message.toString())
-                initiateTransferResponse.postValue(Resource.error("Error -> ${e.message}"))
+                _initiateTransferResponse.postValue(Resource.error("Error -> ${e.message}"))
             }
         }
     }

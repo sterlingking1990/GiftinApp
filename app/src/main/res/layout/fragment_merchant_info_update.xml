@@ -24,15 +24,18 @@
             android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/TextInputStyling"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:textColorHint="?attr/hintColorForTextInput"
+                >
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_facebook"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Facebook handle"
+                    android:textColor="?attr/textColorForInputEdit"
                     android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1"
@@ -48,7 +51,7 @@
             android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/TextInputStyling"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -57,6 +60,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Instagram handle"
+                    android:textColor="?attr/textColorForInputEdit"
                     android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1"
@@ -71,7 +75,7 @@
             android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/TextInputStyling"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -81,6 +85,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Enter WhatsApp"
                     android:imeOptions="actionNext"
+                    android:textColor="?attr/textColorForInputEdit"
                     android:inputType="number"
                     android:maxLines="1"
                     android:textSize="16sp" />
@@ -95,15 +100,16 @@
             android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/TextInputStyling"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_address"
+                    android:id="@+id/et_brandname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter Biz Address"
+                    android:hint="Enter Brand name"
+                    android:textColor="?attr/textColorForInputEdit"
                     android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1"
@@ -131,6 +137,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:textColor="@color/tabColorLight"
                 android:layout_gravity="center"
                 android:text="brand id"
                 android:textSize="16sp"
@@ -146,13 +153,17 @@
         </LinearLayout>
 
 
-        <Button
+        <com.skydoves.elasticviews.ElasticButton
             android:id="@+id/btn_update_merchant_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:text="Update Info"
-            android:background="@drawable/rectangle_shaped_button"
+            app:button_cornerRadius="4dp"
+            app:button_duration="250"
+            app:button_scale="0.87"
+            android:textColor="?attr/actionButtonTextColor"
+            android:background="?attr/actionButtonsColor"
             android:textAlignment="center"
             android:textSize="20dp" />
 

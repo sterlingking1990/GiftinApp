@@ -3,6 +3,7 @@ package com.giftinapp.business.customer
 import android.content.Context
 import android.graphics.Color
 import android.text.Html
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,12 +19,11 @@ import com.giftinapp.business.R
 import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.MerchantStoryPojo
 import com.giftinapp.business.utility.SessionManager
+import com.google.firebase.crashlytics.internal.model.CrashlyticsReport
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
-
-
 class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.Adapter<MerchantStoryListAdapter.ViewHolder>(), Filterable {
 
     private var merchantStories:ArrayList<MerchantStoryPojo> = ArrayList()
@@ -57,7 +57,6 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 val merchantName = findViewById<TextView>(R.id.merchantId)
                 val frontImage = findViewById<CircleImageView>(R.id.imgFrontImage)
 
-
                 val shimmer = Shimmer.ColorHighlightBuilder()
                         .setBaseColor(Color.parseColor("#f3f3f3"))
                         .setHighlightColor(Color.parseColor("#E7E7E7"))
@@ -72,13 +71,12 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 shimmerDrawable.setShimmer(shimmer)
 
                 try {
-                    Picasso.get().load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink).placeholder(shimmerDrawable).into(frontImage)
-
 
                     //getNumberOfViewersForStatus(merchantStories[position].storyOwner)
 
                     merchantName.text = if (isHasStoryHeader && merchantStories[position].merchantId == sessionManager.getEmail()) (Html.fromHtml("<b>My Reward Deal</b>")) else merchantStories[position].merchantId
                     circularStatusView.setPortionsCount(merchantStories[position].merchantStoryList.size)
+                    Picasso.get().load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink).placeholder(shimmerDrawable).into(frontImage)
 
                     frontImage.setOnClickListener {
                         storyClickable.onStoryClicked(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, merchantStories, position, merchantStories[position].storyOwner)
@@ -87,7 +85,7 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                     checkIfStatusSeen(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, context, circularStatusView, merchantStories[position].storyOwner)
                 }
                 catch (e:Exception){
-
+                    Log.d("PicassoException",e.message.toString())
                 }
             }
     }

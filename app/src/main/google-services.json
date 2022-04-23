@@ -1,0 +1,85 @@
+{
+  "project_info": {
+    "project_number": "737567532677",
+    "firebase_url": "https://merchantgifting-default-rtdb.firebaseio.com",
+    "project_id": "merchantgifting",
+    "storage_bucket": "merchantgifting.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:737567532677:android:92ee3b660ed449c27bebec",
+        "android_client_info": {
+          "package_name": "com.giftinapp.business"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "737567532677-hn851vdnvovkttc0n0dqavrjecufev64.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.giftinapp.business",
+            "certificate_hash": "feaa930a01c1c1a4814d0bd6336899d4acce062f"
+          }
+        },
+        {
+          "client_id": "737567532677-uhe7plib7tu4vsvpr9aa590sc3b2qngb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKel8oXgRLEVs8Hb4yTqMzOs49vgFLuQU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "737567532677-uhe7plib7tu4vsvpr9aa590sc3b2qngb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:737567532677:android:76d66b3505bea83b7bebec",
+        "android_client_info": {
+          "package_name": "com.giftinapp.business"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "737567532677-i201hms87e15rlg6bff43ca17soq2ibv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.giftinapp.business",
+            "certificate_hash": "feaa930a01c1c1a4814d0bd6336899d4acce062f"
+          }
+        },
+        {
+          "client_id": "737567532677-uhe7plib7tu4vsvpr9aa590sc3b2qngb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKel8oXgRLEVs8Hb4yTqMzOs49vgFLuQU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "737567532677-uhe7plib7tu4vsvpr9aa590sc3b2qngb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -32,6 +32,8 @@ class SessionManager(context: Context) {
 
         const val CASHOUT_AMOUNT = "cashout_amount"
 
+        const val TOTAL_REFERRED = "total_referred"
+
     }
 
     /**
@@ -124,6 +126,15 @@ class SessionManager(context: Context) {
         editor.putString(EMAIL,email)
         editor.putString(USERMODE,userMode)
         editor.apply()
+    }
+
+    fun saveTotalReferred(amount:Int){
+        val editor =prefs.edit()
+        editor.putInt(TOTAL_REFERRED,amount)
+    }
+
+    fun getTotalReferred():Int{
+        return prefs.getInt(TOTAL_REFERRED,0)
     }
 
     fun getUserMode():String?{
