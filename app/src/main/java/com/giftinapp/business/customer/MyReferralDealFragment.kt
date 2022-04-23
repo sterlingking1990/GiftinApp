@@ -16,10 +16,8 @@ import com.giftinapp.business.R
 import com.giftinapp.business.model.ReferralRewardPojo
 import com.giftinapp.business.model.RewardPojo
 import com.giftinapp.business.utility.SessionManager
-import com.google.android.gms.tasks.Task
 import com.google.android.material.slider.Slider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 
@@ -71,6 +69,8 @@ class MyReferralDealFragment : Fragment() {
         builder = AlertDialog.Builder(requireContext())
         sessionManager = SessionManager(requireContext())
 
+        getReferralTarget()
+
         getTotalReferred()
 
         btnSetReferralTarget.setOnClickListener {
@@ -85,9 +85,48 @@ class MyReferralDealFragment : Fragment() {
         }
 
         referralTargetIndicator.addOnChangeListener { slider, value, fromUser ->
-            REFERAL_TARGET = value.toInt()
-            tvReferralNote.text = resources.getString(R.string.reward_to_get_when_referral_reached,value.toString())
+            updateReferralMessage(value,null)
         }
+
+    }
+
+    private fun updateReferralMessage(value: Float?, value2:Int?) {
+        if(value!=null) {
+            REFERAL_TARGET = value.toInt()
+            tvReferralNote.text =
+                resources.getString(R.string.reward_to_get_when_referral_reached, value.toString())
+            referralTargetIndicator.value=value
+        }
+        else{
+            REFERAL_TARGET = value2!!
+            tvReferralNote.text =
+                resources.getString(R.string.reward_to_get_when_referral_reached, value2.toString())
+            referralTargetIndicator.value=value2.toFloat()
+        }
+    }
+
+    private fun getReferralTarget() {
+        val db = FirebaseFirestore.getInstance()
+
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("referral_reward").document(sessionManager.getEmail().toString()).get()
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    val referralDetails = it.result
+                    val referralTarget = referralDetails.getLong("targetToReach")?:5
+                    val referralToken = referralDetails.getString("referralRewardToken")?:""
+                    if(!referralToken.isNullOrEmpty()){
+                        Toast.makeText(requireContext(),"You have already received reward token for this target, set new target",Toast.LENGTH_LONG).show()
+                    }
+                    Log.d("Target",referralDetails.getLong("targetToReach").toString())
+                    REFERAL_TARGET = referralTarget.toInt()
+                    updateReferralMessage(null,referralTarget.toInt())
+                }
+            }
 
     }
 

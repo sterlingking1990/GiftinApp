@@ -130,9 +130,8 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val result: QuerySnapshot? = task.result
+                        val merchantStoryPojos = ArrayList<MerchantStoryPojo>()
                         if (result != null) {
-                            val merchantStoryPojos = ArrayList<MerchantStoryPojo>()
-
                             for (eachRes in result) {
                                 countDoc += 1
                                 pgLoading.visibility = View.VISIBLE
@@ -229,12 +228,6 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                         }
                                     }
                             }
-                            if (merchantStoryPojos.size==0){
-                                pgLoading.visibility = View.GONE
-                                Toast.makeText(requireContext(),"No status available, help us get brands",Toast.LENGTH_LONG).show()
-                            }
-
-
                         }
 
                     }
