@@ -7,34 +7,37 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.giftinapp.business.BuildConfig
 import com.giftinapp.business.MainActivity
 import com.giftinapp.business.R
-import com.giftinapp.business.model.InitiateTransactionReceiptPojo
-import com.giftinapp.business.model.RewardPojo
-import com.giftinapp.business.model.TransferReferenceModel
+import com.giftinapp.business.model.*
+import com.giftinapp.business.network.cashoutmodel.DataXXX
 import com.giftinapp.business.network.cashoutmodel.InitiateTransferRequestModel
 import com.giftinapp.business.network.cashoutmodel.TransferModel
-import com.giftinapp.business.network.viewmodel.cashoutviewmodel.GetBanksViewModel
-import com.giftinapp.business.network.viewmodel.cashoutviewmodel.InitiateTransferViewModel
-import com.giftinapp.business.network.viewmodel.cashoutviewmodel.TransferViewModel
-import com.giftinapp.business.network.viewmodel.cashoutviewmodel.VerifyAccountViewModel
-import com.giftinapp.business.utility.Resource
-import com.giftinapp.business.utility.SessionManager
+import com.giftinapp.business.network.viewmodel.cashoutviewmodel.*
+import com.giftinapp.business.utility.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.jakewharton.rxbinding2.view.enabled
+import com.synnapps.carouselview.CarouselView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_cashout.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.floor
 
 @AndroidEntryPoint
-class CashoutFragment : Fragment() {
+class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
 
     private val getBanksViewModel:GetBanksViewModel by viewModels()
@@ -42,17 +45,17 @@ class CashoutFragment : Fragment() {
     private val initiateTransferViewModel:InitiateTransferViewModel by viewModels()
     private val transferViewModel:TransferViewModel by viewModels()
 
-    private lateinit var bankAndCodeList:MutableMap<String, String>
-    private var onlyBanks:MutableList<String> = mutableListOf()
-    private lateinit var arrayBankListAdapter:ArrayAdapter<String>
+    private var bankNameAndCode = ArrayList<BankItem>()
 
     private lateinit var sessionManager: SessionManager
+
+    private var bankName: String? = null
+    private var bankCode: String? = null
 
     private lateinit var totalAmountToCashOut:String
 
     var builder: AlertDialog.Builder? = null
 
-    private lateinit var bankCode:String
     private lateinit var accountNumber:String
     private lateinit var recipientCode:String
 
@@ -62,25 +65,40 @@ class CashoutFragment : Fragment() {
         // Inflate the layout for this fragment
 
         val view = inflater.inflate(R.layout.fragment_cashout, container, false)
-        sessionManager = SessionManager(requireContext())
-        sessionManager.setCashoutAmount(0.0)
-        loadAmountToCashOut()
-        handleObservers()
+
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+//        arrayBankListAdapter = ArrayAdapter(requireContext(),R.layout.single_bank_item,onlyBanks)
+
+
+        sessionManager = SessionManager(requireContext())
+        sessionManager.setCashoutAmount(0.0)
+        loadAmountToCashOut()
+
+        bank_spinner.onItemSelectedListener = this
+        //bankListView.isEnabled = true
+
+       // bankListView.setText("loading banks ...")
 
         builder = AlertDialog.Builder(requireContext())
 
-        bankAndCodeList = mutableMapOf()
-        getBanksViewModel.getBankList(BuildConfig.PSTACK_AUTHKEY, "nigeria")
+        fetchBanks()
+
+        handleObservers()
 
         disableOnLoad()
 
         handleClicks()
+
+
+    }
+
+    private fun fetchBanks() {
+        getBanksViewModel.getBankList()
     }
 
     private fun checkIfCanCashOut(){
@@ -115,11 +133,13 @@ class CashoutFragment : Fragment() {
         db.firestoreSettings = settings
 
         //get the gift coin of the user
-        db.collection("users").document(sessionManager.getEmail().toString()).collection("rewards").get()
+        try {
+            db.collection("users").document(sessionManager.getEmail().toString())
+                .collection("rewards").get()
                 .addOnCompleteListener {
-                    if(it.isSuccessful){
+                    if (it.isSuccessful) {
                         var totalCashout = 0.0
-                        for (eachBusinessThatGiftedCustomer in it.result!!){
+                        for (eachBusinessThatGiftedCustomer in it.result!!) {
                             val rewardCoin = eachBusinessThatGiftedCustomer.getDouble("gift_coin")
                             Log.d("reward", rewardCoin.toString())
                             if (rewardCoin != null) {
@@ -129,6 +149,9 @@ class CashoutFragment : Fragment() {
                         sessionManager.setCashoutAmount(totalCashout)
                     }
                 }
+        }catch (e:Exception){
+            Log.d("NoUser",e.message.toString())
+        }
     }
 
     private fun disableOnLoad(){
@@ -139,16 +162,11 @@ class CashoutFragment : Fragment() {
 
 
     private fun handleClicks(){
-        btnVerifyAccount.setOnClickListener {
-            val bankSelected = bankListView.text.toString()
-            bankCode = bankAndCodeList[bankSelected].toString()
-            accountNumber = et_account_number.text.toString()
 
-            if(bankSelected == "select bank"){
-                Toast.makeText(requireContext(), "Please select your bank before verification", Toast.LENGTH_LONG).show()
-            }
-            else if(accountNumber.isEmpty()){
-                Toast.makeText(requireContext(), "Please enter your account number", Toast.LENGTH_LONG).show()
+        btnVerifyAccount.setOnClickListener {
+            accountNumber = et_account_number.text.toString()
+            if(accountNumber.isEmpty() || bankCode.isNullOrEmpty()){
+                Toast.makeText(requireContext(), "Bank and Account Number must be provided", Toast.LENGTH_LONG).show()
             }
             else {
                 verifyAccountViewModel.verifyAccountNumber("Bearer ${BuildConfig.PSTACK_AUTHKEY}", accountNumber, bankCode.toString())
@@ -166,8 +184,13 @@ class CashoutFragment : Fragment() {
     }
 
     private fun initiateTransfer(){
-        val initiateTransferRequest = InitiateTransferRequestModel("nuban", et_AccountName.text.toString(), et_account_number.text.toString(), bankCode, "NGN")
-        initiateTransferViewModel.initiateTransferProcess("Bearer ${BuildConfig.PSTACK_AUTHKEY}", initiateTransferRequest)
+        val initiateTransferRequest = bankCode?.let {
+            InitiateTransferRequestModel("nuban", et_AccountName.text.toString(), et_account_number.text.toString(),
+                it, "NGN")
+        }
+        if (initiateTransferRequest != null) {
+            initiateTransferViewModel.initiateTransferProcess("Bearer ${BuildConfig.PSTACK_AUTHKEY}", initiateTransferRequest)
+        }
     }
 
     private fun updateInfluencerBalance(){
@@ -282,93 +305,109 @@ class CashoutFragment : Fragment() {
 
 
     private fun handleObservers(){
-        getBanksViewModel._bankListObservable.observe(viewLifecycleOwner, {
-            //Log.d("BankList",it.data.toString())
-            when (it.status) {
-                Resource.Status.LOADING -> {
-                    bankListView.setText("loading bank...")
-                }
-                Resource.Status.SUCCESS -> {
-                    if (it.data != null) {
-                        for (i in it.data.data.indices) {
-
-                            val key = it.data.data[i].name
-                            onlyBanks.add(key)
-                            bankAndCodeList[key] = it.data.data[i].code
-                        }
-                        bankListView.isEnabled = true
-                        bankListView.setText("select bank")
-                        arrayBankListAdapter = ArrayAdapter(requireContext(), R.layout.single_bank_item, onlyBanks)
-                        bankListView.setAdapter(arrayBankListAdapter)
+        getBanksViewModel.bankListResponse.observe(viewLifecycleOwner) {
+            if (it != null) {
+                when (it.status) {
+                    Resource.Status.LOADING -> {
+                        progress_bar.visible()
+                        dropdown.gone()
+                    }
+                    Resource.Status.SUCCESS -> {
+                        dropdown.visible()
+                        progress_bar.gone()
+                        loadBankSpinner(it.data)
+                    }
+                    Resource.Status.ERROR -> {
+                        progress_bar.gone()
+                        Toast.makeText(
+                            requireContext(),
+                            "Unable to fetch banks",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
-                Resource.Status.ERROR -> {
-                    bankListView.setText("unable to load bank")
-                }
             }
-        })
+        }
 
-        verifyAccountViewModel._verifyAccountObservable.observe(viewLifecycleOwner, {
-            when (it.status) {
-                Resource.Status.LOADING -> {
-                    btnVerifyAccount.text = "Verifying..."
-                    btnVerifyAccount.isEnabled = false
-                }
+        verifyAccountViewModel.verifyAccountObservable.observe(viewLifecycleOwner) {
+            if(it!=null) {
+                when (it.status) {
+                    Resource.Status.LOADING -> {
+                        btnVerifyAccount.text = "Verifying..."
+                        btnVerifyAccount.isEnabled = false
+                    }
 
-                Resource.Status.SUCCESS -> {
-                    if (it.data != null) {
-                        val accountName = it.data.data.accountName
-                        et_AccountName.setText(accountName)
-                        btnVerifyAccount.text = "Verify Account"
+                    Resource.Status.SUCCESS -> {
+                        if (it.data != null) {
+                            val accountName = it.data.data.accountName
+                            et_AccountName.setText(accountName)
+                            btnVerifyAccount.text = "Verify Account"
+                            btnVerifyAccount.isEnabled = true
+                            checkIfCanCashOut()
+                            if (totalAmountToCashOut.toInt() >= 1000) {
+                                fbProcessCashout.isEnabled = true
+
+                            }
+                        }
+
+                    }
+                    Resource.Status.ERROR -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Unable to verify account number",
+                            Toast.LENGTH_LONG
+                        ).show()
                         btnVerifyAccount.isEnabled = true
-                        checkIfCanCashOut()
-                        if (totalAmountToCashOut.toInt() >= 1000) {
-                            fbProcessCashout.isEnabled = true
-
-                        }
+                        btnVerifyAccount.text = "Verify Account"
                     }
-
-                }
-
-                else -> {
-                    Toast.makeText(requireContext(), "Unable to verify account number", Toast.LENGTH_LONG).show()
-                    btnVerifyAccount.isEnabled = true
                 }
             }
-        })
+        }
 
 
         //observing initiating transfer
-        initiateTransferViewModel._initiateTransferResponseObservable.observe(viewLifecycleOwner, {
-            when (it.status) {
-                Resource.Status.LOADING -> {
+        initiateTransferViewModel.initiateTransferResponseObservable.observe(viewLifecycleOwner) {
+            if(it!=null) {
+                when (it.status) {
+                    Resource.Status.LOADING -> {
 
-                }
-                Resource.Status.SUCCESS -> {
-                    if (it.data != null) {
-                        recipientCode = it.data.data.recipientCode
-                        //update user record with recipientCode
-                        updateRecordWithRecipientCode()
                     }
-                }
-
-                else -> Toast.makeText(requireContext(), "could not establish payment receipt, please try later", Toast.LENGTH_LONG).show()
-            }
-        })
-
-        transferViewModel._transferResponseObservable.observe(viewLifecycleOwner, {
-            when (it.status) {
-                Resource.Status.LOADING -> {
-
-                }
-                Resource.Status.SUCCESS -> {
-                    if (it.data != null) {
-                        updateRecordWithReferenceCode()
+                    Resource.Status.SUCCESS -> {
+                        if (it.data != null) {
+                            recipientCode = it.data.data.recipientCode
+                            //update user record with recipientCode
+                            updateRecordWithRecipientCode()
+                        }
                     }
+
+                    Resource.Status.ERROR -> Toast.makeText(
+                        requireContext(),
+                        "could not establish payment receipt, please try later",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-                else -> Toast.makeText(requireContext(), "unable to transfer to your account, please try again later", Toast.LENGTH_LONG).show()
             }
-        })
+        }
+
+        transferViewModel.transferResponseObservable.observe(viewLifecycleOwner) {
+            if(it!=null) {
+                when (it.status) {
+                    Resource.Status.LOADING -> {
+
+                    }
+                    Resource.Status.SUCCESS -> {
+                        if (it.data != null) {
+                            updateRecordWithReferenceCode()
+                        }
+                    }
+                    Resource.Status.ERROR -> Toast.makeText(
+                        requireContext(),
+                        "unable to transfer to your account, please try again later",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
 
 
     }
@@ -456,5 +495,48 @@ class CashoutFragment : Fragment() {
         transferViewModel.transferToBank(BuildConfig.PSTACK_AUTHKEY, transferRequest)
     }
 
+    private fun getBankCode(bankName: String): String? {
+        var code: String? = null
+        bankNameAndCode.forEach { bank ->
+            if (bank.name == bankName) {
+                code = bank.code
+            }
+        }
+        return code
+    }
+
+    private fun loadBankSpinner(data: FetchBanksResponse?) {
+        bankNameAndCode = getBanksViewModel.sortBanks(data)
+        val list = arrayListOf<String>()
+        list.add("")
+        bankNameAndCode.forEach {
+            it.name?.let { it1 -> list.add(it1) }
+        }
+        bankNameAndCode
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            list.distinct()
+        )
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        bank_spinner.adapter = adapter
+    }
+
+    override fun onItemSelected(parent: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+        bankName = parent?.getItemAtPosition(position).toString()
+
+        bankCode = getBankCode(bankName!!)
+    }
+
+    override fun onNothingSelected(p0: AdapterView<*>?) {
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val carousel = activity?.findViewById<CarouselView>(R.id.carouselView)
+        carousel?.isVisible= false
+
+    }
 
 }

@@ -32,17 +32,29 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
             tvLink.text = merchantStoryListPojo[position].storyTag
 
             tvLink.setOnClickListener {
-                if(merchantStoryListPojo[position].statusReachAndWorthPojo!=null) {
-                    clickableUploadedStory.displayImage(merchantStoryListPojo[position].merchantStatusImageLink.toString(), merchantStoryListPojo[position].storyTag.toString(), merchantStoryListPojo[position].statusReachAndWorthPojo.status_worth,
-                            merchantStoryListPojo[position].statusReachAndWorthPojo.status_reach,  merchantStoryListPojo[position].merchantStatusId)
-                }
-                else{
-                    clickableUploadedStory.displayImage(merchantStoryListPojo[position].merchantStatusImageLink.toString(), merchantStoryListPojo[position].storyTag.toString(),null,null,   merchantStoryListPojo[position].merchantStatusId)
-                }
+                if (merchantStoryListPojo[position].statusReachAndWorthPojo != null) {
+                    clickableUploadedStory.displayImage(
+                        merchantStoryListPojo[position].merchantStatusImageLink.toString(),
+                        merchantStoryListPojo[position].storyAudioLink.toString(),
+                        merchantStoryListPojo[position].storyTag.toString(),
+                        merchantStoryListPojo[position].statusReachAndWorthPojo.status_worth,
+                        merchantStoryListPojo[position].statusReachAndWorthPojo.status_reach,
+                        merchantStoryListPojo[position].merchantStatusId
+                    )
+                } else
+                    clickableUploadedStory.displayImage(
+                        merchantStoryListPojo[position].merchantStatusImageLink.toString(),
+                        merchantStoryListPojo[position].storyAudioLink.toString(),
+                        merchantStoryListPojo[position].storyTag.toString(),
+                        null,
+                        null,
+                        merchantStoryListPojo[position].merchantStatusId
+                    )
             }
 
             ivDelete.setOnClickListener {
                 clickableUploadedStory.deleteLink(merchantStoryListPojo[position].merchantStatusImageLink.toString(),
+                    merchantStoryListPojo[position].storyAudioLink.toString(),
                         merchantStoryListPojo[position].merchantStatusId.toString(),
                         position)
             }
@@ -54,8 +66,8 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
     }
 
     interface ClickableUploadedStory{
-        fun deleteLink(link: String, id: String, positionId: Int)
-        fun displayImage(url: String, tag: String, status_worth:Int?, status_reach:Int?, status_id:String?)
+        fun deleteLink(link: String, audioLink:String, id: String, positionId: Int)
+        fun displayImage(url: String, audioLink:String,tag: String, status_worth:Int?, status_reach:Int?, status_id:String?)
     }
 
     fun clear(position:Int) {

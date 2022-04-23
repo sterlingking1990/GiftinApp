@@ -99,11 +99,11 @@ class RateInfluencerFragment : Fragment(), UploadedRewardStoryListAdapter.Clicka
         })
     }
 
-    override fun deleteLink(link: String, id: String, positionId: Int) {
+    override fun deleteLink(link: String, audioLink:String, id: String, positionId: Int) {
         Toast.makeText(requireContext(),"Go to influenca deal menu to delete this status", Toast.LENGTH_LONG).show()
     }
 
-    override fun displayImage(url: String, tag: String, status_worth: Int?, status_reach: Int?, status_id:String?) {
+    override fun displayImage(url: String, audioLink:String,tag: String, status_worth: Int?, status_reach: Int?, status_id:String?) {
 
         statusId = status_id
 
