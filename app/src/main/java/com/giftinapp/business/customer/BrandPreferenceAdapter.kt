@@ -1,6 +1,7 @@
 package com.giftinapp.business.customer
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -66,9 +67,7 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
                     if(btnTogglePreference.text.toString() == "FOLLOW") followingStatus.setTextColor(context.resources.getColor(R.color.tabColor)) else followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
                 }
             }
-
             checkIfUserFollowedBrand(giftingMerchantList[position].giftingMerchantId,btnTogglePreference,context,followingStatus)
-
         }
     }
 
@@ -104,6 +103,7 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
 
         //check if this user already added this gift to redeemable
         if (emailOfFollower != null) {
+            Log.d("EmailOfFollower",emailOfFollower.toString())
             db.collection("merchants").document(brandId).collection("followers")
                     .get()
                     .addOnCompleteListener {
@@ -115,14 +115,13 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
                                     isFollowed = true
                                 }
                             }
-
+                            btnToggleBrandFollowership.text = "FOLLOW"
+                            followingStatus.text = "not following"
                             if(isFollowed){
                                 btnToggleBrandFollowership.text = "UNFOLLOW"
                                 btnToggleBrandFollowership.textSize = 18F
                                 followingStatus.text = "following"
                                 followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
-
-                                //addToCart.visibility= View.GONE
                             }
                             else{
                                 btnToggleBrandFollowership.text = "FOLLOW"
@@ -140,13 +139,19 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val charSearch = constraint.toString()
                 val filteredList:MutableList<GiftingMerchantViewPojo> = ArrayList()
+
                 if (charSearch.isEmpty()) {
                     filteredList.addAll(giftinMerchantListAll)
                 } else {
                     for (row in giftinMerchantListAll) {
-                        if (row.giftingMerchantId.toString().contains(constraint.toString().toLowerCase(Locale.ROOT))) {
-                            filteredList.add(row)
-                        }
+                        val isContain = row.giftingMerchantId.toLowerCase().replace(" ","").contains(charSearch.toLowerCase(
+                            Locale.ROOT
+                        )
+                        )
+                        if(isContain) filteredList.add(row)
+//                        if (row.giftingMerchantId.contains(constraint.toString().toLowerCase(Locale.ROOT))) {
+//                            filteredList.add(row)
+//                        }
                     }
                 }
                 val filterResults = FilterResults()

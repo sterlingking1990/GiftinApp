@@ -11,6 +11,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CATEGORY_SERVICE
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -45,6 +46,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun showNotification(
             context: Context,
             title: String?,
@@ -56,7 +58,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         ii.action = "actionstring" + System.currentTimeMillis()
         ii.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         val pi =
-                PendingIntent.getActivity(context, 0, ii, PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.getActivity(context, 0, ii, PendingIntent.FLAG_IMMUTABLE)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             //Log.e("Notification", "Created in up to orio OS device");

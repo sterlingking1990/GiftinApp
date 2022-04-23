@@ -1,13 +1,21 @@
 package com.giftinapp.business.customer
 
+import android.content.DialogInterface
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
+import android.text.Html
 import android.text.TextWatcher
+import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,13 +23,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
 import com.giftinapp.business.model.GiftingMerchantPojo
 import com.giftinapp.business.model.GiftingMerchantViewPojo
-import com.giftinapp.business.model.MerchantStoryPojo
 import com.giftinapp.business.model.SendGiftPojo
 import com.giftinapp.business.utility.SessionManager
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.QuerySnapshot
+import java.net.URLEncoder
 import java.util.*
+
 
 class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon {
     private var brandPreferenceAdapter: BrandPreferenceAdapter? = null
@@ -33,6 +42,7 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
     var builder: AlertDialog.Builder? = null
 
     private var etSearchBrands: EditText? = null
+    private var pgLoading:ProgressBar? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -44,6 +54,7 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
         sessionManager?.setFollowingCount(0)
 
         etSearchBrands = view.findViewById(R.id.etSearchBrand)
+        pgLoading = view.findViewById(R.id.pgLoading)
 
         brandPreferenceAdapter = BrandPreferenceAdapter(this)
         rvBrands = view.findViewById(R.id.rv_brands)
@@ -93,45 +104,97 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
                 .build()
         db.firestoreSettings = settings
 
-        db.collection("merchants").get()
+        if (FirebaseAuth.getInstance().currentUser?.isEmailVerified  == true) {
+            db.collection("merchants").get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val giftingMerchantViewPojos = ArrayList<GiftingMerchantViewPojo>()
-                        for (document in Objects.requireNonNull(task.result)!!) {
+                        for (document in Objects.requireNonNull(task.result)) {
 
                             val giftingMerchantViewPojo = GiftingMerchantViewPojo()
 
-                                val giftingMerchantPojo = document.toObject(GiftingMerchantPojo::class.java)
-                                if (giftingMerchantPojo.whatsapp == null || giftingMerchantPojo.instagram == null || giftingMerchantPojo.facebook == null || giftingMerchantPojo.address == null) {
-                                    giftingMerchantPojo.whatsapp = "not provided"
-                                    giftingMerchantPojo.address = "not provided"
-                                    giftingMerchantPojo.facebook = "not provided"
-                                    giftingMerchantPojo.instagram = "not provided"
-                                }
-                                giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo
-                                giftingMerchantViewPojo.numberOfCustomerGifted = 0
-                                giftingMerchantViewPojo.giftingMerchantId = document.id
+                            val giftingMerchantPojo =
+                                document.toObject(GiftingMerchantPojo::class.java)
+                            if (giftingMerchantPojo.whatsapp == null || giftingMerchantPojo.instagram == null || giftingMerchantPojo.facebook == null || giftingMerchantPojo.address == null) {
+                                giftingMerchantPojo.whatsapp = "not provided"
+                                giftingMerchantPojo.address = "not provided"
+                                giftingMerchantPojo.facebook = "not provided"
+                                giftingMerchantPojo.instagram = "not provided"
+                            }
+                            giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo
+                            giftingMerchantViewPojo.numberOfCustomerGifted = 0
+                            giftingMerchantViewPojo.giftingMerchantId =    if (document.getString("giftorId") != null) document.getString(
+                                "giftorId"
+                            ) else document.id
                             if (giftingMerchantViewPojo.giftingMerchantId != sessionManager?.getEmail()) {
+                                pgLoading?.visibility = View.GONE
                                 giftingMerchantViewPojos.add(giftingMerchantViewPojo)
-                                brandPreferenceAdapter?.setGiftingMerchantList(giftingMerchantViewPojos)
+                                brandPreferenceAdapter?.setGiftingMerchantList(
+                                    giftingMerchantViewPojos
+                                )
                                 rvBrands?.adapter = brandPreferenceAdapter
                                 brandPreferenceAdapter?.notifyDataSetChanged()
                             }
                         }
                     }
                 }
+        }else{
+            builder!!.setMessage("You need to be a verified user in other to follow brands, please check your mail for verification")
+                .setCancelable(false)
+                .setPositiveButton("Ok") { dialog2: DialogInterface?, id2: Int ->
+                    FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
+                    pgLoading?.visibility = View.GONE
+                    //tvNoGift.setVisibility(View.VISIBLE)
+                }
+            val alert = builder!!.create()
+            alert.show()
+        }
     }
 
     override fun openMerchantFacebookDetail(facebookHandle: String) {
-
+        try {
+            if(facebookHandle.isNotEmpty() && facebookHandle!="not provided"){
+            val url = "https://facebook.com/$facebookHandle"
+            val i = Intent(Intent.ACTION_VIEW)
+            i.data = Uri.parse(url)
+            startActivity(i)
+        }
+        }catch (e: Exception) {
+            Toast.makeText(requireContext(), "Please Install Instagram to continue chat", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun openMerchantInstagramDetail(instagramHandle: String) {
+        try {
+            if(instagramHandle.isNotEmpty() && instagramHandle!="not provided") {
+                val url = "https://instagram.com/$instagramHandle"
+                val i = Intent(Intent.ACTION_VIEW)
+                i.data = Uri.parse(url)
+                startActivity(i)
+            }
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Please Install Instagram to continue chat", Toast.LENGTH_SHORT).show()
+        }
 
     }
 
     override fun openMerchantWhatsApp(whatsApp: String) {
-
+        try {
+            if(whatsApp.isNotEmpty() && whatsApp!="not provided") {
+                val msg = "Hi, I am chatting you up from *Brandible*"
+                val url = "https://api.whatsapp.com/send?phone=${
+                    "+234$whatsApp" + "&text=" + URLEncoder.encode(
+                        msg,
+                        "UTF-8"
+                    )
+                }"
+                val i = Intent(Intent.ACTION_VIEW)
+                i.data = Uri.parse(url)
+                startActivity(i)
+            }
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Please Install WhatsApp to continue chat", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun togglePreference(brandId: String, btnToggleBrandStatus: String) {
@@ -146,26 +209,39 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
                 .setPersistenceEnabled(true)
                 .build()
         db.firestoreSettings = settings
-
-        if(btnToggleBrandStatus == "UNFOLLOW"){
-            //influer will stop following, hence delete his account from the followers list
-            db.collection("merchants").document(brandId).collection("followers").document(sessionManager?.getEmail().toString()).delete()
-            sessionManager?.getFollowingCount()?.minus(1)?.let { sessionManager!!.setFollowingCount(it) }
-        }
-        else{
-            sessionManager?.getFollowingCount()?.plus(1)?.let { sessionManager?.setFollowingCount(it) }
-            //i will follow
+        if (FirebaseAuth.getInstance().currentUser?.isEmailVerified  == true) {
+            if (btnToggleBrandStatus == "UNFOLLOW") {
+                //influer will stop following, hence delete his account from the followers list
+                db.collection("merchants").document(brandId).collection("followers")
+                    .document(sessionManager?.getEmail().toString()).delete()
+                sessionManager?.getFollowingCount()?.minus(1)
+                    ?.let { sessionManager!!.setFollowingCount(it) }
+            } else {
+                sessionManager?.getFollowingCount()?.plus(1)
+                    ?.let { sessionManager?.setFollowingCount(it) }
+                //i will follow
                 val sendGiftPojo = SendGiftPojo("empty")
-                db.collection("merchants").document(brandId).collection("followers").document(sessionManager?.getEmail().toString()).set(sendGiftPojo)
-                        .addOnCompleteListener {
-                            if(it.isSuccessful){
+                db.collection("merchants").document(brandId).collection("followers")
+                    .document(sessionManager?.getEmail().toString()).set(sendGiftPojo)
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
 
-                            }
                         }
+                    }
 
+            }
+
+        }else{
+            builder!!.setMessage("You need to be a verified user in other to follow brands, please check your mail for verification")
+                .setCancelable(false)
+                .setPositiveButton("Ok") { dialog2: DialogInterface?, id2: Int ->
+                    FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
+                    pgLoading?.visibility = View.GONE
+                    //tvNoGift.setVisibility(View.VISIBLE)
+                }
+            val alert = builder!!.create()
+            alert.show()
         }
-
-
     }
 
 }

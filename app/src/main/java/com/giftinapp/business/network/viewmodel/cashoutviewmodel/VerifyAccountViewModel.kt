@@ -17,28 +17,28 @@ import javax.inject.Inject
 @HiltViewModel
 class VerifyAccountViewModel @Inject constructor(private val cashOutApiServiceRepository: CashOutApiServiceRepository, private val networkHelper: NetworkHelper) : ViewModel() {
 
-    private var verifyAccountResponse = MutableLiveData<Resource<VerifyAccountResponse>>()
-    val _verifyAccountObservable: LiveData<Resource<VerifyAccountResponse>>
-        get() = verifyAccountResponse
+    private var _verifyAccountResponse = MutableLiveData<Resource<VerifyAccountResponse>>()
+    val verifyAccountObservable: LiveData<Resource<VerifyAccountResponse>>
+        get() = _verifyAccountResponse
 
 
     fun verifyAccountNumber(authorization:String,account_number:String,bank_code:String){
         viewModelScope.launch {
-            verifyAccountResponse.postValue(Resource.loading())
+            _verifyAccountResponse.postValue(Resource.loading())
 
             try{
                 val verifiedAccountResponse = cashOutApiServiceRepository.verifyAccountNumber(authorization,account_number,bank_code)
                 Log.d("verified",verifiedAccountResponse.toString())
                 if(verifiedAccountResponse.isSuccessful){
-                    verifyAccountResponse.postValue(Resource(Resource.Status.SUCCESS,verifiedAccountResponse.body(),null))
+                    _verifyAccountResponse.postValue(Resource(Resource.Status.SUCCESS,verifiedAccountResponse.body(),null))
                 }
                 else{
-                    verifyAccountResponse.postValue(Resource.error("Unable to verify account"))
+                    _verifyAccountResponse.postValue(Resource.error("Unable to verify account"))
                 }
             }
             catch (e:Exception){
                 Log.d("Error",e.message.toString())
-                verifyAccountResponse.postValue(Resource.error("Error -> ${e.message}"))
+                _verifyAccountResponse.postValue(Resource.error("Error -> ${e.message}"))
             }
         }
     }

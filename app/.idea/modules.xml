@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1085769731/Merchant.iml" filepath="$PROJECT_DIR$/.idea/modules/1085769731/Merchant.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Merchant.app.iml" filepath="$PROJECT_DIR$/.idea/modules/Merchant.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1670447747/Merchant.mylibrary.iml" filepath="$PROJECT_DIR$/.idea/modules/1670447747/Merchant.mylibrary.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/158558060/Merchant.paystack.iml" filepath="$PROJECT_DIR$/.idea/modules/158558060/Merchant.paystack.iml" />
+    </modules>
+  </component>
+</project>

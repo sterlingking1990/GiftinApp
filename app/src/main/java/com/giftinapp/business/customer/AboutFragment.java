@@ -24,10 +24,10 @@ import java.util.List;
 public class AboutFragment extends Fragment {
 
 
-    ExpandableListView expandableListView;
-    ExpandableListAdapter expandableListAdapter;
-    List<String> expandableListTitle;
-    HashMap<String, List<String>> expandableListDetail;
+//    ExpandableListView expandableListView;
+//    ExpandableListAdapter expandableListAdapter;
+//    List<String> expandableListTitle;
+//    HashMap<String, List<String>> expandableListDetail;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -39,11 +39,11 @@ public class AboutFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        expandableListView = (ExpandableListView) view.findViewById(R.id.expandableListView);
-        expandableListDetail = ExpandableListDataPump.getData();
-        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-        expandableListAdapter = new CustomExpandableListAdapter(getContext(), expandableListTitle, expandableListDetail);
-        expandableListView.setAdapter(expandableListAdapter);
+//        expandableListView = (ExpandableListView) view.findViewById(R.id.expandableListView);
+//        expandableListDetail = ExpandableListDataPump.getData();
+//        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+//        expandableListAdapter = new CustomExpandableListAdapter(getContext(), expandableListTitle, expandableListDetail);
+//        expandableListView.setAdapter(expandableListAdapter);
         
     }
 
