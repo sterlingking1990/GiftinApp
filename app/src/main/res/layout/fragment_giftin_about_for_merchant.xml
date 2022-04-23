@@ -15,6 +15,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingStart="3dp"
+        android:textColor="@color/black"
+        android:paddingEnd="3dp"
         android:text="Brandible"
         android:textSize="20sp"
         />
@@ -24,9 +27,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:text="@string/about_giftin"
+        android:text="@string/about_brandible"
         android:gravity="center_vertical"
         android:lineSpacingExtra="4dp"
+        android:textColor="@color/black"
         android:layout_gravity="center"/>
     <!-- This adds a border between the TextViews -->
     <View
@@ -35,12 +39,12 @@
         android:layout_marginTop="10dp"
         android:background="@color/grey_500" />
 
-    <ExpandableListView
-        android:id="@+id/expandableListView"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="0.5dp" />
+<!--    <ExpandableListView-->
+<!--        android:id="@+id/expandableListView"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft"-->
+<!--        android:divider="@android:color/darker_gray"-->
+<!--        android:dividerHeight="0.5dp" />-->
 
 </LinearLayout>
