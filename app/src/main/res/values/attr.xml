@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="actionButtonsColor" format="reference"/>
+    <attr name="actionButtonTextColor" format="reference"/>
+    <attr name="cardBackground" format="reference"/>
+    <attr name="followingButton" format="reference"/>
+    <attr name="textColorForInputEdit" format="reference"/>
+    <attr name="inputEditBackground" format="reference"/>
+    <attr name="hintColorForTextInput" format="reference"/>
+    <attr name="drawerBackground" format="reference"/>
+    <attr name="drawerItemColor" format="reference"/>
+</resources>

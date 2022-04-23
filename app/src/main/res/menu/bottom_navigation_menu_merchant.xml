@@ -16,20 +16,20 @@
         android:icon="@drawable/ic_baseline_filter_tilt_shift_24"
         android:title="Follow Brands"/>
 
-    <item
-        android:id="@+id/navigation_view_rate_influencer"
-        android:icon="@drawable/ic_rate_influencer"
-        android:title="Rate Influenca"/>
+<!--    <item-->
+<!--        android:id="@+id/navigation_view_rate_influencer"-->
+<!--        android:icon="@drawable/ic_rate_influencer"-->
+<!--        android:title="Rate Influenca"/>-->
 
-    <item
-        android:id="@+id/navigation_gift_customer_fan"
-        android:icon="@drawable/ic_gift_customer_fan"
-        android:title="Reward Influencer(s)"/>
+<!--    <item-->
+<!--        android:id="@+id/navigation_gift_customer_fan"-->
+<!--        android:icon="@drawable/ic_gift_customer_fan"-->
+<!--        android:title="Reward Influencer(s)"/>-->
 
-    <item
-        android:id="@+id/navigation_merchant_gift_stats"
-        android:icon="@drawable/ic_merchant_gift_stats"
-        android:title="Reward Stats"/>
+<!--    <item-->
+<!--        android:id="@+id/navigation_merchant_gift_stats"-->
+<!--        android:icon="@drawable/ic_merchant_gift_stats"-->
+<!--        android:title="Deal Stats"/>-->
 
     <item
         android:id="@+id/navigation_wallet_info"

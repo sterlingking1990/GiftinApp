@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Gradle: com.google.firebase:firebase-appcheck-safetynet:16.0.0-beta01@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/transforms-3/1b7b8ebda8295234e31939b608ea2051/transformed/jetified-firebase-appcheck-safetynet-16.0.0-beta01/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/1b7b8ebda8295234e31939b608ea2051/transformed/jetified-firebase-appcheck-safetynet-16.0.0-beta01/res" />
+      <root url="file://$USER_HOME$/Library/Android/sdk/caches/transforms-3/1b7b8ebda8295234e31939b608ea2051/transformed/jetified-firebase-appcheck-safetynet-16.0.0-beta01/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/modules-2/files-2.1/com.google.firebase/firebase-appcheck-safetynet/16.0.0-beta01/50d1f8acaaa44b35c2e8be59f8a325913c152b2e/firebase-appcheck-safetynet-16.0.0-beta01-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/Library/Android/sdk/caches/modules-2/files-2.1/com.google.firebase/firebase-appcheck-safetynet/16.0.0-beta01/99ab1c3dc3c60627b5d5e1d4e5dd275be13ddd70/firebase-appcheck-safetynet-16.0.0-beta01-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

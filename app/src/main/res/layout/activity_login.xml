@@ -117,15 +117,19 @@
         android:orientation="horizontal">
 
 
-        <com.google.android.material.button.MaterialButton
+        <com.skydoves.elasticviews.ElasticButton
             android:id="@+id/btn_login_user"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:padding="10dp"
-            android:background="@drawable/rectangle_shaped_button"
+            android:background="@color/cardview_dark_background"
             android:text="@string/login"
             android:elevation="2dp"
+            android:textColor="@android:color/white"
+            app:button_cornerRadius="4dp"
+            app:button_duration="250"
+            app:button_scale="0.87"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -162,13 +166,17 @@
         app:layout_constraintStart_toStartOf="parent"
         >
 
-        <com.google.android.material.button.MaterialButton
+        <com.skydoves.elasticviews.ElasticButton
             android:id="@+id/btn_resend_email_verification"
             android:elevation="2dp"
-            android:background="@drawable/rectangle_shaped_button"
+            android:background="@color/cardview_dark_background"
+            android:textColor="@android:color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTintMode="src_atop"
+            app:button_cornerRadius="4dp"
+            app:button_duration="250"
+            app:button_scale="0.87"
             android:visibility="gone"
             android:text="@string/resend_verfication_email"
             android:textSize="12sp" />

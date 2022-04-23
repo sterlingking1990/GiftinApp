@@ -19,28 +19,28 @@ import javax.inject.Inject
 @HiltViewModel
 class TransferViewModel @Inject constructor(private val cashOutApiServiceRepository: CashOutApiServiceRepository, private val networkHelper: NetworkHelper) : ViewModel() {
 
-    private var transferResponse = MutableLiveData<Resource<TransferModelResponse>>()
-    val _transferResponseObservable: LiveData<Resource<TransferModelResponse>>
-        get() = transferResponse
+    private var _transferResponse = MutableLiveData<Resource<TransferModelResponse>>()
+    val transferResponseObservable: LiveData<Resource<TransferModelResponse>>
+        get() = _transferResponse
 
 
     fun transferToBank(authorization:String,transferRequest: TransferModel){
         viewModelScope.launch {
-            transferResponse.postValue(Resource.loading())
+            _transferResponse.postValue(Resource.loading())
 
             try{
                 val transferResponseReceived = cashOutApiServiceRepository.transfer(authorization,transferRequest)
                 Log.d("verified",transferResponseReceived.toString())
                 if(transferResponseReceived.isSuccessful){
-                    transferResponse.postValue(Resource(Resource.Status.SUCCESS,transferResponseReceived.body(),null))
+                    _transferResponse.postValue(Resource(Resource.Status.SUCCESS,transferResponseReceived.body(),null))
                 }
                 else{
-                    transferResponse.postValue(Resource.error("Unable to verify account"))
+                    _transferResponse.postValue(Resource.error("Unable to verify account"))
                 }
             }
             catch (e:Exception){
                 Log.d("Error",e.message.toString())
-                transferResponse.postValue(Resource.error("Error -> ${e.message}"))
+                _transferResponse.postValue(Resource.error("Error -> ${e.message}"))
             }
         }
     }

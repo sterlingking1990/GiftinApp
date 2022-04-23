@@ -12,6 +12,15 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+
+        <item name="actionButtonsColor">@color/cardview_dark_background</item>
+        <item name="actionButtonTextColor">@color/whitesmoke</item>
+        <item name="cardBackground">@color/tabColorLight</item>
+        <item name="followingButton">@color/tabColorLight</item>
+        <item name="textColorForInputEdit">@color/tabColorLight</item>
+        <item name="inputEditBackground">@color/cardview_dark_background</item>
+        <item name="hintColorForTextInput">@color/tabColor</item>
+        <item name="drawerBackground">@color/drawerBackgroundLight</item>
     </style>
 
     <!-- Dark Buttons -->
@@ -34,6 +43,23 @@
         <item name="colorControlActivated">@color/tabColor</item>
     </style>
 
+        <style name="TextView" />
+
+        <style name="TextView.Label">
+            <item name="android:layout_alignParentLeft">true</item>
+            <item name="android:layout_alignParentTop">true</item>
+            <item name="android:layout_marginLeft">10dp</item>
+            <item name="android:layout_marginTop">30dp</item>
+            <item name="android:textSize">24sp</item>
+            <item name="android:paddingLeft">10dp</item>
+            <item name="android:paddingRight">10dp</item>
+            <item name="android:paddingTop">5dp</item>
+            <item name="android:paddingBottom">5dp</item>
+            <item name="android:background">#44FFFFFF</item>
+            <item name="android:fontFamily">sans-serif-thin</item>
+            <item name="android:textColor">@android:color/white</item>
+        </style>
+
 <!--    <style name="Widget.MaterialComponents.TextInputLayout.FilledBox" parent="Base.Widget.MaterialComponents.TextInputLayout">-->
 <!--        &lt;!&ndash; underline color in FilledBox style &ndash;&gt;-->
 <!--        <item name="boxStrokeColor">@color/white</item>-->
@@ -41,4 +67,9 @@
 <!--        &lt;!&ndash; The color of the label when it is collapsed and the text field is active &ndash;&gt;-->
 <!--    </style>-->
 
+    <style name="TextInputStyling" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+        <item name="boxStrokeColor">@color/tabColor</item>
+    </style>
+
+    
 </resources>

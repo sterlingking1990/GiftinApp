@@ -169,18 +169,22 @@
         app:layout_constraintStart_toStartOf="parent"
         android:orientation="horizontal"
         >
-        <Button
+        <com.skydoves.elasticviews.ElasticButton
             android:id="@+id/btn_sign_up"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:text="@string/sign_up"
-            android:background="@drawable/rectangle_shaped_button"
+            android:textColor="@android:color/white"
+            android:background="@color/cardview_dark_background"
             app:layout_constraintBottom_toTopOf="@id/ll_signin_notice"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.444"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:button_cornerRadius="4dp"
+            app:button_duration="250"
+            app:button_scale="0.87"
             app:layout_constraintVertical_bias="0.415" />
     </LinearLayout>
 
@@ -205,15 +209,42 @@
             android:text="@string/already_a_user"
             android:textSize="18sp" />
 
-        <Button
+        <com.skydoves.elasticviews.ElasticButton
             android:id="@+id/btn_sign_in_trigger"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/rectangle_shaped_button"
+            app:button_cornerRadius="4dp"
+            app:button_duration="250"
+            app:button_scale="0.87"
+            android:textColor="?attr/actionButtonTextColor"
+            android:background="?attr/actionButtonsColor"
             android:layout_weight="1"
             android:text="@string/sign_in" />
 
     </LinearLayout>
+
+        <TextView
+            app:layout_constraintTop_toBottomOf="@id/ll_signin_notice"
+            app:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/tvTermsAndCondition"
+            android:layout_width="wrap_content"
+            android:layout_marginStart="20dp"
+            app:layout_constraintEnd_toStartOf="@id/tvPrivacyPolicy"
+            android:gravity="center"
+            android:layout_marginTop="20dp"
+            android:layout_height="wrap_content"
+            android:text="@string/terms_and_condition"
+            />
+        <TextView
+            android:id="@+id/tvPrivacyPolicy"
+            android:layout_width="wrap_content"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintStart_toEndOf="@id/tvTermsAndCondition"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/tvTermsAndCondition"
+            android:layout_height="wrap_content"
+            android:text="@string/privacy_policy"
+            />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

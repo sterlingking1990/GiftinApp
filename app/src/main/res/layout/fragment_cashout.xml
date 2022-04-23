@@ -7,27 +7,36 @@
     tools:context=".customer.CashoutFragment">
 
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tl_BankList"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:layout_marginStart="32dp"
+        android:text="Select Bank"
+        android:gravity="start"
+        android:textStyle="bold"
+        android:textColor="?attr/textColorForInputEdit"
         android:layout_marginEnd="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20sp"
+        android:layout_marginStart="32dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:id="@+id/tvSelectLabel"
+        android:textSize="18sp"
+        />
 
-        <AutoCompleteTextView
-            android:id="@+id/bankListView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:enabled="false"
-            android:inputType="none"
-            android:text="" />
-    </com.google.android.material.textfield.TextInputLayout>
+        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+            android:id="@+id/bank_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="32dp"
+            android:background="@drawable/rectangle_grey_full"
+            android:textColor="#000"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvSelectLabel" />
+
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tl_accountNumber"
@@ -36,30 +45,36 @@
         android:layout_marginTop="30dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        app:layout_constraintTop_toBottomOf="@id/tl_BankList"
-        app:layout_constraintEnd_toEndOf="@id/tl_BankList"
-        app:layout_constraintStart_toStartOf="@id/tl_BankList"
+        app:layout_constraintTop_toBottomOf="@id/bank_spinner"
+        app:layout_constraintEnd_toEndOf="@id/bank_spinner"
+        app:layout_constraintStart_toStartOf="@id/bank_spinner"
         android:layout_height="wrap_content">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_account_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="?attr/textColorForInputEdit"
             android:hint="Account Number"
+            android:textColorHint="?attr/textColorForInputEdit"
             android:imeOptions="actionNext"
             android:inputType="number"
             android:maxLines="1"
             android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <com.skydoves.elasticviews.ElasticButton
         android:id="@+id/btnVerifyAccount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:background="@drawable/rectangle_shaped_button"
+        app:button_cornerRadius="4dp"
+        app:button_duration="250"
+        android:background="@color/cardview_dark_background"
+        android:textColor="@android:color/white"
+        app:button_scale="0.87"
         app:layout_constraintTop_toBottomOf="@id/tl_accountNumber"
         app:layout_constraintStart_toStartOf="@id/tl_accountNumber"
         app:layout_constraintEnd_toEndOf="@id/tl_accountNumber"
@@ -73,6 +88,7 @@
         android:layout_height="wrap_content"
         android:text="your details"
         android:textSize="18sp"
+        android:textColor="?attr/textColorForInputEdit"
         android:textStyle="bold"
         android:layout_marginTop="30dp"
         android:layout_marginStart="32dp"
@@ -100,6 +116,7 @@
             android:layout_height="wrap_content"
             android:hint="Account Name"
             android:imeOptions="actionNext"
+            android:textColor="?attr/textColorForInputEdit"
             android:enabled="false"
             android:inputType="number"
             android:maxLines="1"
@@ -126,6 +143,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.5"
             android:layout_gravity="center_vertical"
+            android:textColor="?attr/textColorForInputEdit"
             android:layout_margin="10dp"
             android:text="Amount to cashout"
             />
@@ -135,24 +153,51 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:layout_weight="0.5"
+            app:trackColor="?attr/textColorForInputEdit"
             android:value="1000.0"
             android:valueTo="10000.0"
             android:stepSize="1000"
             android:valueFrom="1000"
-            android:backgroundTint="@color/tabColor"
             android:elevation="10dp"/>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.skydoves.elasticviews.ElasticFloatingActionButton
         android:id="@+id/fbProcessCashout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
+        app:backgroundTint="?attr/textColorForInputEdit"
+        app:button_cornerRadius="4dp"
+        app:button_duration="250"
+        app:button_scale="0.87"
         android:src="@drawable/ic_done_to_cashout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.976" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="16dp"
+        android:indeterminate="true"
+        android:indeterminateBehavior="cycle"
+        app:layout_constraintBottom_toBottomOf="@+id/bank_spinner"
+        app:layout_constraintStart_toStartOf="@+id/bank_spinner"
+        app:layout_constraintTop_toTopOf="@+id/bank_spinner" />
+
+    <ImageView
+        android:id="@+id/dropdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/bank_spinner"
+        app:layout_constraintEnd_toEndOf="@+id/bank_spinner"
+        app:layout_constraintTop_toTopOf="@+id/bank_spinner"
+        app:srcCompat="@drawable/drop_down_arrow" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

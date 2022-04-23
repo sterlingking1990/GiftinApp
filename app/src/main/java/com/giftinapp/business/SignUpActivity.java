@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.giftinapp.business.model.UserPojo;
@@ -59,8 +60,11 @@ public class SignUpActivity extends AppCompatActivity {
 
     public Boolean isPasswordVisible = false;
 
-    @SuppressLint("ClickableViewAccessibility")
+    TextView tvTermsAndCondition;
+    TextView tvPrivacyPolicy;
+
     @Override
+    @SuppressLint("ClickableViewAccessibility")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
@@ -71,6 +75,8 @@ public class SignUpActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(getApplicationContext());
 
+        tvTermsAndCondition = findViewById(R.id.tvTermsAndCondition);
+        tvPrivacyPolicy = findViewById(R.id.tvPrivacyPolicy);
 
         String[] loginMode = new String[]{"As Influencer", "As Brand"};
         ArrayAdapter<String> loginModeAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, loginMode);
@@ -89,6 +95,16 @@ public class SignUpActivity extends AppCompatActivity {
         spInterest = findViewById(R.id.sp_signup_interest);
 
         spInterest.setAdapter(loginModeAdapter);
+
+
+
+        tvTermsAndCondition.setOnClickListener(v-> {
+            startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(getString(R.string.terms_and_condition_link))));
+        });
+
+        tvPrivacyPolicy.setOnClickListener(v->{
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.privacy_policy_link))));
+        });
 
         btnSignUp.setOnClickListener(v -> {
             if(etFirstname.getText().toString().isEmpty() || etLastname.getText().toString().isEmpty()){
@@ -146,13 +162,8 @@ public class SignUpActivity extends AppCompatActivity {
                 .getDynamicLink(getIntent())
                 .addOnSuccessListener(this, pendingDynamicLinkData -> {
                     // Get deep link from result (may be null if no link is found)
-                    Uri deepLink = null;
                     if (pendingDynamicLinkData != null) {
-                        deepLink=pendingDynamicLinkData.getLink();
-
-                    }
-                    if (deepLink != null) {
-                        String fullLink = deepLink.toString();
+                        String fullLink = pendingDynamicLinkData.getLink().toString();
                         ArrayList<String> emails = new ArrayList<>();
 
                         Matcher matcher = Pattern.compile("[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}").matcher(fullLink);

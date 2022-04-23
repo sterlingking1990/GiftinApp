@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".customer.MyReferralDealFragment">
+
+    <TextView
+        android:id="@+id/tvGetReferralRewardHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Already got a referral token? Please enter it to redeem it"
+        android:textSize="20sp"
+        style="@style/TextAppearance.AppCompat.Title"
+        android:lineSpacingExtra="10sp"
+        android:letterSpacing="0.1"
+        android:layout_margin="20dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/et_reward_token"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter referral reward token"
+        android:imeOptions="actionNext"
+        android:lineSpacingExtra="2dp"
+        app:layout_constraintTop_toBottomOf="@id/tvGetReferralRewardHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:maxLength="6"
+        android:layout_margin="10dp"
+        android:inputType="number"
+        android:maxLines="1"
+        android:textSize="16sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_get_referral_reward"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:imeOptions="actionDone"
+        app:layout_constraintTop_toBottomOf="@id/et_reward_token"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/rectangle_shaped_button"
+        android:backgroundTint="@color/tabColor"
+        android:text="Get Referral Reward"
+        android:elevation="10dp"/>
+
+
+        <TextView
+            android:id="@+id/tvReferralDealHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Don't have a reward token yet?,\n\n Set a referral target to get referral reward token when you meet the target"
+            android:textSize="15sp"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:lineSpacingExtra="10sp"
+            android:letterSpacing="0.1"
+            android:layout_margin="20dp"
+            app:layout_constraintTop_toBottomOf="@id/btn_get_referral_reward"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/tvReferralTarget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set referral target( 0 referred so far)"
+            app:layout_constraintTop_toBottomOf="@id/tvReferralDealHeader"
+            app:layout_constraintStart_toStartOf="parent"
+            android:gravity="start"
+            android:layout_marginTop="40dp"
+            android:layout_marginStart="20dp"
+            style="@style/TextAppearance.AppCompat.Subhead"
+            android:textSize="16sp"
+            />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/referralTargetIndicator"
+            app:layout_constraintTop_toBottomOf="@id/tvReferralTarget"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="0.5"
+            android:value="5.0"
+            android:valueTo="100.0"
+            android:stepSize="5.0"
+            android:valueFrom="5.0"
+            android:backgroundTint="@color/tabColor"
+            android:elevation="10dp"/>
+
+        <TextView
+            android:id="@+id/tvReferralNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="You will receive referral reward token when (5) people sign up through your referral link"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/referralTargetIndicator"
+            android:gravity="center"
+            android:lineSpacingMultiplier="1.2"
+            android:layout_margin="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/set_referral_target"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:imeOptions="actionDone"
+            app:layout_constraintTop_toBottomOf="@id/tvReferralNote"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:background="@drawable/rectangle_shaped_button"
+            android:backgroundTint="@color/tabColor"
+            android:text="Set my target"
+            android:elevation="10dp"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
