@@ -267,12 +267,12 @@ public class MainActivity extends AppCompatActivity {
             switch (position){
                 case 0: {
                     RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
-                    imageOne = remoteConfigUtil.getCarouselOneImage();
-                    //labelTextView.setText(sampleTitles[position]);
-                    if(!imageOne.equals("")) {
+                    try {
+                        String imageFromConfig = remoteConfigUtil.getCarouselOneImage();
+                        Picasso.get().load(imageFromConfig).into(fruitImageView);
+                    }catch (Exception e){
                         Picasso.get().load(imageOne).into(fruitImageView);
                     }
-
                     fruitImageView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -283,17 +283,24 @@ public class MainActivity extends AppCompatActivity {
                 }
                 case 1: {
                     RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
-                    imageTwo = remoteConfigUtil.getCarouselTwoImage();
-                    //labelTextView.setText(sampleTitles[position]);
 
-                    Picasso.get().load(imageTwo).into(fruitImageView);
+                    //labelTextView.setText(sampleTitles[position]);
+                    try {
+                        String imageFromConfig = remoteConfigUtil.getCarouselTwoImage();
+                        Picasso.get().load(imageFromConfig).into(fruitImageView);
+                    }catch (Exception e){
+                        Picasso.get().load(imageTwo).into(fruitImageView);
+                    }
                     break;
                 }
                 case 2: {
                     RemoteConfigUtil remoteConfigUtil = new RemoteConfigUtil();
-                    imageThree = remoteConfigUtil.getCarouselThreeImage();
-                    //labelTextView.setText(sampleTitles[position]);
-                    Picasso.get().load(imageThree).into(fruitImageView);
+                    try {
+                        String imageFromConfig = remoteConfigUtil.getCarouselThreeImage();
+                        Picasso.get().load(imageFromConfig).into(fruitImageView);
+                    }catch (Exception e){
+                        Picasso.get().load(imageThree).into(fruitImageView);
+                    }
                     break;
                 }
             }
