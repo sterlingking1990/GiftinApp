@@ -10,6 +10,7 @@
         android:id="@+id/image_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:translationZ="2dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -37,22 +38,67 @@
 
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/merchantId"
-        android:layout_width="0dp"
-        android:textAlignment="center"
-        android:layout_height="match_parent"
-        android:layout_marginTop="24dp"
-        android:maxLines="1"
-        android:paddingStart="5dp"
-        android:paddingEnd="5dp"
-        android:text="John Doe is my name if you know so that "
-        android:ellipsize="end"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
+
+        <TextView
+            android:id="@+id/merchantId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="John Doe"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/image_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/merchantId"
+        app:layout_constraintStart_toEndOf="@id/image_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/image_layout"
-        app:layout_constraintTop_toTopOf="@+id/image_layout" />
+        >
+
+        <ImageView
+            android:id="@+id/imgReview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_chat_with_business"
+            />
+
+        <TextView
+            android:id="@+id/tvReviewCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            app:layout_constraintTop_toTopOf="@id/imgReview"
+            app:layout_constraintBottom_toBottomOf="@id/imgReview"
+            app:layout_constraintStart_toEndOf="@id/imgReview"
+            />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/gift_coin_icon"
+            android:layout_marginStart="10dp"/>
+        <TextView
+            android:id="@+id/tvBrcWorth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0Brc"/>
+
+
+    </LinearLayout>
+
+
 
     <View
         android:layout_width="0dp"

@@ -29,13 +29,13 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/carouselView"
         android:layout_centerHorizontal="true"
-        android:translationZ="2dp"
         android:layout_margin="20dp"
         android:fontFamily="sans-serif-light"
         android:layout_alignBottom="@id/drawer_layout"
         android:layout_centerInParent="true"
         android:background="@color/cardview_dark_background"
         android:gravity="center"
+        android:translationZ="0dp"
         android:text="Explore Brand"
         app:button_cornerRadius="4dp"
         app:button_duration="250"
@@ -49,6 +49,7 @@
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:translationZ="2dp"
         android:fitsSystemWindows="true">
 
         <FrameLayout

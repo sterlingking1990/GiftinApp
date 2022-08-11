@@ -13,8 +13,9 @@
 
             <FrameLayout
                 android:id="@+id/ll_image"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/frame_layout_corner_background"
                 android:orientation="horizontal"
                 android:layout_gravity="center_vertical"
                 >
@@ -23,14 +24,27 @@
                     android:layout_height="250dp"
                     app:cardCornerRadius="25dp"
                     android:layout_gravity="fill"
-                    android:elevation="100dp"
+                    android:elevation="50dp"
                     >
+
+                    <androidx.media3.ui.PlayerView
+                        android:id="@+id/viewVideo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_centerHorizontal="true"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_gravity="center_vertical"/>
+
             <ImageView
                 android:id="@+id/viewImage"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
+                android:layout_height="wrap_content"
+                android:scaleType="fitXY"
                 android:elevation="10dp"
+                android:visibility="visible"
                 android:layout_centerHorizontal="true"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -172,12 +186,23 @@
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/recordAudioBtn"
                 android:layout_width="wrap_content"
-                android:layout_weight="2"
+                android:layout_weight="1"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:layout_height="wrap_content"
                 app:srcCompat="@drawable/mic_icon"
                 android:contentDescription="Record button" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/recordVideoBtn"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_video"
+                android:contentDescription="Record Video button" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -330,11 +355,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:autoLink="web"
+                android:text=""
                 style="@style/TextAppearance.AppCompat.Headline"/>
 
             <TextView
                 android:id="@+id/tv_audio_download_uri"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/tv_download_uri"
+                android:textAlignment="center"
+                android:text=""
+                style="@style/TextAppearance.AppCompat.Headline"/>
+
+            <TextView
+                android:id="@+id/tv_video_download_uri"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@id/tv_download_uri"
@@ -360,4 +394,6 @@
         </androidx.appcompat.widget.LinearLayoutCompat>
 
     </LinearLayout>
+
+
 </ScrollView>

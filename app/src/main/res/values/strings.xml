@@ -42,11 +42,11 @@
     <string name="number_of_reach">number of reach(%1$s)</string>
     <string name="reward_to_get_when_referral_reached">You will receive referral reward token when (%1$s) people sign up through your referral link</string>
     <string name="total_referred">Set Referral Target. (%1$s) referred so far</string>
-    <string name="influenca_name_and_status">%1$s\nbrands following (%2$s)\ncredits (%3$s)</string>
+    <string name="influenca_name_and_status">%1$s\nbrands following (%2$s)\nBrC (%3$s)</string>
     <string name="rate_influencer">Rate Influencer</string>
     <string name="brand_name_and_status">%1$s\nFollowers (%2$s)</string>
     <string name="rated_by">Rated By: %1$s</string>
-    <string name="amount_to_cashout">cashout\namount-\n#%1$s</string>
+    <string name="amount_to_cashout">cashout BrC\n(%1$s)</string>
     <string name="youAreNotUpdatedMessage">There are new features now available to explore and enjoy</string>
     <string name="youAreNotUpdatedMessage1">update now</string>
     <string name="terms_and_condition"><a href="https://www.notion.so/Brandible-Terms-and-Condition-98b33ae92a73480591b64e2046095d92">Terms and Condition</a></string>
@@ -55,6 +55,7 @@
     <string name="privacy_policy_link">https://stirring-laborer-7fd.notion.site/Privacy-Policy-1e6ae4bb84fb46979026a1a1281c610b</string>
     <string name="deeplink">https://giftinappdev.page.link/amTC/?link=brandible-app.com/?invitedBy=%1$s</string>
     <string name="deeplinkonly">https://giftinappdev.page.link</string>
+    <string name="ok">Ok</string>
     <string-array name="months">
         <item>Month</item>
         <item>01</item>

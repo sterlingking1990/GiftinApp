@@ -13,6 +13,7 @@ import androidx.viewpager.widget.ViewPager;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,6 +44,14 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.InstallStateUpdatedListener;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.InstallStatus;
+import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
@@ -59,17 +68,22 @@ import com.synnapps.carouselview.ImageListener;
 import com.synnapps.carouselview.ViewListener;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import smartdevelop.ir.eram.showcaseviewlib.GuideView;
+import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
+
 import java.util.Random;
 
 
  @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
-    public SessionManager sessionManager;
+     private static final int MY_REQUEST_CODE = 100;
+     public SessionManager sessionManager;
     public StorySession storySession;
     public AlertDialog.Builder builder;
      public AlertDialog.Builder builder2;
@@ -108,46 +122,59 @@ public class MainActivity extends AppCompatActivity {
     String imageTwo = "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1";
     String imageThree = "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1";
 
+    public Integer rewardToBrcBase = 2;
+
+     AppUpdateManager appUpdateManager;
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+//        new GuideView.Builder(this)
+//                .setTitle("Guide Title Text")
+//                .setContentText("Guide Description Text\n .....Guide Description Text\n .....Guide Description Text .....")
+//                .setDismissType(DismissType.anywhere) //optional - default DismissType.targetView
+//                .setTargetView(R.id)
+//                .setContentTextSize(12)//optional
+//                .setTitleTextSize(14)//optional
+//                .build()
+//                .show();
+
         MobileAds.initialize(this); {
 
         }
 
+        appUpdateManager = AppUpdateManagerFactory.create(this);
+        checkAndInstallUpdate();
+
+        InstallStateUpdatedListener updateListener = state -> {
+            if (state.installStatus() == InstallStatus.DOWNLOADED) {
+               popupSnackbarForCompleteUpdate();
+            }
+           if(state.installStatus() == InstallStatus.FAILED){
+               popUpSnackbarFailedUpdateInstall();
+           }
+           if(state.installStatus() == InstallStatus.INSTALLED){
+               popUpSnackbarForUpdatedInstalled();
+           }
+        };
+
+        appUpdateManager.registerListener(updateListener);
+
+
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        AppUpdater appUpdater = new AppUpdater(this)
-        .setTitleOnUpdateAvailable("Update available")
-                .setContentOnUpdateAvailable("Check out the latest version for Brandible!")
-                .setTitleOnUpdateNotAvailable("Update not available")
-                .setContentOnUpdateNotAvailable("No update available. Check for updates again later!")
-                .setButtonUpdate("Update now?")
-                .setButtonUpdateClickListener((dialogInterface, i) -> MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + MainActivity.this.getPackageName()))))
-                .setButtonDismiss("Maybe later")
-                .setButtonDismissClickListener((dialogInterface, i) -> {
-
-                })
-	            .setButtonDoNotShowAgain("Huh, not interested")
-                .setButtonDoNotShowAgainClickListener((dialogInterface, i) -> {
-
-                })
-	            .setIcon(R.drawable.system_software_update) // Notification icon
-                .setCancelable(false); // Dialog could not be dismissable
-                appUpdater.start();
 
         btnExploreBrand = findViewById(R.id.btnExploreBrand);
 
         remoteConfigUtil = new RemoteConfigUtil();
 
-        btnExploreBrand.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openWebView(remoteConfigUtil.getBrandLink());
-            }
-        });
+        rewardToBrcBase = Math.toIntExact(remoteConfigUtil.rewardToBRCBase().asLong());
+
+
+        btnExploreBrand.setOnClickListener(view -> openWebView(remoteConfigUtil.getBrandLink()));
 
         //MediationTestSuite.launch(MainActivity.this);
 
@@ -156,17 +183,7 @@ public class MainActivity extends AppCompatActivity {
         carouselView = findViewById(R.id.carouselView);
 
         carouselView.setPageCount(3);
-        //carouselView.setViewListener(viewListener);
         carouselView.setViewListener(adViewListener);
-        //carouselView.setImageListener(imageListener);
-        //startImageCarousel(0);
-
-        carouselView.setImageClickListener(new ImageClickListener() {
-            @Override
-            public void onClick(int position) {
-                Toast.makeText(MainActivity.this, "Clicked item: "+ position, Toast.LENGTH_SHORT).show();
-            }
-        });
 
 
         carouselView.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -188,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
 
         drawer = findViewById(R.id.drawer_layout);
         t = new ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -199,11 +217,12 @@ public class MainActivity extends AppCompatActivity {
             public void onDrawerOpened(@NonNull View drawerView) {
                 getTotalGiftCoin();
                 getNumberOfFollowers();
+                btnExploreBrand.setTranslationZ(0f);
             }
 
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
-
+                btnExploreBrand.setTranslationZ(2f);
             }
 
             @Override
@@ -244,9 +263,29 @@ public class MainActivity extends AppCompatActivity {
         getNumberOfFollowers();
 
 
-        navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(following),String.valueOf(totalGiftCoin)));
+        navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(following), String.valueOf(totalGiftCoin/rewardToBrcBase)));
 
         getTotalReferred();
+    }
+
+
+    private void checkAndInstallUpdate(){
+        com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                try {
+                    appUpdateManager.startUpdateFlowForResult(
+                            appUpdateInfo,
+                            AppUpdateType.FLEXIBLE,
+                            this,
+                            MY_REQUEST_CODE);
+                } catch (IntentSender.SendIntentException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
      private void openWebView(String brandLink) {
@@ -484,16 +523,14 @@ public class MainActivity extends AppCompatActivity {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             try {
-                if (!sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")) {
+                if (!Objects.equals(sessionManager.getCurrentFragment(), "CustomerRewardStoriesFragment")) {
                     startActivity(new Intent(MainActivity.this, MainActivity.class));
+                    super.onBackPressed();
                 }
-                super.onBackPressed();
             } catch (Exception e) {
-                //mauth.signOut();
-                //sessionManager.clearData();
-                //storySession.clearData();
-                startActivity(new Intent(MainActivity.this, MainActivity.class));
-                finish();
+//                startActivity(new Intent(MainActivity.this, MainActivity.class));
+//                finish();
+                super.onBackPressed();
             }
         }
     }
@@ -577,6 +614,7 @@ public class MainActivity extends AppCompatActivity {
                 sessionManager.clearData();
                 storySession.clearData();
                 startActivity(new Intent(MainActivity.this, SignUpActivity.class));
+                finish();
                 dialog.cancel();
             });
             builder.show();
@@ -594,7 +632,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPersistenceEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
-        db.collection("users").document(sessionManager.getEmail()).collection("rewards").get()
+        db.collection("users").document(Objects.requireNonNull(sessionManager.getEmail())).collection("rewards").get()
                 .addOnCompleteListener(task -> {
 
                     if (task.isSuccessful()) {
@@ -603,7 +641,7 @@ public class MainActivity extends AppCompatActivity {
                             Double giftCoin = queryDocumentSnapshot.getDouble("gift_coin");
                             totalGiftCoin += giftCoin;
                         }
-                        navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(sessionManager.getFollowingCount()),String.valueOf(totalGiftCoin)));
+                        navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(sessionManager.getFollowingCount()),String.valueOf(totalGiftCoin/rewardToBrcBase)));
                     } else {
                         totalGiftCoin = 0L;
                     }
@@ -619,7 +657,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPersistenceEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
-        db.collection("users").document("giftinappinc@gmail.com").collection("customers_redeemed").document(sessionManager.getEmail()).get()
+        db.collection("users").document("giftinappinc@gmail.com").collection("customers_redeemed").document(Objects.requireNonNull(sessionManager.getEmail())).get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         try {
@@ -644,7 +682,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         db.setFirestoreSettings(settings);
 
-        db.collection("influenca_activity_track").document(sessionManager.getEmail()).collection("status_rating").get()
+        db.collection("influenca_activity_track").document(Objects.requireNonNull(sessionManager.getEmail())).collection("status_rating").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -675,7 +713,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         db.setFirestoreSettings(settings);
 
-        db.collection("influenca_activity_track").document(sessionManager.getEmail()).get()
+        db.collection("influenca_activity_track").document(Objects.requireNonNull(sessionManager.getEmail())).get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -732,41 +770,35 @@ public class MainActivity extends AppCompatActivity {
         db.setFirestoreSettings(settings);
 
         db.collection("merchants").get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            QuerySnapshot result = task.getResult();
-                            if (result != null) {
-                                List<DocumentSnapshot> eachRes = result.getDocuments();
-                                for (int i = 0; i < eachRes.size(); i++) {
-                                    counter += 1;
-                                    db.collection("merchants").document(eachRes.get(i).getId()).collection("followers").get()
-                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<QuerySnapshot> followersTask) {
-                                                    if (followersTask.isSuccessful()) {
-                                                        QuerySnapshot followersQuerry = followersTask.getResult();
-                                                        if (followersQuerry != null) {
-                                                            List<DocumentSnapshot> eachFollower = followersQuerry.getDocuments();
-                                                            for (int j = 0; j < eachFollower.size(); j++) {
-                                                                if (eachFollower.get(j).getId().equals(sessionManager.getEmail())) {
-                                                                    following += 1;
-                                                                }
-                                                            }
-                                                            Log.d("Followers",following.toString());
-
-                                                            if (counter == result.getDocuments().size()) {
-                                                                sessionManager.setFollowingCount(following);
-
-                                                            }
-                                                            navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(sessionManager.getFollowingCount()),String.valueOf(totalGiftCoin)));
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot result = task.getResult();
+                        if (result != null) {
+                            List<DocumentSnapshot> eachRes = result.getDocuments();
+                            for (int i = 0; i < eachRes.size(); i++) {
+                                counter += 1;
+                                db.collection("merchants").document(eachRes.get(i).getId()).collection("followers").get()
+                                        .addOnCompleteListener(followersTask -> {
+                                            if (followersTask.isSuccessful()) {
+                                                QuerySnapshot followersQuerry = followersTask.getResult();
+                                                if (followersQuerry != null) {
+                                                    List<DocumentSnapshot> eachFollower = followersQuerry.getDocuments();
+                                                    for (int j = 0; j < eachFollower.size(); j++) {
+                                                        if (eachFollower.get(j).getId().equals(sessionManager.getEmail())) {
+                                                            following += 1;
                                                         }
                                                     }
+                                                    Log.d("Followers",following.toString());
 
+                                                    if (counter == result.getDocuments().size()) {
+                                                        sessionManager.setFollowingCount(following);
+
+                                                    }
+                                                    navTextView.setText(getResources().getString(R.string.influenca_name_and_status, Objects.requireNonNull(mauth.getCurrentUser()).getEmail(),String.valueOf(sessionManager.getFollowingCount()),String.valueOf(totalGiftCoin/rewardToBrcBase)));
                                                 }
-                                            });
-                                }
+                                            }
+
+                                        });
                             }
                         }
                     }
@@ -810,7 +842,7 @@ public class MainActivity extends AppCompatActivity {
                                 total_referred += 1;
                             }
                         } catch (Exception e) {
-
+                            Log.d("ErrTotalReffered",e.getLocalizedMessage());
                         }
                     }
                 }
@@ -834,11 +866,11 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-            db.collection("referral_reward").document(sessionManager.getEmail()).get().addOnCompleteListener(task -> {
+            db.collection("referral_reward").document(Objects.requireNonNull(sessionManager.getEmail())).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot resultDoc = task.getResult();
                     if (resultDoc.exists()) {
-                        Integer target = ((Number) Objects.requireNonNull(resultDoc.get("targetToReach"))).intValue();
+                        int target = ((Number) Objects.requireNonNull(resultDoc.get("targetToReach"))).intValue();
                         String referralRewardToken = (String) resultDoc.get("referralRewardToken");
                         if (totalReferred >= target) {
                             assert referralRewardToken != null;
@@ -847,7 +879,7 @@ public class MainActivity extends AppCompatActivity {
                                 int token = random.nextInt(999999);
 
                                 ReferralRewardPojo referralRewardPojo = new ReferralRewardPojo();
-                                referralRewardPojo.referralRewardToken = String.format("%06d",token);
+                                referralRewardPojo.referralRewardToken = String.format(Locale.ENGLISH,"%06d",token);
                                 referralRewardPojo.referralRewardAmount = Integer.parseInt(remoteConfigUtil.getReferralRewardBase()) * target;
                                 referralRewardPojo.targetToReach = target;
 
@@ -858,7 +890,7 @@ public class MainActivity extends AppCompatActivity {
                                                db.collection("referral_reward").document(sessionManager.getEmail()).set(referralRewardPojo)
                                                        .addOnCompleteListener(task1 -> {
                                                            if (task1.isSuccessful()) {
-                                                               Toast.makeText(this, "You reward token will be sent to you via mail, please check in few minutes", Toast.LENGTH_LONG).show();
+                                                               Toast.makeText(this, "Your reward token will be sent to you via mail, please check in few minutes", Toast.LENGTH_LONG).show();
                                                            }
                                                        });
                                            }
@@ -870,5 +902,47 @@ public class MainActivity extends AppCompatActivity {
             });
     }
 
+     @Override
+     protected void onResume() {
+         super.onResume();
+         appUpdateManager
+                 .getAppUpdateInfo()
+                 .addOnSuccessListener(appUpdateInfo -> {
 
-}
+                     if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                         popupSnackbarForCompleteUpdate();
+                     }
+                 });
+     }
+
+     private void popupSnackbarForCompleteUpdate() {
+         Snackbar snackbar =
+                 Snackbar.make(findViewById(R.id.rl_activity_main),
+                         "An update has just been downloaded.",
+                         Snackbar.LENGTH_INDEFINITE);
+         snackbar.setAction("RESTART", view -> appUpdateManager.completeUpdate());
+         snackbar.setActionTextColor(
+                 getResources().getColor(R.color.whitesmoke));
+         snackbar.show();
+     }
+
+     private void popUpSnackbarFailedUpdateInstall(){
+         Snackbar snackbar =
+                 Snackbar.make(findViewById(R.id.rl_activity_main),
+                         "Update Failed",
+                         Snackbar.LENGTH_INDEFINITE);
+         snackbar.setBackgroundTint(getResources().getColor(R.color.tabColorLight));
+         snackbar.setAction("RETRY", view -> checkAndInstallUpdate());
+         snackbar.setActionTextColor(
+                 getResources().getColor(R.color.whitesmoke));
+         snackbar.show();
+     }
+
+     private void popUpSnackbarForUpdatedInstalled(){
+         Snackbar snackbar =
+                 Snackbar.make(findViewById(R.id.rl_activity_main),
+                         "Update Installed",
+                         Snackbar.LENGTH_SHORT);
+         snackbar.show();
+     }
+ }

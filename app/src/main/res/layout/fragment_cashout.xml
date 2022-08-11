@@ -57,7 +57,7 @@
             android:textColor="?attr/textColorForInputEdit"
             android:hint="Account Number"
             android:textColorHint="?attr/textColorForInputEdit"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionDone"
             android:inputType="number"
             android:maxLines="1"
             android:textSize="16sp" />
@@ -166,7 +166,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        app:backgroundTint="?attr/textColorForInputEdit"
+        app:backgroundTint="@color/cardview_dark_background"
         app:button_cornerRadius="4dp"
         app:button_duration="250"
         app:button_scale="0.87"

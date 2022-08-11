@@ -35,11 +35,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.floor
+import kotlin.math.truncate
 
 @AndroidEntryPoint
 class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
-
-
     private val getBanksViewModel:GetBanksViewModel by viewModels()
     private val verifyAccountViewModel:VerifyAccountViewModel by viewModels()
     private val initiateTransferViewModel:InitiateTransferViewModel by viewModels()
@@ -59,6 +58,11 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var accountNumber:String
     private lateinit var recipientCode:String
 
+    private lateinit var remoteConfigUtil: RemoteConfigUtil
+
+    var rewardToRbcBase = 2.0
+    var amountLimitToWithdraw = 1000.0
+
     private lateinit var reference:String
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -74,6 +78,9 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
 //        arrayBankListAdapter = ArrayAdapter(requireContext(),R.layout.single_bank_item,onlyBanks)
 
+        remoteConfigUtil = RemoteConfigUtil()
+        rewardToRbcBase = remoteConfigUtil.rewardToBRCBase().asDouble()
+        amountLimitToWithdraw = remoteConfigUtil.getWithdrawLimit().asDouble()
 
         sessionManager = SessionManager(requireContext())
         sessionManager.setCashoutAmount(0.0)
@@ -103,15 +110,16 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private fun checkIfCanCashOut(){
         totalAmountToCashOut = sessionManager.getCashoutAmount().toString()
-        if(totalAmountToCashOut.toInt()< 1000){
-            Toast.makeText(requireContext(), "Sorry you dont have enough cash to cash out, you should have above #500 before cashout", Toast.LENGTH_LONG).show()
+        if(totalAmountToCashOut.toInt() < amountLimitToWithdraw){
+            Toast.makeText(requireContext(), "Sorry you dont have enough cash to cash out, you should have above 250 BrC before cashout", Toast.LENGTH_LONG).show()
         }
         else{
             sliderAmountToCashout.isEnabled = true
-            sliderAmountToCashout.valueTo = totalAmountToCashOut.toFloat()
-            sliderAmountToCashout.valueFrom = totalAmountToCashOut.toFloat()/2
-            sliderAmountToCashout.value = totalAmountToCashOut.toFloat()/2
-            sliderAmountToCashout.stepSize = totalAmountToCashOut.toFloat()/2
+            sliderAmountToCashout.valueTo = (totalAmountToCashOut.toDouble().div(rewardToRbcBase)).toFloat()
+            sliderAmountToCashout.valueFrom = ((totalAmountToCashOut.toDouble().div(rewardToRbcBase))/2.toFloat()).toFloat()
+            sliderAmountToCashout.value = (totalAmountToCashOut.toDouble().div(rewardToRbcBase)).toFloat()
+            sliderAmountToCashout.stepSize = ((totalAmountToCashOut.toDouble().div(rewardToRbcBase))/2.toFloat()).toFloat()
+
             tvAmountToCashout.text = resources.getString(R.string.amount_to_cashout, sliderAmountToCashout.value.toString())
 
         }
@@ -169,7 +177,7 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 Toast.makeText(requireContext(), "Bank and Account Number must be provided", Toast.LENGTH_LONG).show()
             }
             else {
-                verifyAccountViewModel.verifyAccountNumber("Bearer ${BuildConfig.PSTACK_AUTHKEY}", accountNumber, bankCode.toString())
+                verifyAccountViewModel.verifyAccountNumber("Bearer ${BuildConfig.PSTACK_TEST_AUTHKEY}", accountNumber, bankCode.toString())
             }
         }
 
@@ -189,7 +197,7 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 it, "NGN")
         }
         if (initiateTransferRequest != null) {
-            initiateTransferViewModel.initiateTransferProcess("Bearer ${BuildConfig.PSTACK_AUTHKEY}", initiateTransferRequest)
+            initiateTransferViewModel.initiateTransferProcess("Bearer ${BuildConfig.PSTACK_TEST_AUTHKEY}", initiateTransferRequest)
         }
     }
 
@@ -216,8 +224,8 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 .addOnCompleteListener {
                     if(it.isSuccessful){
                         for (eachBusinessThatGiftedCustomer in it.result!!){
-                            val rewardCoin = if (eachBusinessThatGiftedCustomer.getDouble("gift_coin") == null)  0.0 else eachBusinessThatGiftedCustomer.getDouble("gift_coin")
-                            if (amountToOffset >= rewardCoin!!) {
+                            val rewardCoin:Double = if (eachBusinessThatGiftedCustomer.get("gift_coin") == null)  0.0 else eachBusinessThatGiftedCustomer.get("gift_coin") as Double
+                            if (amountToOffset >= rewardCoin) {
 
                                 amountToOffset -= rewardCoin
                                 //Toast.makeText(requireContext(), "Amount to offset is greater than reward coin", Toast.LENGTH_SHORT).show()
@@ -346,6 +354,7 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
                             checkIfCanCashOut()
                             if (totalAmountToCashOut.toInt() >= 1000) {
                                 fbProcessCashout.isEnabled = true
+                                fbProcessCashout.setBackgroundColor(R.color.whitesmoke)
 
                             }
                         }
@@ -397,12 +406,13 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     }
                     Resource.Status.SUCCESS -> {
                         if (it.data != null) {
+                            reference = it.data.data.reference
                             updateRecordWithReferenceCode()
                         }
                     }
                     Resource.Status.ERROR -> Toast.makeText(
                         requireContext(),
-                        "unable to transfer to your account, please try again later",
+                        it.data?.message,
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -467,7 +477,7 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
         db.collection("users").document(sessionManager.getEmail().toString()).collection("cashoutreceipt").document("transfer").set(reference)
                 .addOnCompleteListener {
                     if(it.isSuccessful){
-                        Toast.makeText(requireContext(), "Transfer established", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), "Your money will arrive in your account soon", Toast.LENGTH_LONG).show()
                         updateUserRecordAfterTransfer()
                         //we proceed to carrying out the transfer and then on success of that one, we do cashout to bank and updatecustomer redeemed record
                     }
@@ -491,8 +501,12 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     private fun proceedToTransfer(){
-        val transferRequest = TransferModel("cashout", sliderAmountToCashout.value.toString(), recipientCode, "Brandible cashout")
-        transferViewModel.transferToBank(BuildConfig.PSTACK_AUTHKEY, transferRequest)
+        Log.d("RecipientCode",recipientCode)
+        Log.d("AuthKey",BuildConfig.PSTACK_TEST_AUTHKEY)
+        val amount = truncate(sliderAmountToCashout.value).toInt()*100
+        Log.d("Amount",amount.toString())
+        val transferRequest = TransferModel("balance", amount.toString(), recipientCode, "Brandible cashout")
+        transferViewModel.transferToBank("Bearer ${BuildConfig.PSTACK_TEST_AUTHKEY}", transferRequest)
     }
 
     private fun getBankCode(bankName: String): String? {

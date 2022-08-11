@@ -20,6 +20,8 @@ class RemoteConfigUtil{
     private val UPDATE_TITLE = "update_title"
     private val UPDATE_MESSAGE = "update_message"
     private val REFERRAL_REWARD_BASE = "referral_reward_base"
+    private val REWARD_TO_BRC_BASE = "reward_to_brc_base"
+    private val WITHDRAW_LIMIT = "withdraw_limit"
 
     private val DEFAULTS: HashMap<String, Any> =
         hashMapOf(
@@ -29,7 +31,9 @@ class RemoteConfigUtil{
             BRAND_LINK to "https://zuri.health/",
             UPDATE_TITLE  to "Update Brandible",
             UPDATE_MESSAGE  to "New features available, update to enjoy and explore them all",
-            REFERRAL_REWARD_BASE  to 20
+            REFERRAL_REWARD_BASE  to 20,
+            REWARD_TO_BRC_BASE  to 2,
+            WITHDRAW_LIMIT  to 1000
         )
 
     //private lateinit var remoteConfig: FirebaseRemoteConfig
@@ -56,15 +60,16 @@ class RemoteConfigUtil{
 
         return remoteConfig
     }
-         fun getCarouselOneImage():String = getFirebaseRemoteConfig().getString(CAROUSEL_ONE)
+    fun getCarouselOneImage():String = getFirebaseRemoteConfig().getString(CAROUSEL_ONE)
 
-         fun getCarouselTwoImage(): String = getFirebaseRemoteConfig().getString(CAROUSEL_TWO)
+    fun getCarouselTwoImage(): String = getFirebaseRemoteConfig().getString(CAROUSEL_TWO)
 
-         fun getCarouselThreeImage(): String = getFirebaseRemoteConfig().getString(CAROUSEL_THREE)
+    fun getCarouselThreeImage(): String = getFirebaseRemoteConfig().getString(CAROUSEL_THREE)
 
-         fun getBrandLink():String = getFirebaseRemoteConfig().getString(BRAND_LINK)
-        fun getUpdateTitle():String = getFirebaseRemoteConfig().getString(UPDATE_TITLE)
-        fun getUpdateMessage():String = getFirebaseRemoteConfig().getString(UPDATE_MESSAGE)
-
+    fun getBrandLink():String = getFirebaseRemoteConfig().getString(BRAND_LINK)
+    fun getUpdateTitle():String = getFirebaseRemoteConfig().getString(UPDATE_TITLE)
+    fun getUpdateMessage():String = getFirebaseRemoteConfig().getString(UPDATE_MESSAGE)
     fun getReferralRewardBase(): String = getFirebaseRemoteConfig().getString(REFERRAL_REWARD_BASE)
+    fun rewardToBRCBase(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[REWARD_TO_BRC_BASE]
+    fun getWithdrawLimit(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[WITHDRAW_LIMIT]
     }

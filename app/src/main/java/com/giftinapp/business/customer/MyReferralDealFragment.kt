@@ -11,17 +11,20 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.Fragment
 import com.giftinapp.business.R
+import com.giftinapp.business.databinding.FragmentMyReferralDealBinding
 import com.giftinapp.business.model.ReferralRewardPojo
 import com.giftinapp.business.model.RewardPojo
 import com.giftinapp.business.utility.SessionManager
+import com.giftinapp.business.utility.base.BaseFragment
 import com.google.android.material.slider.Slider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import org.aviran.cookiebar2.CookieBar
+import kotlin.math.truncate
 
-class MyReferralDealFragment : Fragment() {
+open class MyReferralDealFragment : BaseFragment<FragmentMyReferralDealBinding>() {
 
     private lateinit var etReferralRewardToken:EditText
     private lateinit var btnGetReferralReward:Button
@@ -80,22 +83,22 @@ class MyReferralDealFragment : Fragment() {
             if(!etReferralRewardToken.text.isNullOrEmpty()) {
                 redeemReferralReward()
             }else{
-                Toast.makeText(requireContext(),"Please enter referral reward token to redeem rework",Toast.LENGTH_LONG).show()
+                showErrorCookieBar("Empty Token Provided","Please enter referral reward token to redeem rework")
             }
         }
 
         referralTargetIndicator.addOnChangeListener { slider, value, fromUser ->
-            updateReferralMessage(value,null)
+            updateReferralMessage(truncate(value).toInt(),null)
         }
 
     }
 
-    private fun updateReferralMessage(value: Float?, value2:Int?) {
+    private fun updateReferralMessage(value: Int?, value2:Int?) {
         if(value!=null) {
             REFERAL_TARGET = value.toInt()
             tvReferralNote.text =
                 resources.getString(R.string.reward_to_get_when_referral_reached, value.toString())
-            referralTargetIndicator.value=value
+            referralTargetIndicator.value=value.toFloat()
         }
         else{
             REFERAL_TARGET = value2!!
@@ -120,7 +123,8 @@ class MyReferralDealFragment : Fragment() {
                     val referralTarget = referralDetails.getLong("targetToReach")?:5
                     val referralToken = referralDetails.getString("referralRewardToken")?:""
                     if(!referralToken.isNullOrEmpty()){
-                        Toast.makeText(requireContext(),"You have already received reward token for this target, set new target",Toast.LENGTH_LONG).show()
+                        showCookieBar("Reward Already Recieved","You have already received reward token for this target, set new target", position = CookieBar.BOTTOM, delay = 5000L)
+                        //Toast.makeText(requireContext(),"You have already received reward token for this target, set new target",Toast.LENGTH_LONG).show()
                     }
                     Log.d("Target",referralDetails.getLong("targetToReach").toString())
                     REFERAL_TARGET = referralTarget.toInt()
@@ -155,11 +159,7 @@ class MyReferralDealFragment : Fragment() {
                         if (referralTokenEntered == referralToken) {
                             updateUserReward(amountToReward.toInt())
                         } else {
-                            Toast.makeText(
-                                requireContext(),
-                                "Referral Reward Token is Invalid or already used, please try again",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            showErrorCookieBar("Invalid Token","Referral Reward Token is Invalid or already used, please try again")
                         }
                     }
                 }
@@ -236,11 +236,7 @@ class MyReferralDealFragment : Fragment() {
         db.collection("referral_reward").document(sessionManager.getEmail().toString())
             .update("referralRewardToken", "expired")
             .addOnCompleteListener {
-                Toast.makeText(
-                    requireContext(),
-                    "You have been credited with #$amount successfully",
-                    Toast.LENGTH_LONG
-                ).show()
+                showCookieBar("Congratulations","You have been credited with #$amount successfully", position = CookieBar.BOTTOM)
             }
     }
 
@@ -265,15 +261,11 @@ class MyReferralDealFragment : Fragment() {
                     .set(referralReward)
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
-                            Toast.makeText(
-                                requireContext(),
-                                "Referral Target set successfully",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            showCookieBar("Target Set","Referral Target set successfully", position = CookieBar.BOTTOM)
                         }
                     }
             } else{
-                Toast.makeText(requireContext(),"You have to set referral target to be greater than total referred so far",Toast.LENGTH_LONG).show()
+                showErrorCookieBar("Referral Target too low","You have to set referral target to be greater than total referred so far")
             }
         }
         else{
@@ -310,6 +302,11 @@ class MyReferralDealFragment : Fragment() {
                 }
             }
     }
+
+    override fun getFragmentBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): FragmentMyReferralDealBinding = FragmentMyReferralDealBinding.inflate(layoutInflater,container,false)
 
 
 }

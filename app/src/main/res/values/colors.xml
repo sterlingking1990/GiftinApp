@@ -30,4 +30,6 @@
     <color name="drawerBackgroundDark">#4f5b62</color>
     <color name="drawerBackgroundLight">#F8F8F8</color>
 
+    <color name="red">#FF0000</color>
+
 </resources>

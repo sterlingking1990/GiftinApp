@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="50dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/tvReviewDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:text="27-09-2022"
+        android:textSize="15sp"
+        style="@style/MaterialAlertDialog.MaterialComponents.Title.Icon.CenterStacked"
+        android:layout_marginStart="5dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/reviewerUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_light"
+        style="@style/TextAppearance.AppCompat.Subhead"
+        android:layout_marginStart="20dp"
+        android:text="- Izundu kingsley"
+        app:layout_constraintTop_toTopOf="@id/tvReviewDate"
+        app:layout_constraintStart_toEndOf="@id/tvReviewDate"
+        />
+    <TextView
+        android:id="@+id/tvReview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="3dp"
+        android:text="I like your product a lot, the first time I used it, I enjoyed all of it in a very wonderful way, keep it up"
+        android:textSize="15sp"
+        app:layout_constraintTop_toBottomOf="@id/tvReviewDate"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/tvReviewFeedback"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:visibility="visible"
+        android:layout_marginBottom="5dp"
+        android:fontFamily="@font/mtnbrightersansmedium"
+        android:textSize="12sp"
+        android:text="view feedback from the business to understand what you need to do in other to grow very well your own busnesss"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvReview" />
+</androidx.constraintlayout.widget.ConstraintLayout>

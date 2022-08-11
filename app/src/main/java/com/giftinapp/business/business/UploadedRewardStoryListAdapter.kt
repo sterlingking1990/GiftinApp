@@ -35,6 +35,7 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
                 if (merchantStoryListPojo[position].statusReachAndWorthPojo != null) {
                     clickableUploadedStory.displayImage(
                         merchantStoryListPojo[position].merchantStatusImageLink.toString(),
+                        merchantStoryListPojo[position].merchantStatusVideoLink.toString(),
                         merchantStoryListPojo[position].storyAudioLink.toString(),
                         merchantStoryListPojo[position].storyTag.toString(),
                         merchantStoryListPojo[position].statusReachAndWorthPojo.status_worth,
@@ -44,6 +45,7 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
                 } else
                     clickableUploadedStory.displayImage(
                         merchantStoryListPojo[position].merchantStatusImageLink.toString(),
+                        merchantStoryListPojo[position].merchantStatusVideoLink.toString(),
                         merchantStoryListPojo[position].storyAudioLink.toString(),
                         merchantStoryListPojo[position].storyTag.toString(),
                         null,
@@ -54,7 +56,9 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
 
             ivDelete.setOnClickListener {
                 clickableUploadedStory.deleteLink(merchantStoryListPojo[position].merchantStatusImageLink.toString(),
+                    merchantStoryListPojo[position].merchantStatusVideoLink.toString(),
                     merchantStoryListPojo[position].storyAudioLink.toString(),
+                    merchantStoryListPojo[position].videoArtWork.toString(),
                         merchantStoryListPojo[position].merchantStatusId.toString(),
                         position)
             }
@@ -66,8 +70,8 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
     }
 
     interface ClickableUploadedStory{
-        fun deleteLink(link: String, audioLink:String, id: String, positionId: Int)
-        fun displayImage(url: String, audioLink:String,tag: String, status_worth:Int?, status_reach:Int?, status_id:String?)
+        fun deleteLink(link: String, videoLink:String,audioLink:String,artWorkLink:String, id: String, positionId: Int)
+        fun displayImage(url: String, videoLink:String, audioLink:String,tag: String, status_worth:Int?, status_reach:Int?, status_id:String?)
     }
 
     fun clear(position:Int) {

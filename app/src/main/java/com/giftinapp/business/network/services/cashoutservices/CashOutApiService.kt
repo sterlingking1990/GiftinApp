@@ -17,6 +17,6 @@ interface CashOutApiService {
     @POST("transferrecipient")
     suspend fun initiateTransferProcess(@Header("Authorization") authorization: String, @Body transferRequestModel: InitiateTransferRequestModel):Response<InitiateTransferResponseModel>
 
-    @POST("/transfer")
+    @POST("transfer")
     suspend fun transfer(@Header("Authorization") authorization: String, @Body transfer:TransferModel ):Response<TransferModelResponse>
 }

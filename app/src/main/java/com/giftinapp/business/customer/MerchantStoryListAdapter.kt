@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -18,18 +19,21 @@ import com.facebook.shimmer.ShimmerDrawable
 import com.giftinapp.business.R
 import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.MerchantStoryPojo
+import com.giftinapp.business.utility.RemoteConfigUtil
 import com.giftinapp.business.utility.SessionManager
-import com.google.firebase.crashlytics.internal.model.CrashlyticsReport
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.android.synthetic.main.single_item_status_list.view.*
+
 class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.Adapter<MerchantStoryListAdapter.ViewHolder>(), Filterable {
 
     private var merchantStories:ArrayList<MerchantStoryPojo> = ArrayList()
     private var merchantStoriesAll:ArrayList<MerchantStoryPojo> = ArrayList()
     private lateinit var context: Context
     private lateinit var sessionManager: SessionManager
+    private lateinit var remoteConfigUtil: RemoteConfigUtil
     private var isHasStoryHeader:Boolean = false
     var numFollowing:Int = 0
     //private var numberOfViews:String = "0"
@@ -42,6 +46,7 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
         this.isHasStoryHeader = isStoryHeader
         this.merchantStoriesAll = merchantStats
         this.numFollowing = numFollowed
+        this.remoteConfigUtil = RemoteConfigUtil()
 
     }
 
@@ -56,6 +61,8 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 val circularStatusView = findViewById<CircularStatusView>(R.id.circular_status_view)
                 val merchantName = findViewById<TextView>(R.id.merchantId)
                 val frontImage = findViewById<CircleImageView>(R.id.imgFrontImage)
+                val imgReview = findViewById<ImageView>(R.id.imgReview)
+                val tvReviewCount = findViewById<TextView>(R.id.tvReviewCount)
 
                 val shimmer = Shimmer.ColorHighlightBuilder()
                         .setBaseColor(Color.parseColor("#f3f3f3"))
@@ -70,16 +77,41 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 val shimmerDrawable = ShimmerDrawable()
                 shimmerDrawable.setShimmer(shimmer)
 
+                val rewardToBaseBrc = remoteConfigUtil.rewardToBRCBase().asLong()
+
                 try {
 
-                    //getNumberOfViewersForStatus(merchantStories[position].storyOwner)
 
+                    val merchantStoryListNoEmptyEmailId =merchantStories[position].merchantStoryList.first {
+                        !it.merchantStatusId.isNullOrEmpty()
+                    }
+                    val merchantStoryOwnerEmailId= merchantStoryListNoEmptyEmailId.merchantStatusId
+
+
+                    val totalWorth = merchantStories[position].merchantStoryList.sumOf {
+                        it.statusReachAndWorthPojo.status_worth
+                    }
+                    this.tvBrcWorth.text = (totalWorth/rewardToBaseBrc).toString() + "BrC"
+                    getNumberOfReviews(tvReviewCount,merchantStoryOwnerEmailId)
+                   // Log.d("TotalWorth",totalWorth.toString())
                     merchantName.text = if (isHasStoryHeader && merchantStories[position].merchantId == sessionManager.getEmail()) (Html.fromHtml("<b>My Reward Deal</b>")) else merchantStories[position].merchantId
                     circularStatusView.setPortionsCount(merchantStories[position].merchantStoryList.size)
-                    Picasso.get().load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink).placeholder(shimmerDrawable).into(frontImage)
+                    if(!merchantStories[position].merchantStoryList[0].merchantStatusImageLink.isNullOrEmpty()) {
+                        Picasso.get()
+                            .load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink)
+                            .placeholder(shimmerDrawable).into(frontImage)
+                    }else{
+                        Picasso.get()
+                            .load(merchantStories[position].merchantStoryList[0].videoArtWork)
+                            .placeholder(shimmerDrawable).into(frontImage)
+                    }
 
                     frontImage.setOnClickListener {
                         storyClickable.onStoryClicked(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, merchantStories, position, merchantStories[position].storyOwner)
+                    }
+
+                    imgReview.setOnClickListener {
+                        storyClickable.onReviewClicked(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, merchantStories[position].storyOwner)
                     }
 
                     checkIfStatusSeen(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, context, circularStatusView, merchantStories[position].storyOwner)
@@ -96,24 +128,22 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
 
 
 
+
     interface StoryClickable{
         fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, storyOwner:String)
+        fun onReviewClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>,storyOwner:String){
+
+        }
     }
 
     private fun checkIfStatusSeen(merchantStoryList: ArrayList<MerchantStoryListPojo>,
                                   context: Context,
                                   circularStatusView: CircularStatusView, owner: String) {
 
-        //send the gift to giftin company for redeeming
 
         val emailOfUser = sessionManager.getEmail()
         val db = FirebaseFirestore.getInstance()
-        // [END get_firestore_instance]
 
-        // [START set_firestore_settings]
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
         val settings = FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build()
@@ -143,6 +173,32 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                         }
                     }
     }
+
+    private fun getNumberOfReviews(tvReviewCount: TextView, merchantStoryOwnerEmailId: String) {
+        Log.d("MerchantOwnerId", merchantStoryOwnerEmailId)
+        val db = FirebaseFirestore.getInstance()
+
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("reviews").document(merchantStoryOwnerEmailId).collection("reviewers").get()
+            .addOnCompleteListener {
+                if(it.isSuccessful) {
+                    val result = it.result
+                    if (!result.isEmpty) {
+                        val numOfReviews = result.documents.size
+                        Log.d("NumberOfReview",numOfReviews.toString())
+                        tvReviewCount.text = numOfReviews.toString()
+                    }
+                }
+            }
+    }
+
+
+
+
 
     override fun getFilter(): Filter {
         return object : Filter() {
@@ -174,16 +230,8 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
     }
 
     private fun getNumberOfViewersForStatus(storyOwner: String) {
-        //get the users views in a map
-
 
         val db = FirebaseFirestore.getInstance()
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
         val settings = FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build()

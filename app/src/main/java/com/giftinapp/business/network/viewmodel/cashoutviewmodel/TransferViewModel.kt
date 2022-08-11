@@ -35,7 +35,7 @@ class TransferViewModel @Inject constructor(private val cashOutApiServiceReposit
                     _transferResponse.postValue(Resource(Resource.Status.SUCCESS,transferResponseReceived.body(),null))
                 }
                 else{
-                    _transferResponse.postValue(Resource.error("Unable to verify account"))
+                    _transferResponse.postValue(Resource(Resource.Status.ERROR,null,transferResponseReceived.message()))
                 }
             }
             catch (e:Exception){

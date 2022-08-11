@@ -18,21 +18,23 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
+import com.giftinapp.business.databinding.FragmentBrandPreferenceBinding
 import com.giftinapp.business.model.GiftingMerchantPojo
 import com.giftinapp.business.model.GiftingMerchantViewPojo
 import com.giftinapp.business.model.SendGiftPojo
 import com.giftinapp.business.utility.SessionManager
+import com.giftinapp.business.utility.base.BaseFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import java.net.URLEncoder
 import java.util.*
 
-
-class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon {
+open class BrandPreferenceFragment : BaseFragment<FragmentBrandPreferenceBinding>(), BrandPreferenceAdapter.ClickableIcon {
     private var brandPreferenceAdapter: BrandPreferenceAdapter? = null
     private var rvBrands: RecyclerView? = null
     private var layoutManager: RecyclerView.LayoutManager? = null
@@ -160,7 +162,7 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
             startActivity(i)
         }
         }catch (e: Exception) {
-            Toast.makeText(requireContext(), "Please Install Instagram to continue chat", Toast.LENGTH_SHORT).show()
+            showErrorCookieBar("No Facebook Installed", "Please Install Facebook to continue chat")
         }
     }
 
@@ -173,7 +175,7 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
                 startActivity(i)
             }
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Please Install Instagram to continue chat", Toast.LENGTH_SHORT).show()
+            showErrorCookieBar("No Instagram Installed","Please Install Instagram to continue chat")
         }
 
     }
@@ -193,7 +195,7 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
                 startActivity(i)
             }
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Please Install WhatsApp to continue chat", Toast.LENGTH_SHORT).show()
+            showErrorCookieBar("No WhatsApp Installed","Please Install WhatsApp to continue chat")
         }
     }
 
@@ -243,5 +245,22 @@ class BrandPreferenceFragment : Fragment(), BrandPreferenceAdapter.ClickableIcon
             alert.show()
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        val mgr: View? = BrandPreferenceFragment().parentFragment?.view
+        if (mgr != null) {
+            val frag = FragmentManager.findFragment<Fragment>(mgr)
+            val fm = fragmentManager
+            fm!!.beginTransaction()
+                .remove(frag)
+                .commit()
+        }
+    }
+
+    override fun getFragmentBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): FragmentBrandPreferenceBinding = FragmentBrandPreferenceBinding.inflate(layoutInflater,container,false)
 
 }

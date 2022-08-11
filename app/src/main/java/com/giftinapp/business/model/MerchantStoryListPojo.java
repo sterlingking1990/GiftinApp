@@ -11,14 +11,16 @@ import java.util.ArrayList;
  public class MerchantStoryListPojo implements Serializable {
 
     public String merchantStatusId = "";
-    public String merchantStatusImageLink = "";
+    public String merchantStatusImageLink = null;
+    public String merchantStatusVideoLink = null;
+    public String videoArtWork = null;
     public String storyTag = "";
-    public String storyAudioLink = "";
+    public String storyAudioLink = null;
     public String mediaDuration = "0";
     public Boolean seen;
     public ArrayList<String> viewers;
     public StatusReachAndWorthPojo statusReachAndWorthPojo;
 
-    public MerchantStoryListPojo(){}
+    public MerchantStoryListPojo (){}
 
 }

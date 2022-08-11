@@ -67,6 +67,14 @@
 <!--        &lt;!&ndash; The color of the label when it is collapsed and the text field is active &ndash;&gt;-->
 <!--    </style>-->
 
+    <style name="dialog_style" parent="@android:style/Theme.Dialog">
+        <item name="android:windowAnimationStyle">@style/dialog_animation</item>
+    </style>
+
+    <style name="dialog_animation" parent="@android:style/Animation.Activity">
+        <item name="android:windowEnterAnimation">@anim/slide_in_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
+    </style>
     <style name="TextInputStyling" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
         <item name="boxStrokeColor">@color/tabColor</item>
     </style>

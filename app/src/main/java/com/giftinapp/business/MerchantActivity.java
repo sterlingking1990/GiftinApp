@@ -21,6 +21,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -47,6 +48,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.InstallStateUpdatedListener;
 import com.google.android.play.core.install.model.AppUpdateType;
 import com.google.android.play.core.install.model.InstallStatus;
 import com.google.android.play.core.install.model.UpdateAvailability;
@@ -71,9 +73,12 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class MerchantActivity extends AppCompatActivity {
+    private static final int MY_REQUEST_CODE = 103;
     BottomNavigationView bottomNavigation;
 
     public SessionManager sessionManager;
+
+    AppUpdateManager appUpdateManager;
 
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
@@ -110,27 +115,27 @@ public class MerchantActivity extends AppCompatActivity {
 
         MobileAds.initialize(this); {}
 
+        appUpdateManager = AppUpdateManagerFactory.create(this);
+        checkAndInstallUpdate();
+
+        InstallStateUpdatedListener updateListener = state -> {
+            if (state.installStatus() == InstallStatus.DOWNLOADED) {
+                popupSnackbarForCompleteUpdate();
+            }
+            if(state.installStatus() == InstallStatus.FAILED){
+                popUpSnackbarFailedUpdateInstall();
+            }
+            if(state.installStatus() == InstallStatus.INSTALLED){
+                popUpSnackbarForUpdatedInstalled();
+            }
+        };
+
+        appUpdateManager.registerListener(updateListener);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         PaystackSdk.initialize(getApplicationContext());
         // Returns an intent object that you use to check for an update.
-
-        AppUpdater appUpdater = new AppUpdater(this)
-                .setTitleOnUpdateAvailable("Update available")
-                .setContentOnUpdateAvailable("Check out the latest version for Brandible!")
-                .setTitleOnUpdateNotAvailable("Update not available")
-                .setContentOnUpdateNotAvailable("No update available. Check for updates again later!")
-                .setButtonUpdate("Update now?")
-                .setButtonUpdateClickListener((dialogInterface, i) -> MerchantActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + MerchantActivity.this.getPackageName()))))
-                .setButtonDismiss("Maybe later")
-                .setButtonDismissClickListener((dialogInterface, i) -> {
-
-                })
-                .setButtonDoNotShowAgain("Huh, not interested")
-                .setButtonDoNotShowAgainClickListener((dialogInterface, i) -> {
-
-                })
-                .setIcon(R.drawable.system_software_update) // Notification icon
-                .setCancelable(false); // Dialog could not be dismissable
-                appUpdater.start();
 
 
         sessionManager = new SessionManager(getApplicationContext());
@@ -186,6 +191,25 @@ public class MerchantActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 openWebView(remoteConfigUtil.getBrandLink());
+            }
+        });
+    }
+
+    private void checkAndInstallUpdate(){
+        com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                try {
+                    appUpdateManager.startUpdateFlowForResult(
+                            appUpdateInfo,
+                            AppUpdateType.FLEXIBLE,
+                            this,
+                            MY_REQUEST_CODE);
+                } catch (IntentSender.SendIntentException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -490,6 +514,7 @@ public class MerchantActivity extends AppCompatActivity {
                     mAuth.signOut();
                     sessionManager.clearData();
                     startActivity(new Intent(MerchantActivity.this,SignUpActivity.class));
+                    finish();
                     dialog.cancel();
 
                 });
@@ -552,10 +577,7 @@ public class MerchantActivity extends AppCompatActivity {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             try {
-                if(sessionManager.getCurrentFragment().equals("CustomerRewardStoriesFragment")){
-                    super.onBackPressed();
-                }
-                else {
+                if (!Objects.equals(sessionManager.getCurrentFragment(), "CustomerRewardStoriesFragment")) {
 
                     startActivity(new Intent(MerchantActivity.this, MerchantActivity.class));
                     super.onBackPressed();
@@ -564,8 +586,9 @@ public class MerchantActivity extends AppCompatActivity {
             catch (Exception e) {
                 //mAuth.signOut();
                 //sessionManager.clearData();
-                startActivity(new Intent(MerchantActivity.this, SignUpActivity.class));
-                finish();
+//                startActivity(new Intent(MerchantActivity.this, SignUpActivity.class));
+//                finish();
+                super.onBackPressed();
             }
 
         }
@@ -574,8 +597,22 @@ public class MerchantActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        appUpdateManager
+                .getAppUpdateInfo()
+                .addOnSuccessListener(appUpdateInfo -> {
+
+                    if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                        popupSnackbarForCompleteUpdate();
+                    }
+                });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -612,5 +649,38 @@ public class MerchantActivity extends AppCompatActivity {
 
                     }
                 });
+    }
+
+
+
+    private void popupSnackbarForCompleteUpdate() {
+        Snackbar snackbar =
+                Snackbar.make(findViewById(R.id.rl_activity_main),
+                        "An update has just been downloaded.",
+                        Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("RESTART", view -> appUpdateManager.completeUpdate());
+        snackbar.setActionTextColor(
+                getResources().getColor(R.color.whitesmoke));
+        snackbar.show();
+    }
+
+    private void popUpSnackbarFailedUpdateInstall(){
+        Snackbar snackbar =
+                Snackbar.make(findViewById(R.id.rl_activity_main),
+                        "Update Failed",
+                        Snackbar.LENGTH_INDEFINITE);
+        snackbar.setBackgroundTint(getResources().getColor(R.color.tabColorLight));
+        snackbar.setAction("RETRY", view -> checkAndInstallUpdate());
+        snackbar.setActionTextColor(
+                getResources().getColor(R.color.whitesmoke));
+        snackbar.show();
+    }
+
+    private void popUpSnackbarForUpdatedInstalled(){
+        Snackbar snackbar =
+                Snackbar.make(findViewById(R.id.rl_activity_main),
+                        "Update Installed",
+                        Snackbar.LENGTH_SHORT);
+        snackbar.show();
     }
 }

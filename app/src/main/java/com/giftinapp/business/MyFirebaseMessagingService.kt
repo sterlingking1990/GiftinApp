@@ -23,12 +23,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     var NOTIFICATION_CHANNEL_ID = "com.giftinapp.business"
     val NOTIFICATION_ID = 100
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        Log.e("message","Message Received ...");
+        Log.d("message","Message Received ...");
 
-        if (remoteMessage.data.size > 0) {
+        if (remoteMessage.data.isNotEmpty()) {
             val title = remoteMessage.data["title"]
             val body = remoteMessage.data["body"]
             showNotification(applicationContext, title, body)
@@ -41,8 +42,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
 
     override fun onNewToken(p0: String) {
-        super.onNewToken(p0)
-        Log.e("token","New Token")
+        Log.d("token", p0)
     }
 
 
@@ -52,8 +52,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             title: String?,
             message: String?
     ) {
-        val ii: Intent
-        ii = Intent(context, MainActivity::class.java)
+        val ii: Intent = Intent(context, MainActivity::class.java)
         ii.data = Uri.parse("custom://" + System.currentTimeMillis())
         ii.action = "actionstring" + System.currentTimeMillis()
         ii.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -105,7 +104,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     private fun getNotificationIcon(): Int {
         val useWhiteIcon =
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-        return if (useWhiteIcon) R.mipmap.ic_launcher else R.mipmap.ic_launcher
+            true
+        return if (useWhiteIcon) R.mipmap.ic_brandible_icon else R.mipmap.ic_brandible_icon
     }
 }

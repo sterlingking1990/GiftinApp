@@ -4,17 +4,17 @@
     <item
         android:id="@+id/navigation_set_reward_deal"
         android:icon="@drawable/ic_set_reward_status"
-        android:title="Set Brand Deal"/>
+        android:title="Set Brand Story"/>
 
 
     <item
         android:id="@+id/navigation_view_reward_deal"
         android:icon="@drawable/ic_view_reward_deal"
-        android:title="View Deals"/>
+        android:title="Brand Stories"/>
 
     <item android:id="@+id/navigation_merchant_follow_brands"
         android:icon="@drawable/ic_baseline_filter_tilt_shift_24"
-        android:title="Follow Brands"/>
+        android:title="Brands"/>
 
 <!--    <item-->
 <!--        android:id="@+id/navigation_view_rate_influencer"-->

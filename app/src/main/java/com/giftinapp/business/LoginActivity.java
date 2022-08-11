@@ -101,31 +101,28 @@ public class LoginActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(getApplicationContext());
 
-        etSignInPassword.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                v.performClick();
-                int RIGHT = 2;
-                if(event.getAction()==MotionEvent.ACTION_UP){
-                    if(event.getRawX()>=etSignInPassword.getRight() - etSignInPassword.getCompoundDrawables()[RIGHT].getBounds().width()){
-                        int selection = etSignInPassword.getSelectionEnd();
-                        if(isPasswordVisible){
-                            etSignInPassword.setCompoundDrawablesRelativeWithIntrinsicBounds(0,0, R.drawable.ic_password_toggle_off,0);
-                            etSignInPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                            isPasswordVisible=false;
-                        }
-                        else{
-                            etSignInPassword.setCompoundDrawablesRelativeWithIntrinsicBounds(0,0,R.drawable.ic_password_toggle,0);
-                            etSignInPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                            isPasswordVisible = true;
-                        }
-                        etSignInPassword.setSelection(selection);
-                        return true;
+        etSignInPassword.setOnTouchListener((v, event) -> {
+            v.performClick();
+            int RIGHT = 2;
+            if(event.getAction()==MotionEvent.ACTION_UP){
+                if(event.getRawX()>=etSignInPassword.getRight() - etSignInPassword.getCompoundDrawables()[RIGHT].getBounds().width()){
+                    int selection = etSignInPassword.getSelectionEnd();
+                    if(isPasswordVisible){
+                        etSignInPassword.setCompoundDrawablesRelativeWithIntrinsicBounds(0,0, R.drawable.ic_password_toggle_off,0);
+                        etSignInPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        isPasswordVisible=false;
                     }
+                    else{
+                        etSignInPassword.setCompoundDrawablesRelativeWithIntrinsicBounds(0,0,R.drawable.ic_password_toggle,0);
+                        etSignInPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                        isPasswordVisible = true;
+                    }
+                    etSignInPassword.setSelection(selection);
+                    return true;
                 }
-
-                return false;
             }
+
+            return false;
         });
     }
 
@@ -354,5 +351,6 @@ public class LoginActivity extends AppCompatActivity {
 //
 //
 //    }
+
 
 }

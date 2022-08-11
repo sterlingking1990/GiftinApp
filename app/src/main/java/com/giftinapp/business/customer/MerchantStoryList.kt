@@ -10,26 +10,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
 import com.giftinapp.business.business.SetRewardDeal
+import com.giftinapp.business.databinding.FragmentMerchantStoryListBinding
 import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.MerchantStoryPojo
+import com.giftinapp.business.model.StatusReachAndWorthPojo
 import com.giftinapp.business.model.StoryHeaderPojo
 import com.giftinapp.business.utility.SessionManager
 import com.giftinapp.business.utility.StorySession
+import com.giftinapp.business.utility.base.BaseFragment
+import com.giftinapp.business.utility.showBottomSheet
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.QuerySnapshot
 import java.io.Serializable
-import java.util.*
 
-class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
+open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(), MerchantStoryListAdapter.StoryClickable {
     lateinit var merchantStoryListAdapter:MerchantStoryListAdapter
 
     lateinit var merchantStoryListRecyclerView:RecyclerView
@@ -161,14 +164,18 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                                             eachList.getBoolean("seen")
                                                                         merchantStoryListPojo.storyTag =
                                                                             eachList.getString("storyTag")
-                                                                        merchantStoryListPojo.storyAudioLink = eachList.getString("storyAudioLink")
+                                                                        merchantStoryListPojo.storyAudioLink = eachList.getString("storyAudioLink")?:""
                                                                         merchantStoryListPojo.mediaDuration =
                                                                             eachList.getString("mediaDuration")
                                                                         merchantStoryListPojo.merchantStatusImageLink =
-                                                                            eachList.getString("merchantStatusImageLink")
+                                                                            eachList.getString("merchantStatusImageLink")?:""
+                                                                        merchantStoryListPojo.merchantStatusVideoLink = eachList.getString("merchantStatusVideoLink")?:""
+                                                                        merchantStoryListPojo.videoArtWork = eachList.getString("videoArtWork")?:""
+                                                                        merchantStoryListPojo.statusReachAndWorthPojo =
+                                                                            eachList.get("statusReachAndWorthPojo",StatusReachAndWorthPojo::class.java)
                                                                         //val merchantStoryListPojo = eachList.toObject(MerchantStoryListPojo::class.java)
-                                                                        merchantStoryListPojo.merchantStatusId =
-                                                                            eachList.id
+//                                                                        merchantStoryListPojo.merchantStatusId =
+//                                                                            eachList.id
                                                                         merchantStoryListPojos.add(
                                                                             merchantStoryListPojo
                                                                         )
@@ -192,7 +199,7 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                                                                         )
                                                                     } else {
                                                                         if (eachRes.id == sessionManager.getEmail()) {
-                                                                            showMessage(true)
+                                                                            showMessage()
                                                                             return@addOnCompleteListener
                                                                         }
                                                                     }
@@ -234,40 +241,51 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
 
                 }
         } else {
-            builder!!.setMessage("You need to be a verified user in other to view brand stories, promotions and deals so at to get rewards")
-                .setCancelable(false)
-                .setPositiveButton("Ok") { _: DialogInterface?, _: Int ->
+            showMessageDialog(title = "Not Verified", message = "You need to be a verified user in other to view brand stories, promotions and deals so at to get rewards",
+            disMissable = false, posBtnText = "Ok", listener = {
                     FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
                     pgLoading.visibility = View.GONE
-                }
-            val alert = builder!!.create()
-            alert.show()
+                })
+//            builder!!.setMessage("")
+//                .setCancelable(false)
+//                .setPositiveButton("Ok") { _: DialogInterface?, _: Int ->
+//                    FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
+//                    pgLoading.visibility = View.GONE
+//                }
+//            val alert = builder!!.create()
+//            alert.show()
         }
     }
 
     private fun checkFollowingRate(){
         if(sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="customer"){
             pgLoading.visibility = View.GONE
-                    builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
-                            .setCancelable(false)
-                            .setPositiveButton("OK") { dia: DialogInterface?, _: Int ->
-                                // take user to rewarding merchants
-                                openFragmentForInfluencer(BrandPreferenceFragment())
-                            }
-                    val alert = builder!!.create()
-                    alert.show()
+            showMessageDialog(title = "Follow Brands", message = "You are not following any brands yet,. You will be directed to list of Brands to follow",
+                hasNegativeBtn = false, posBtnText = "OK", disMissable = false, listener = {openFragmentForInfluencer(BrandPreferenceFragment())}
+            )
+//                    builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
+//                            .setCancelable(false)
+//                            .setPositiveButton("OK") { dia: DialogInterface?, _: Int ->
+//                                // take user to rewarding merchants
+//                                openFragmentForInfluencer(BrandPreferenceFragment())
+//                            }
+//                    val alert = builder!!.create()
+//                    alert.show()
                 }
                 else if(sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="business"){
                     //this person is a brand and needs to follow brands to view status
                     pgLoading.visibility = View.GONE
-                    builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
-                            .setCancelable(false)
-                            .setPositiveButton("OK") { d: DialogInterface?, _: Int ->
-                                // take user to rewarding merchants
-                                openFragment(BrandPreferenceFragment())
-                            }
-                    val alert = builder!!.create()
-                    alert.show()
+            showMessageDialog(title = "Follow Brands", message = "You are not following any brands yet,. You will be directed to list of Brands to follow",
+                hasNegativeBtn = false, posBtnText = "OK", disMissable = false, listener = {openFragment(BrandPreferenceFragment())}
+            )
+//                    builder!!.setMessage("")
+//                            .setCancelable(false)
+//                            .setPositiveButton("OK") { d: DialogInterface?, _: Int ->
+//                                // take user to rewarding merchants
+//                                openFragment(BrandPreferenceFragment())
+//                            }
+//                    val alert = builder!!.create()
+//                    alert.show()
                 }
     }
 
@@ -295,21 +313,31 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                     ?.commit()
     }
 
+    override fun onReviewClicked(
+        merchantStoryList: ArrayList<MerchantStoryListPojo>,
+        storyOwner: String
+    ) {
 
-    fun showMessage(isDisplay: Boolean) {
+        showBottomSheet(ReviewFragment.newInstance(storyOwner))
+        //Toast.makeText(requireContext(),"I am going to take user to reviews and ability to leave a review sticker",Toast.LENGTH_LONG).show()
+    }
 
-        if(isDisplay) {
-            builder!!.setMessage("When you publish status as a brand, it will be displayed here. Do you want to Publish your reward status now so you can begin engaging customers for more buy?")
-                    .setCancelable(false)
-                    .setPositiveButton("Yes") { dialogInterface: DialogInterface, i: Int ->
-                        openFragment(SetRewardDeal())
-                        dialogInterface.dismiss()
-                    }
-                    .setNegativeButton("Later") { _: DialogInterface, _ ->
-                    }
-            val alert = builder!!.create()
-            alert.show()
-        }
+
+    private fun showMessage() {
+
+            showMessageDialog("When you publish status as a brand, it will be displayed here. Do you want to Publish your reward status now so you can begin engaging customers for more buy?", title = "Publish Brand Story",
+                hasNegativeBtn = true, negbtnText = "Later", posBtnText = "Yes",listener = {openFragment(SetRewardDeal())},disMissable = false
+            )
+//            builder!!.setMessage()
+//                    .setCancelable(false)
+//                    .setPositiveButton("Yes") { dialogInterface: DialogInterface, i: Int ->
+//                        openFragment(SetRewardDeal())
+//                        dialogInterface.dismiss()
+//                    }
+//                    .setNegativeButton("Later") { _: DialogInterface, _ ->
+//                    }
+//            val alert = builder!!.create()
+//            alert.show()
 
     }
 
@@ -322,12 +350,30 @@ class MerchantStoryList : Fragment(), MerchantStoryListAdapter.StoryClickable {
                 .commit()
     }
 
-    fun openFragmentForInfluencer(fragment: Fragment?){
+    private fun openFragmentForInfluencer(fragment: Fragment?){
         val fm = fragmentManager
         fm!!.beginTransaction()
                 .replace(R.id.fr_game, fragment!!)
                 .addToBackStack(null)
                 .commit()
     }
+
+    override fun onPause() {
+        super.onPause()
+        val mgr: View? = MerchantStoryList().parentFragment?.view
+        if(mgr != null) {
+            val frag =FragmentManager.findFragment<Fragment>(mgr)
+            val fm = fragmentManager
+            fm!!.beginTransaction()
+                .remove(frag)
+                .commit()
+        }
+
+    }
+
+    override fun getFragmentBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): FragmentMerchantStoryListBinding = FragmentMerchantStoryListBinding.inflate(layoutInflater,container,false)
 
 }

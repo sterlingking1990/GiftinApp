@@ -24,6 +24,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.Calendar;
+import java.util.Objects;
 
 import co.paystack.android.Paystack;
 import co.paystack.android.PaystackSdk;
@@ -67,7 +68,7 @@ public class WalletInfo extends Fragment {
 
         spFundWalletRange=view.findViewById(R.id.sp_wallet_range);
 
-        sessionManager = new SessionManager(getContext());
+        sessionManager = new SessionManager(requireContext());
 
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, getYears());
@@ -95,7 +96,7 @@ public class WalletInfo extends Fragment {
         merchantWalletPojo.merchant_wallet_amount= (long) (walletAmountFromDb + amountInKobo);
 
 
-        db.collection("merchants").document(sessionManager.getEmail()).collection("reward_wallet").document("deposit").set(merchantWalletPojo);
+        db.collection("merchants").document(Objects.requireNonNull(sessionManager.getEmail())).collection("reward_wallet").document("deposit").set(merchantWalletPojo);
 
     }
 
@@ -109,7 +110,7 @@ public class WalletInfo extends Fragment {
                 .build();
         db.setFirestoreSettings(settings);
 
-        db.collection("merchants").document(sessionManager.getEmail()).collection("reward_wallet").document("deposit").get()
+        db.collection("merchants").document(Objects.requireNonNull(sessionManager.getEmail())).collection("reward_wallet").document("deposit").get()
                 .addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
                         DocumentSnapshot result = task.getResult();
