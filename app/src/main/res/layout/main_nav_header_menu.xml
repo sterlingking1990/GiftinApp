@@ -24,7 +24,8 @@
         android:id="@+id/nav_header_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="16dp"
+        android:paddingBottom="10dp"
+        android:paddingTop="5dp"
         android:text="@string/influenca_name_and_status"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 <!--    -->

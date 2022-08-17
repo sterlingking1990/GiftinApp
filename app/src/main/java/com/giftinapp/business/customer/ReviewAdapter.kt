@@ -3,12 +3,13 @@ package com.giftinapp.business.customer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
 import com.giftinapp.business.model.ReviewModel
-import kotlinx.android.synthetic.main.single_item_review.view.*
+import org.w3c.dom.Text
 
-class ReviewAdapter(val clickableReview: ClickableReview):RecyclerView.Adapter<ReviewAdapter.ViewItemHolder>() {
+class ReviewAdapter(private val clickableReview: ClickableReview):RecyclerView.Adapter<ReviewAdapter.ViewItemHolder>() {
 
     private var reviews= arrayListOf<ReviewModel>()
 
@@ -26,13 +27,18 @@ class ReviewAdapter(val clickableReview: ClickableReview):RecyclerView.Adapter<R
 
     override fun onBindViewHolder(holder: ViewItemHolder, position: Int) {
         holder.itemView.apply {
-            this.reviewerUsername.text = reviews[position].reviewerUsername
-            this.tvReviewDate.text = reviews[position].reviewDate.toString()
-            this.tvReview.text = reviews[position].review
+            val reviewerUsername = this.findViewById<TextView>(R.id.reviewerUsername)
+            val tvReviewDate = this.findViewById<TextView>(R.id.tvReviewDate)
+            val tvReview = this.findViewById<TextView>(R.id.tvReview)
+            val tvReviewFeedback = this.findViewById<TextView>(R.id.tvReviewFeedback)
+
+            reviewerUsername.text = reviews[position].reviewerUsername
+            tvReviewDate.text = reviews[position].reviewDate.toString()
+            tvReview.text = reviews[position].review
             if(reviews[position].feedback.isNullOrEmpty()){
-                this.tvReviewFeedback.visibility= View.GONE
+                tvReviewFeedback.visibility= View.GONE
             }else {
-                this.tvReviewFeedback.text = reviews[position].feedback
+                tvReviewFeedback.text = reviews[position].feedback
             }
             this.setOnClickListener {
                 clickableReview.allowFeedbackTo(reviews[position].user)

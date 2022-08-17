@@ -2,7 +2,6 @@ package com.giftinapp.business.customer
 
 import android.content.DialogInterface
 import android.content.Intent
-import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,34 +10,29 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.giftinapp.business.BuildConfig
 import com.giftinapp.business.MainActivity
 import com.giftinapp.business.R
+import com.giftinapp.business.databinding.FragmentCashoutBinding
 import com.giftinapp.business.model.*
-import com.giftinapp.business.network.cashoutmodel.DataXXX
 import com.giftinapp.business.network.cashoutmodel.InitiateTransferRequestModel
 import com.giftinapp.business.network.cashoutmodel.TransferModel
 import com.giftinapp.business.network.viewmodel.cashoutviewmodel.*
 import com.giftinapp.business.utility.*
+import com.giftinapp.business.utility.base.BaseFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.jakewharton.rxbinding2.view.enabled
 import com.synnapps.carouselview.CarouselView
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_cashout.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.math.floor
 import kotlin.math.truncate
 
 @AndroidEntryPoint
-class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
+class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnItemSelectedListener {
+    private lateinit var binding: FragmentCashoutBinding
+
     private val getBanksViewModel:GetBanksViewModel by viewModels()
     private val verifyAccountViewModel:VerifyAccountViewModel by viewModels()
     private val initiateTransferViewModel:InitiateTransferViewModel by viewModels()
@@ -64,45 +58,6 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
     var amountLimitToWithdraw = 1000.0
 
     private lateinit var reference:String
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
-
-        val view = inflater.inflate(R.layout.fragment_cashout, container, false)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-//        arrayBankListAdapter = ArrayAdapter(requireContext(),R.layout.single_bank_item,onlyBanks)
-
-        remoteConfigUtil = RemoteConfigUtil()
-        rewardToRbcBase = remoteConfigUtil.rewardToBRCBase().asDouble()
-        amountLimitToWithdraw = remoteConfigUtil.getWithdrawLimit().asDouble()
-
-        sessionManager = SessionManager(requireContext())
-        sessionManager.setCashoutAmount(0.0)
-        loadAmountToCashOut()
-
-        bank_spinner.onItemSelectedListener = this
-        //bankListView.isEnabled = true
-
-       // bankListView.setText("loading banks ...")
-
-        builder = AlertDialog.Builder(requireContext())
-
-        fetchBanks()
-
-        handleObservers()
-
-        disableOnLoad()
-
-        handleClicks()
-
-
-    }
 
     private fun fetchBanks() {
         getBanksViewModel.getBankList()
@@ -114,13 +69,13 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
             Toast.makeText(requireContext(), "Sorry you dont have enough cash to cash out, you should have above 250 BrC before cashout", Toast.LENGTH_LONG).show()
         }
         else{
-            sliderAmountToCashout.isEnabled = true
-            sliderAmountToCashout.valueTo = (totalAmountToCashOut.toDouble().div(rewardToRbcBase)).toFloat()
-            sliderAmountToCashout.valueFrom = ((totalAmountToCashOut.toDouble().div(rewardToRbcBase))/2.toFloat()).toFloat()
-            sliderAmountToCashout.value = (totalAmountToCashOut.toDouble().div(rewardToRbcBase)).toFloat()
-            sliderAmountToCashout.stepSize = ((totalAmountToCashOut.toDouble().div(rewardToRbcBase))/2.toFloat()).toFloat()
+            binding.sliderAmountToCashout.isEnabled = true
+            binding.sliderAmountToCashout.valueTo = (totalAmountToCashOut.toDouble().div(rewardToRbcBase)).toFloat()
+            binding.sliderAmountToCashout.valueFrom = ((totalAmountToCashOut.toDouble().div(rewardToRbcBase))/2.toFloat()).toFloat()
+            binding.sliderAmountToCashout.value = (totalAmountToCashOut.toDouble().div(rewardToRbcBase)).toFloat()
+            binding.sliderAmountToCashout.stepSize = ((totalAmountToCashOut.toDouble().div(rewardToRbcBase))/2.toFloat()).toFloat()
 
-            tvAmountToCashout.text = resources.getString(R.string.amount_to_cashout, sliderAmountToCashout.value.toString())
+            binding.tvAmountToCashout.text = resources.getString(R.string.amount_to_cashout, binding.sliderAmountToCashout.value.toString())
 
         }
     }
@@ -163,16 +118,16 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     private fun disableOnLoad(){
-        fbProcessCashout.isEnabled = false
-        sliderAmountToCashout.isEnabled = false
+        binding.fbProcessCashout.isEnabled = false
+        binding.sliderAmountToCashout.isEnabled = false
 
     }
 
 
     private fun handleClicks(){
 
-        btnVerifyAccount.setOnClickListener {
-            accountNumber = et_account_number.text.toString()
+        binding.btnVerifyAccount.setOnClickListener {
+            accountNumber = binding.etAccountNumber.text.toString()
             if(accountNumber.isEmpty() || bankCode.isNullOrEmpty()){
                 Toast.makeText(requireContext(), "Bank and Account Number must be provided", Toast.LENGTH_LONG).show()
             }
@@ -181,11 +136,11 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
             }
         }
 
-        sliderAmountToCashout.addOnChangeListener { slider, value, fromUser ->
-            tvAmountToCashout.text = resources.getString(R.string.amount_to_cashout, value.toString())
+        binding.sliderAmountToCashout.addOnChangeListener { slider, value, fromUser ->
+            binding.tvAmountToCashout.text = resources.getString(R.string.amount_to_cashout, value.toString())
         }
 
-        fbProcessCashout.setOnClickListener {
+        binding.fbProcessCashout.setOnClickListener {
             initiateTransfer()
         }
 
@@ -193,7 +148,7 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private fun initiateTransfer(){
         val initiateTransferRequest = bankCode?.let {
-            InitiateTransferRequestModel("nuban", et_AccountName.text.toString(), et_account_number.text.toString(),
+            InitiateTransferRequestModel("nuban", binding.etAccountName.text.toString(), binding.etAccountNumber.text.toString(),
                 it, "NGN")
         }
         if (initiateTransferRequest != null) {
@@ -202,7 +157,7 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     private fun updateInfluencerBalance(){
-        val amountToOffsetLong: Float =sliderAmountToCashout.value
+        val amountToOffsetLong: Float = binding.sliderAmountToCashout.value
 
         var amountToOffset:Double = amountToOffsetLong.toDouble()
 
@@ -253,7 +208,7 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
 
     private fun updateCustomersRedeemedRecord(){
-        val amountToOffsetLong: Float =sliderAmountToCashout.value
+        val amountToOffsetLong: Float = binding.sliderAmountToCashout.value
 
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
@@ -317,16 +272,16 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
             if (it != null) {
                 when (it.status) {
                     Resource.Status.LOADING -> {
-                        progress_bar.visible()
-                        dropdown.gone()
+                        binding.progressBar.visible()
+                        binding.dropdown.gone()
                     }
                     Resource.Status.SUCCESS -> {
-                        dropdown.visible()
-                        progress_bar.gone()
+                        binding.dropdown.visible()
+                        binding.progressBar.gone()
                         loadBankSpinner(it.data)
                     }
                     Resource.Status.ERROR -> {
-                        progress_bar.gone()
+                        binding.progressBar.gone()
                         Toast.makeText(
                             requireContext(),
                             "Unable to fetch banks",
@@ -341,20 +296,20 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
             if(it!=null) {
                 when (it.status) {
                     Resource.Status.LOADING -> {
-                        btnVerifyAccount.text = "Verifying..."
-                        btnVerifyAccount.isEnabled = false
+                        binding.btnVerifyAccount.text = "Verifying..."
+                        binding.btnVerifyAccount.isEnabled = false
                     }
 
                     Resource.Status.SUCCESS -> {
                         if (it.data != null) {
                             val accountName = it.data.data.accountName
-                            et_AccountName.setText(accountName)
-                            btnVerifyAccount.text = "Verify Account"
-                            btnVerifyAccount.isEnabled = true
+                            binding.etAccountName.setText(accountName)
+                            binding.btnVerifyAccount.text = "Verify Account"
+                            binding.btnVerifyAccount.isEnabled = true
                             checkIfCanCashOut()
                             if (totalAmountToCashOut.toInt() >= 1000) {
-                                fbProcessCashout.isEnabled = true
-                                fbProcessCashout.setBackgroundColor(R.color.whitesmoke)
+                                binding.fbProcessCashout.isEnabled = true
+                                binding.fbProcessCashout.setBackgroundColor(R.color.whitesmoke)
 
                             }
                         }
@@ -366,8 +321,8 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
                             "Unable to verify account number",
                             Toast.LENGTH_LONG
                         ).show()
-                        btnVerifyAccount.isEnabled = true
-                        btnVerifyAccount.text = "Verify Account"
+                        binding.btnVerifyAccount.isEnabled = true
+                        binding.btnVerifyAccount.text = "Verify Account"
                     }
                 }
             }
@@ -503,7 +458,7 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private fun proceedToTransfer(){
         Log.d("RecipientCode",recipientCode)
         Log.d("AuthKey",BuildConfig.PSTACK_TEST_AUTHKEY)
-        val amount = truncate(sliderAmountToCashout.value).toInt()*100
+        val amount = truncate(binding.sliderAmountToCashout.value).toInt()*100
         Log.d("Amount",amount.toString())
         val transferRequest = TransferModel("balance", amount.toString(), recipientCode, "Brandible cashout")
         transferViewModel.transferToBank("Bearer ${BuildConfig.PSTACK_TEST_AUTHKEY}", transferRequest)
@@ -534,7 +489,7 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
         )
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        bank_spinner.adapter = adapter
+        binding.bankSpinner.adapter = adapter
     }
 
     override fun onItemSelected(parent: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
@@ -549,8 +504,41 @@ class CashoutFragment : Fragment(), AdapterView.OnItemSelectedListener {
     override fun onResume() {
         super.onResume()
         val carousel = activity?.findViewById<CarouselView>(R.id.carouselView)
-        carousel?.isVisible= false
+        carousel?.visibility= View.GONE
 
+    }
+
+    override fun getFragmentBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): FragmentCashoutBinding {
+        binding = FragmentCashoutBinding.inflate(layoutInflater,container,false)
+
+
+        remoteConfigUtil = RemoteConfigUtil()
+        rewardToRbcBase = remoteConfigUtil.rewardToBRCBase().asDouble()
+        amountLimitToWithdraw = remoteConfigUtil.getWithdrawLimit().asDouble()
+
+        sessionManager = SessionManager(requireContext())
+        sessionManager.setCashoutAmount(0.0)
+        loadAmountToCashOut()
+
+        binding.bankSpinner.onItemSelectedListener = this
+        //bankListView.isEnabled = true
+
+        // bankListView.setText("loading banks ...")
+
+        builder = AlertDialog.Builder(requireContext())
+
+        fetchBanks()
+
+        handleObservers()
+
+        disableOnLoad()
+
+        handleClicks()
+
+        return binding
     }
 
 }

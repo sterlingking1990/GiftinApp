@@ -468,11 +468,11 @@ public class GiftACustomerFragment extends Fragment {
     }
 
     public void openFragment(Fragment fragment) {
-        FragmentManager fm = getFragmentManager();
-        fm.beginTransaction()
-                .replace(R.id.fr_layout_merchant, fragment)
-                .addToBackStack(null)
-                .commit();
+//        FragmentManager fm = getFragmentManager();
+//        fm.beginTransaction()
+//                .replace(R.id.fr_layout_merchant, fragment)
+//                .addToBackStack(null)
+//                .commit();
     }
 
     public void checkIfSocialInfoExist(String email) {

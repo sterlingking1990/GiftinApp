@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
@@ -25,7 +26,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlinx.android.synthetic.main.single_item_status_list.view.*
 
 class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.Adapter<MerchantStoryListAdapter.ViewHolder>(), Filterable {
 
@@ -63,6 +63,12 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 val frontImage = findViewById<CircleImageView>(R.id.imgFrontImage)
                 val imgReview = findViewById<ImageView>(R.id.imgReview)
                 val tvReviewCount = findViewById<TextView>(R.id.tvReviewCount)
+                val tvBrcWorth = findViewById<TextView>(R.id.tvBrcWorth)
+
+                val anim = AnimationUtils.loadAnimation(context, R.anim.text_view_animation)
+                imgReview.animation = anim
+
+                tvBrcWorth.animation = anim
 
                 val shimmer = Shimmer.ColorHighlightBuilder()
                         .setBaseColor(Color.parseColor("#f3f3f3"))
@@ -91,19 +97,19 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                     val totalWorth = merchantStories[position].merchantStoryList.sumOf {
                         it.statusReachAndWorthPojo.status_worth
                     }
-                    this.tvBrcWorth.text = (totalWorth/rewardToBaseBrc).toString() + "BrC"
+                    tvBrcWorth.text = (totalWorth/rewardToBaseBrc).toString() + "BrC"
                     getNumberOfReviews(tvReviewCount,merchantStoryOwnerEmailId)
                    // Log.d("TotalWorth",totalWorth.toString())
                     merchantName.text = if (isHasStoryHeader && merchantStories[position].merchantId == sessionManager.getEmail()) (Html.fromHtml("<b>My Reward Deal</b>")) else merchantStories[position].merchantId
                     circularStatusView.setPortionsCount(merchantStories[position].merchantStoryList.size)
                     if(!merchantStories[position].merchantStoryList[0].merchantStatusImageLink.isNullOrEmpty()) {
-                        Picasso.get()
-                            .load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink)
-                            .placeholder(shimmerDrawable).into(frontImage)
+                            Picasso.get()
+                                .load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink)
+                                .into(frontImage)
                     }else{
                         Picasso.get()
                             .load(merchantStories[position].merchantStoryList[0].videoArtWork)
-                            .placeholder(shimmerDrawable).into(frontImage)
+                            .into(frontImage)
                     }
 
                     frontImage.setOnClickListener {
@@ -132,6 +138,9 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
     interface StoryClickable{
         fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, storyOwner:String)
         fun onReviewClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>,storyOwner:String){
+
+        }
+        fun onStoryStarred(merchantStoryList: ArrayList<MerchantStoryListPojo>){
 
         }
     }

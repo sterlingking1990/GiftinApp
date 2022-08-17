@@ -9,42 +9,6 @@
         android:background="@drawable/recyclerviewgradient"
         tools:context="com.giftinapp.business.MainActivity">
 
-
-            <com.synnapps.carouselview.CarouselView
-                android:id="@+id/carouselView"
-                android:layout_marginTop="90dp"
-                android:layout_width="match_parent"
-                android:layout_height="600dp"
-                app:fillColor="@color/tabColor"
-                app:pageColor="#00000000"
-                app:radius="6dp"
-                app:indicatorVisibility="gone"
-                app:slideInterval="3000"
-                app:strokeColor="#FF777777"
-                app:strokeWidth="1dp" />
-
-    <com.skydoves.elasticviews.ElasticButton
-        android:id="@+id/btnExploreBrand"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/carouselView"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="20dp"
-        android:fontFamily="sans-serif-light"
-        android:layout_alignBottom="@id/drawer_layout"
-        android:layout_centerInParent="true"
-        android:background="@color/cardview_dark_background"
-        android:gravity="center"
-        android:translationZ="0dp"
-        android:text="Explore Brand"
-        app:button_cornerRadius="4dp"
-        app:button_duration="250"
-        app:button_scale="0.87"
-        android:elevation="100dp"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"/>
-
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
@@ -52,10 +16,35 @@
         android:translationZ="2dp"
         android:fitsSystemWindows="true">
 
-        <FrameLayout
-            android:id="@+id/fr_game"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <com.synnapps.carouselview.CarouselView
+                android:id="@+id/carouselView"
+                android:layout_width="match_parent"
+                android:layout_height="600dp"
+                app:fillColor="#FFFFFFFF"
+                app:indicatorVisibility="gone"
+                app:pageColor="#00000000"
+                app:radius="6dp"
+                app:slideInterval="3000"
+                app:strokeColor="#FF777777"
+                app:strokeWidth="1dp"/>
+
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/main_act_nav_host_fragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/main_act_navgraph"
+            tools:layout_editor_absoluteX="22dp"
+            tools:layout_editor_absoluteY="55dp"
+            />
+        </LinearLayout>
 
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/nav_view"

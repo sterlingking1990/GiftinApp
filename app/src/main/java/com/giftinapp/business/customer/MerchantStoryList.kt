@@ -1,6 +1,7 @@
 package com.giftinapp.business.customer
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,9 +14,12 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
+import com.giftinapp.business.SignUpActivity
 import com.giftinapp.business.business.SetRewardDeal
 import com.giftinapp.business.databinding.FragmentMerchantStoryListBinding
 import com.giftinapp.business.model.MerchantStoryListPojo
@@ -261,7 +265,10 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
         if(sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="customer"){
             pgLoading.visibility = View.GONE
             showMessageDialog(title = "Follow Brands", message = "You are not following any brands yet,. You will be directed to list of Brands to follow",
-                hasNegativeBtn = false, posBtnText = "OK", disMissable = false, listener = {openFragmentForInfluencer(BrandPreferenceFragment())}
+                hasNegativeBtn = false, posBtnText = "OK", disMissable = false, listener = {
+                    findNavController().navigate(R.id.brandPreferenceFragment)
+                    //openFragmentForInfluencer(BrandPreferenceFragment())
+                }
             )
 //                    builder!!.setMessage("You are not following any brands yet,. You will be directed to list of Brands to follow")
 //                            .setCancelable(false)
@@ -276,7 +283,10 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
                     //this person is a brand and needs to follow brands to view status
                     pgLoading.visibility = View.GONE
             showMessageDialog(title = "Follow Brands", message = "You are not following any brands yet,. You will be directed to list of Brands to follow",
-                hasNegativeBtn = false, posBtnText = "OK", disMissable = false, listener = {openFragment(BrandPreferenceFragment())}
+                hasNegativeBtn = false, posBtnText = "OK", disMissable = false, listener = {
+                    findNavController().navigate(R.id.brandPreferenceFragment)
+                    //openFragment(BrandPreferenceFragment())
+                }
             )
 //                    builder!!.setMessage("")
 //                            .setCancelable(false)
@@ -291,26 +301,24 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
 
     override fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, storyOwner: String) {
 
-            val fragment = CustomerRewardStories()
-            val fm = fragmentManager
+           // val fragment = CustomerRewardStories()
+            //val fm = fragmentManager
             val arguments = Bundle()
 
-            var fragmentType = R.id.fr_game
+            //var fragmentType = R.id.fr_game
             arguments.putSerializable("storyList", merchantStoryList as Serializable)
             arguments.putSerializable("allStory", allList as Serializable)
             arguments.putInt("currentStoryPos", currentStoryPos)
             arguments.putString("storyOwner", storyOwner)
             arguments.putBoolean("hasHeader", isStoryHasHeader)
             if (isStoryHasHeader || storyOwner == sessionManager.getEmail()) {
-                fragmentType = R.id.fr_layout_merchant
+                //fragmentType = R.id.fr_layout_merchant
+                Log.d("Amhere", "Am here before")
+                findNavController().navigate(R.id.customerRewardStories2,arguments)
+            }else{
+                findNavController().navigate(R.id.customerRewardStories, arguments)
             }
-            fragment.arguments = arguments
 
-            CustomerRewardStories().arguments = arguments
-            fm?.beginTransaction()
-                    ?.replace(fragmentType, fragment)
-                    ?.addToBackStack(null)
-                    ?.commit()
     }
 
     override fun onReviewClicked(
@@ -326,7 +334,11 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
     private fun showMessage() {
 
             showMessageDialog("When you publish status as a brand, it will be displayed here. Do you want to Publish your reward status now so you can begin engaging customers for more buy?", title = "Publish Brand Story",
-                hasNegativeBtn = true, negbtnText = "Later", posBtnText = "Yes",listener = {openFragment(SetRewardDeal())},disMissable = false
+                hasNegativeBtn = true, negbtnText = "Later", posBtnText = "Yes",listener = {
+                    findNavController().navigate(R.id.setRewardDeal)
+                    //openFragment(SetRewardDeal())
+                                                                                           }
+                ,disMissable = false
             )
 //            builder!!.setMessage()
 //                    .setCancelable(false)
@@ -342,34 +354,36 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
     }
 
 
-    fun openFragment(fragment: Fragment?) {
-        val fm = fragmentManager
-        fm!!.beginTransaction()
-                .replace(R.id.fr_layout_merchant, fragment!!)
-                .addToBackStack(null)
-                .commit()
-    }
+//    fun openFragment(fragment: Fragment?) {
+//        val fm = fragmentManager
+//        fm!!.beginTransaction()
+//                .replace(R.id.fr_layout_merchant, fragment!!)
+//                .addToBackStack(null)
+//                .commit()
+//    }
 
-    private fun openFragmentForInfluencer(fragment: Fragment?){
-        val fm = fragmentManager
-        fm!!.beginTransaction()
-                .replace(R.id.fr_game, fragment!!)
-                .addToBackStack(null)
-                .commit()
-    }
+    //private fun openFragmentForInfluencer(fragment: Fragment?){
+//        val fm = fragmentManager
+//        fm!!.beginTransaction()
+//                .replace(R.id.fr_game, fragment!!)
+//                .addToBackStack(null)
+//                .commit()
+    //}
 
-    override fun onPause() {
-        super.onPause()
-        val mgr: View? = MerchantStoryList().parentFragment?.view
-        if(mgr != null) {
-            val frag =FragmentManager.findFragment<Fragment>(mgr)
-            val fm = fragmentManager
-            fm!!.beginTransaction()
-                .remove(frag)
-                .commit()
-        }
-
-    }
+//    override fun onPause() {
+//        super.onPause()
+//        Log.d("OnPauseCalled","OnPauseCalled")
+//        try {
+//            if(findNavController().currentDestination?.id!=R.id.customerRewardStories) {
+//                activity?.finish()
+//            }
+//            if(findNavController().currentDestination?.id!=R.id.customerRewardStories2){
+//                activity?.finish()
+//            }
+//        }catch (e:Exception){
+//            Log.d("MerchantStoryListPause",e.message.toString())
+//        }
+//    }
 
     override fun getFragmentBinding(
         inflater: LayoutInflater,

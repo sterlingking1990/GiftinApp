@@ -219,12 +219,12 @@ public class MyGiftCartFragment extends Fragment implements MyGiftCartAdapter.My
     }
 
     public void openFragment(Fragment fragment) {
-        FragmentManager fm = getFragmentManager();
-        assert fm != null;
-        fm.beginTransaction()
-                .replace(R.id.fr_game, fragment)
-                .addToBackStack(null)
-                .commit();
+//        FragmentManager fm = getFragmentManager();
+//        assert fm != null;
+//        fm.beginTransaction()
+//                .replace(R.id.fr_game, fragment)
+//                .addToBackStack(null)
+//                .commit();
     }
 
     @Override

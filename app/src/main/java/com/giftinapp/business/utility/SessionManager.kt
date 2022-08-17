@@ -34,6 +34,10 @@ class SessionManager(context: Context) {
 
         const val TOTAL_REFERRED = "total_referred"
 
+        const val JUST_SIGNED_UP = "just_signed_up"
+
+        const val SHOW_EXPLORE_TIP = "show_explore_tip"
+
     }
 
     /**
@@ -44,6 +48,21 @@ class SessionManager(context: Context) {
         editor.putString(USER_TOKEN, token)
         editor.apply()
     }
+
+    fun setJustSignedUp(justSignedUp:Boolean){
+        val editor = prefs.edit()
+        editor.putBoolean(JUST_SIGNED_UP,true)
+        editor.apply()
+    }
+
+    fun setShowExploreTip(showTip:Boolean){
+        val editor = prefs.edit()
+        editor.putBoolean(SHOW_EXPLORE_TIP,true)
+        editor.apply()
+    }
+
+    fun willShowExploreTip():Boolean = prefs.getBoolean(SHOW_EXPLORE_TIP,true)
+
 
 
 

@@ -5,9 +5,6 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.media.Image
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -19,14 +16,13 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.core.content.ContextCompat
-import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.navigation.fragment.findNavController
 import com.facebook.ads.AdSettings
 import com.facebook.ads.AudienceNetworkAds
 import com.giftinapp.business.R
@@ -42,21 +38,19 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.fragment_customer_reward_stories.view.*
-import kotlinx.android.synthetic.main.single_video_layout.*
 import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @AndroidEntryPoint
-open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBinding>() {
+class CustomerRewardStories : Fragment() {
+    private lateinit var binding: FragmentCustomerRewardStoriesBinding
     private val playbackStateListener: Player.Listener = playbackStateListener()
     private var videoIsReady = false
 
@@ -79,8 +73,6 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
     var audioStoryLink:String? = null
     var progressMax = mutableListOf<Int>()
 
-    lateinit var ll_status:FrameLayout;
-    lateinit var ll_progress_bar:LinearLayout;
     var mDisposable: Disposable? = null
     var mCurrentProgress: Long = 0
     var mCurrentIndex: Int = 0
@@ -151,33 +143,25 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_customer_reward_stories, container, false)
+
+        binding = FragmentCustomerRewardStoriesBinding.inflate(layoutInflater,container,false)
+
+        return binding.root
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        player = ExoPlayer.Builder(requireContext()).build()
+        val anim = AnimationUtils.loadAnimation(requireContext(), R.anim.text_view_animation)
 
-        ll_status = view.findViewById(R.id.ll_status)
-        ll_progress_bar = view.findViewById(R.id.ll_progress_bar)
-
-        tvRewardStoryTag = view.findViewById(R.id.tvRewardStatusTag)
-
-        imgChatWithBusiness = view.findViewById(R.id.imgChatWithBusiness)
-
-        tvNumberOfViewers = view.findViewById(R.id.tvNumberOfViewers)
-
-        tvLikeBrandStory = view.findViewById(R.id.tvLikeBrandStory)
-
-        val anim = AnimationUtils.loadAnimation(requireContext(),R.anim.text_view_animation)
-
-        tvLikeBrandStory.setOnClickListener {
-            tvLikeBrandStory.startAnimation(anim)
+        binding.tvLikeBrandStory.setOnClickListener {
+            binding.tvLikeBrandStory.startAnimation(anim)
             likeStory(mCurrentIndex)
         }
 
-        ll_status.setOnTouchListener(onTouchListener)
+        binding.llStatus.setOnTouchListener(onTouchListener)
 
-        imgChatWithBusiness.setOnClickListener {
+        binding.imgChatWithBusiness.setOnClickListener {
             openChat()
         }
 
@@ -188,6 +172,7 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
         setImageStatusData()
         setProgressData()
         startViewing()
+
     }
 
     private fun likeStory(mCurrentIndex: Int) {
@@ -224,17 +209,16 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
 
     private fun initializePlayer(s: String) {
         try {
-            ll_status.removeAllViews()
-            player = ExoPlayer.Builder(requireContext())
-                .build()
+            binding.llStatus.removeAllViews()
+                player
                 .also { exoPlayer ->
                     videoPlayerView.player = exoPlayer
-                    ll_status.addView(videoPlayerView)
+                    binding.llStatus.addView(videoPlayerView)
                     val mediaItem = MediaItem.fromUri(s)
-                    exoPlayer.setMediaItem(mediaItem)
-                    exoPlayer.addListener(playbackStateListener)
-                    exoPlayer.prepare()
-                    exoPlayer.play()
+                    exoPlayer?.setMediaItem(mediaItem)
+                    exoPlayer?.addListener(playbackStateListener)
+                    exoPlayer?.prepare()
+                    exoPlayer?.play()
                     player?.playWhenReady
                 }
         }catch (e:Exception){
@@ -269,7 +253,7 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                                 i.data = Uri.parse(url)
                                 startActivity(i)
                             } catch (e: Exception) {
-                                showErrorCookieBar("whatsApp Not Found", "Please Install whatsApp to continue chat")
+                                Toast.makeText(requireContext(),"whatsApp Not Found Please Install whatsApp to continue chat",Toast.LENGTH_SHORT)
                             }
                         } else {
                             //open their whatsapp
@@ -279,7 +263,7 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                                 i.data = Uri.parse(url)
                                 startActivity(i)
                             } catch (e: Exception) {
-                                showErrorCookieBar(title = "No WhatsApp","Please Install WhatsApp to continue chat")
+                                Toast.makeText(requireContext(),"No WhatsApp, Please Install WhatsApp to continue chat",Toast.LENGTH_SHORT).show()
                             }
 
                         }
@@ -403,7 +387,7 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
     }
 
     private fun setProgressData() {
-        ll_progress_bar.weightSum = imagesList?.size!!.toFloat()
+        binding.llProgressBar.weightSum = imagesList?.size!!.toFloat()
         imagesList?.forEachIndexed { index, progressData ->
             val progressBar: ProgressBar = ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal) //horizontal progress bar
 
@@ -423,7 +407,7 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
 
             progressBar.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
             progressBar.progress = 0 //initial progress
-            ll_progress_bar.addView(progressBar)
+            binding.llProgressBar.addView(progressBar)
         }
     }
 
@@ -459,7 +443,7 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                 updateStoryAsViewed(mCurrentIndex)
                 releasePlayer()
                 //1 ll_status.removeView(viewList[mCurrentIndex])
-                ll_status.removeAllViews()
+                binding.llStatus.removeAllViews()
                 mCurrentIndex++
                 if(viewList[mCurrentIndex] is ImageView) {
                     imagesList?.get(mCurrentIndex)?.merchantStatusImageLink?.let {
@@ -467,7 +451,7 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                             it
                         )
                     }
-                    ll_status.addView(imageStatusView)
+                    binding.llStatus.addView(imageStatusView)
                 }
                 playAudio(audioLinks[mCurrentIndex])
             }
@@ -521,8 +505,8 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                     mDisposable = null
                     mCurrentProgress = 0L
                     mCurrentIndex = 0
-                    ll_status.removeAllViews()
-                    ll_progress_bar.removeAllViews()
+                    binding.llStatus.removeAllViews()
+                    binding.llProgressBar.removeAllViews()
                     releasePlayer()
                     startTime = System.currentTimeMillis()
                     setImageStatusData()
@@ -533,13 +517,16 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                     //last slide in the reward stories list
                     mDisposable?.dispose()
                     mDisposable = null
-                    val fragmentToMoveTo: Fragment = MerchantStoryList::class.java.newInstance()
-                    openFragment(fragmentToMoveTo)
+                    try {
+                        findNavController().navigate(R.id.merchantStoryList)
+                    }catch (e:Exception){
+                        findNavController().navigate(R.id.merchantStoryList2)
+                    }
                 }
 
             }
 
-            override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
+            override fun onAdFailedToShowFullScreenContent(p0: AdError) {
                 Log.d("CustomerRewardStoriesAd", "Ad failed to show.")
                 indexPos=0
 
@@ -584,8 +571,8 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                 mDisposable = null
                 mCurrentProgress = 0L
                 mCurrentIndex = 0
-                ll_status.removeAllViews()
-                ll_progress_bar.removeAllViews()
+                binding.llStatus.removeAllViews()
+                binding.llProgressBar.removeAllViews()
                 startTime = System.currentTimeMillis()
                 setImageStatusData()
                 setProgressData()
@@ -595,8 +582,11 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                 //last slide in the reward stories list
                 mDisposable?.dispose()
                 mDisposable = null
-                val fragmentToMoveTo: Fragment = MerchantStoryList::class.java.newInstance()
-                openFragment(fragmentToMoveTo)
+                try {
+                    findNavController().navigate(R.id.merchantStoryList)
+                }catch (e:Exception){
+                    findNavController().navigate(R.id.merchantStoryList2)
+                }
             }
             //do the normal flow
         }
@@ -885,22 +875,22 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
         if (videoLinks[mCurrentIndex].isEmpty()) {
             mCurrentProgress = progress
             runOnUiThread {
-                (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = progress.toInt()
+                (binding.llProgressBar[mCurrentIndex] as? ProgressBar)?.progress = progress.toInt()
             }
         } else {
             mCurrentProgress = 0
             runOnUiThread {
-                (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = 0
+                (binding.llProgressBar[mCurrentIndex] as? ProgressBar)?.progress = 0
             }
         }
         //progressLength = if(audioLinks[0] =="empty") 40 else 230
         runOnUiThread {
-            tvRewardStoryTag.text = imagesList?.get(mCurrentIndex)?.storyTag
+            binding.tvRewardStatusTag.text = imagesList?.get(mCurrentIndex)?.storyTag
             getNumberOfViews(imagesList?.get(mCurrentIndex)?.merchantStatusId.toString())
             getNumberOfLikes(imagesList?.get(mCurrentIndex)?.merchantStatusId.toString())
             getStatusWorthAndNumberOfViewsFor(imagesList?.get(mCurrentIndex)?.merchantStatusId.toString())
-            tvNumberOfViewers.text = numberOfStatusView.toString()
-            tvLikeBrandStory.text = numberOfLikes.toString()
+            binding.tvNumberOfViewers.text = numberOfStatusView.toString()
+            binding.tvLikeBrandStory.text = numberOfLikes.toString()
             statusTag = imagesList?.get(mCurrentIndex)?.storyTag
         }
         //indexPos=mCurrentIndex+1
@@ -940,7 +930,7 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                     it
                 )
             }
-            ll_status.addView(imageStatusView)
+            binding.llStatus.addView(imageStatusView)
         }
             runOnUiThread {
                 playAudio(audioLinks[mCurrentIndex])
@@ -1001,9 +991,9 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
         mCurrentProgress = 0
         runOnUiThread {
             if (mCurrentIndex != 0) {
-                (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = 0
+                (binding.llProgressBar[mCurrentIndex] as? ProgressBar)?.progress = 0
                 //2 ll_status.removeView(viewList[mCurrentIndex])
-                ll_status.removeAllViews()
+                binding.llStatus.removeAllViews()
                 mCurrentIndex--
                 indexPos = mCurrentIndex
                 if(viewList[mCurrentIndex] is ImageView) {
@@ -1012,7 +1002,7 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                             it
                         )
                     }
-                    ll_status.addView(imageStatusView)
+                    binding.llStatus.addView(imageStatusView)
                 }
                 if (mCurrentIndex != imagesList?.size!!-1) {
                     releasePlayer()
@@ -1021,16 +1011,16 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                 }
 
             } else {
-                ll_status.removeAllViews()
+                binding.llStatus.removeAllViews()
                 mCurrentIndex = 0
-                (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = 0
+                (binding.llProgressBar[mCurrentIndex] as? ProgressBar)?.progress = 0
                 if(viewList[mCurrentIndex] is ImageView) {
                     imagesList?.get(mCurrentIndex)?.merchantStatusImageLink?.let {
                         imageStatusView.loadImage(
                             it
                         )
                     }
-                    ll_status.addView(imageStatusView)
+                    binding.llStatus.addView(imageStatusView)
                 }
                 indexPos = mCurrentIndex
                 releasePlayer()
@@ -1046,9 +1036,9 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
         runOnUiThread {
             if (mCurrentIndex != imagesList?.size!!-1) {
                 val durationOne = if(audioLinks[mCurrentIndex]=="empty") 40 else 230
-                (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = progressMax[mCurrentIndex]
+                (binding.llProgressBar[mCurrentIndex] as? ProgressBar)?.progress = progressMax[mCurrentIndex]
                 //3 ll_status.removeView(viewList[mCurrentIndex])
-                ll_status.removeAllViews()
+                binding.llStatus.removeAllViews()
                 mCurrentIndex++
                 if(viewList[mCurrentIndex] is ImageView) {
                    // ll_status.addView(viewList[mCurrentIndex])
@@ -1057,11 +1047,11 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
                             it
                         )
                     }
-                    ll_status.addView(imageStatusView)
+                    binding.llStatus.addView(imageStatusView)
                 }
                 emitStatusProgress()
                 indexPos=mCurrentIndex
-                (ll_progress_bar[mCurrentIndex] as? ProgressBar)?.progress = 0
+                (binding.llProgressBar[mCurrentIndex] as? ProgressBar)?.progress = 0
                 releasePlayer()
                 playAudio(audioLinks[mCurrentIndex])
             }else{
@@ -1070,19 +1060,8 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
         }
     }
 
-    private fun openFragment(fragment: Fragment?) {
-        var fragmentType = R.id.fr_game
-
-        if(storyOwner == sessionManager.getEmail()){
-            fragmentType = R.id.fr_layout_merchant
-        }
-        fragmentManager?.beginTransaction()
-                ?.replace(fragmentType, fragment!!)
-                ?.addToBackStack(null)
-                ?.commit()
-    }
-
     override fun onDestroy() {
+        super.onDestroy()
         try {
             mDisposable?.dispose()
             mDisposable = null
@@ -1091,7 +1070,6 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
         }catch (e:Exception){
 
         }
-
     }
 
     override fun onPause() {
@@ -1118,13 +1096,11 @@ open class CustomerRewardStories : BaseFragment<FragmentCustomerRewardStoriesBin
 
 
     private fun releasePlayer(){
-        player?.release()
-        player = null
+        try {
+            player?.release()
+            player = null
+        }catch (e:Exception){
+
+        }
     }
-
-    override fun getFragmentBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?
-    ): FragmentCustomerRewardStoriesBinding = FragmentCustomerRewardStoriesBinding.inflate(layoutInflater,container,false)
-
 }

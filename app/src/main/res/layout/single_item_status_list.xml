@@ -70,9 +70,11 @@
         <ImageView
             android:id="@+id/imgReview"
             android:layout_width="wrap_content"
+            android:elevation="100dp"
+            android:clickable="true"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_chat_with_business"
-            />
+            android:focusable="true" />
 
         <TextView
             android:id="@+id/tvReviewCount"
@@ -84,9 +86,34 @@
             app:layout_constraintStart_toEndOf="@id/imgReview"
             />
 
+
+<!--        <ImageView-->
+<!--            android:id="@+id/imgRating"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_marginStart="10dp"-->
+<!--            android:elevation="100dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:clickable="true"-->
+<!--            android:baselineAlignBottom="true"-->
+<!--            android:textSize="8sp"-->
+<!--            android:textAllCaps="false"-->
+<!--            android:src="@drawable/ic_rate_influencer"-->
+<!--            android:focusable="true" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/tvRatingCount"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="0"-->
+<!--            app:layout_constraintTop_toTopOf="@id/imgRating"-->
+<!--            app:layout_constraintBottom_toBottomOf="@id/imgRating"-->
+<!--            app:layout_constraintStart_toEndOf="@id/imgRating"-->
+<!--            />-->
+
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
+            android:elevation="100dp"
             android:src="@drawable/gift_coin_icon"
             android:layout_marginStart="10dp"/>
         <TextView

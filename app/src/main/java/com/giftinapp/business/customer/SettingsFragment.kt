@@ -21,7 +21,7 @@ import com.giftinapp.business.utility.base.BaseFragment
 import com.google.android.gms.tasks.Task
 import org.aviran.cookiebar2.CookieBar
 
-open class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
+class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
     private lateinit var etFacebook: EditText
     private lateinit var etInstagram: EditText
     private lateinit var etWhatsApp: EditText
@@ -88,7 +88,7 @@ open class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
             val alert = builder!!.create()
             alert.show()
         })
-        spGiftinId.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+        spGiftinId.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
                 view: View,
@@ -104,7 +104,7 @@ open class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
-        })
+        }
     }
 
     private fun updateUserInfo(facebook: String, instagram: String, whatsapp: String) {
@@ -161,7 +161,7 @@ open class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
         return true
     }
 
-    fun fetchInfoOnStart() {
+    private fun fetchInfoOnStart() {
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
 

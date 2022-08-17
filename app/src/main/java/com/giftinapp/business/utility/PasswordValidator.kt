@@ -4,7 +4,7 @@ class PasswordValidator {
 
         public companion object Validator {
             fun validPassword(password: String): Boolean {
-                return password.isNotEmpty() && password.length>6
+                return password.length>6
             }
         }
 }

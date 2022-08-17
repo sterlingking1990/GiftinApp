@@ -6,7 +6,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 
 apply plugin: 'kotlin-kapt'
 
@@ -31,15 +31,15 @@ android {
             keyPassword keystoreProperties['keyPassword']
         }
     }
-    compileSdkVersion 31
+    compileSdkVersion 32
     flavorDimensions "default"
-    buildToolsVersion "30.0.2"
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.giftinapp.business"
         minSdkVersion 21
-        targetSdkVersion 31
-        versionCode 75
+        targetSdkVersion 32
+        versionCode 79
         versionName "1.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -83,37 +83,36 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.core:core-ktx:1.8.0'
     implementation platform('com.google.firebase:firebase-bom:26.1.1')
-    implementation 'androidx.appcompat:appcompat:1.3.0'
-    implementation 'com.google.android.material:material:1.3.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.appcompat:appcompat:1.5.0'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.annotation:annotation:1.2.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
     implementation 'com.airbnb.android:lottie:3.6.0'
-    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
-    implementation 'com.google.android.play:core:1.10.0'
-    implementation 'com.google.firebase:firebase-auth:20.0.3'
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.1'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.1'
+    implementation 'com.google.android.play:core:1.10.3'
+    implementation 'com.google.firebase:firebase-auth:21.0.7'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.2.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    implementation 'androidx.core:core-ktx:1.5.0'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation "io.reactivex.rxjava2:rxjava:2.2.7"
     implementation "io.reactivex.rxjava2:rxkotlin:2.2.0"
     implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.1.1'
     implementation "android.arch.lifecycle:extensions:1.1.1"
-    implementation "com.google.gms:google-services:4.3.10"
+    implementation "com.google.gms:google-services:4.3.13"
 
     //Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'com.google.firebase:firebase-firestore'
-    implementation 'com.google.android.material:material:1.4.0-rc01'
+    implementation 'com.google.android.material:material:1.7.0-beta01'
 
 
     implementation 'com.google.firebase:firebase-auth'
@@ -134,21 +133,16 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.12.0'
 
     //rewarders story list circular
-    implementation 'de.hdodenhof:circleimageview:2.2.0'
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
     implementation 'com.devlomi:circularstatusview:1.0.1'
 
     //messaging
     implementation 'com.google.firebase:firebase-messaging-ktx'
 
-    //using volly
-    implementation 'com.android.volley:volley:1.2.0'
+    implementation 'com.google.android.gms:play-services-basement:18.1.0'
+    implementation 'com.google.firebase:firebase-analytics:21.1.0'
 
-    implementation 'com.google.android.gms:play-services-basement:17.6.0'
-    implementation 'com.google.firebase:firebase-analytics:19.0.0'
-
-    implementation 'com.google.firebase:firebase-appcheck-safetynet:16.0.0-beta01'
-
-    implementation 'com.google.android.gms:play-services-ads:20.5.0'
+    implementation 'com.google.android.gms:play-services-ads:21.1.0'
 
     // Http interceptor
     implementation "com.squareup.okhttp3:logging-interceptor:$squareupOkHttp3LoggingInterceptorVersion"
@@ -224,5 +218,8 @@ repositories {
     }
     maven {
         url = uri("https://repository.jboss.org/maven2")
+    }
+    maven {
+        url = uri("https://jitpack.io")
     }
 }

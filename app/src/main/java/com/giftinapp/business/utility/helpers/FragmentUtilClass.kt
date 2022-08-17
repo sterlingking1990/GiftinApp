@@ -1,5 +1,6 @@
 package com.giftinapp.business.utility.helpers
 
+import android.view.View
 import androidx.annotation.AnimRes
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -8,6 +9,8 @@ import com.giftinapp.business.R
 import com.giftinapp.business.dialogs.LoadingDialog
 import com.giftinapp.business.dialogs.MessageDialog
 import org.aviran.cookiebar2.CookieBar
+import smartdevelop.ir.eram.showcaseviewlib.GuideView
+import smartdevelop.ir.eram.showcaseviewlib.config.DismissType
 
 abstract class FragmentUtilClass: Fragment() {
     private var loading: LoadingDialog? = null
@@ -86,5 +89,25 @@ abstract class FragmentUtilClass: Fragment() {
             disMissable
         )
         messageDialog?.show(requireActivity().supportFragmentManager, MessageDialog::javaClass.name)
+    }
+
+    protected fun showHelpBar(
+        title: String = "",
+        content: String,
+        targetView: View,
+        textSize:Int = 12,
+        titleSize:Int = 14,
+        listener:((View) -> Unit)? = null,
+    ){
+        GuideView.Builder(requireContext())
+            .setTitle(title)
+            .setContentText(content)
+            .setDismissType(DismissType.anywhere)
+            .setTargetView(targetView)
+            .setContentTextSize(textSize)
+            .setTitleTextSize(titleSize)
+            .setGuideListener(listener)
+            .build()
+            .show()
     }
 }

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/merchant_act_navgraph"
+    app:startDestination="@id/carouselHome2">
+
+    <fragment
+        android:id="@+id/customerRewardStories2"
+        android:name="com.giftinapp.business.customer.CustomerRewardStories"
+        android:label="CustomerRewardStories" />
+    <fragment
+        android:id="@+id/merchantStoryList2"
+        android:name="com.giftinapp.business.customer.MerchantStoryList"
+        android:label="fragment_merchant_story_list"
+        tools:layout="@layout/fragment_merchant_story_list" />
+    <dialog
+        android:id="@+id/feedbackReviewFragment"
+        android:name="com.giftinapp.business.business.FeedbackReviewFragment"
+        android:label="fragment_feedback_review"
+        tools:layout="@layout/fragment_feedback_review" />
+    <fragment
+        android:id="@+id/brandPreferenceFragment2"
+        android:name="com.giftinapp.business.customer.BrandPreferenceFragment"
+        android:label="fragment_brand_preference"
+        tools:layout="@layout/fragment_brand_preference" />
+    <fragment
+        android:id="@+id/merchantInfoUpdate"
+        android:name="com.giftinapp.business.business.MerchantInfoUpdate"
+        android:label="fragment_merchant_info_update"
+        tools:layout="@layout/fragment_merchant_info_update" />
+    <dialog
+        android:id="@+id/reviewFragment2"
+        android:name="com.giftinapp.business.customer.ReviewFragment"
+        android:label="fragment_review"
+        tools:layout="@layout/fragment_review" />
+    <fragment
+        android:id="@+id/walletInfo"
+        android:name="com.giftinapp.business.business.WalletInfo"
+        android:label="fragment_wallet_info"
+        tools:layout="@layout/fragment_wallet_info" />
+    <fragment
+        android:id="@+id/setRewardDeal"
+        android:name="com.giftinapp.business.business.SetRewardDeal"
+        android:label="SetRewardDeal" />
+    <fragment
+        android:id="@+id/carouselHome2"
+        android:name="com.giftinapp.business.homefragment.CarouselHome"
+        android:label="fragment_carousel_home"
+        tools:layout="@layout/fragment_carousel_home" />
+    <fragment
+        android:id="@+id/giftinAboutForMerchant"
+        android:name="com.giftinapp.business.business.GiftinAboutForMerchant"
+        android:label="fragment_giftin_about_for_merchant"
+        tools:layout="@layout/fragment_giftin_about_for_merchant" />
+</navigation>

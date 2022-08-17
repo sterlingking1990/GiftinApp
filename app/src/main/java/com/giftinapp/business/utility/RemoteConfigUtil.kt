@@ -22,6 +22,8 @@ class RemoteConfigUtil{
     private val REFERRAL_REWARD_BASE = "referral_reward_base"
     private val REWARD_TO_BRC_BASE = "reward_to_brc_base"
     private val WITHDRAW_LIMIT = "withdraw_limit"
+    private val VERSION = "version"
+    private val FORCE_UPDATE ="force_update"
 
     private val DEFAULTS: HashMap<String, Any> =
         hashMapOf(
@@ -30,10 +32,12 @@ class RemoteConfigUtil{
             CAROUSEL_THREE to "https://i.pinimg.com/564x/61/8d/7b/618d7b2041c923d1d422fc9b40c4d17a.jpg",
             BRAND_LINK to "https://zuri.health/",
             UPDATE_TITLE  to "Update Brandible",
-            UPDATE_MESSAGE  to "New features available, update to enjoy and explore them all",
+            UPDATE_MESSAGE  to "A new version of the app is available. Please update to avoid uninterrupted services",
             REFERRAL_REWARD_BASE  to 20,
             REWARD_TO_BRC_BASE  to 2,
-            WITHDRAW_LIMIT  to 1000
+            WITHDRAW_LIMIT  to 1000,
+            VERSION to 77,
+            FORCE_UPDATE  to true
         )
 
     //private lateinit var remoteConfig: FirebaseRemoteConfig
@@ -72,4 +76,7 @@ class RemoteConfigUtil{
     fun getReferralRewardBase(): String = getFirebaseRemoteConfig().getString(REFERRAL_REWARD_BASE)
     fun rewardToBRCBase(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[REWARD_TO_BRC_BASE]
     fun getWithdrawLimit(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[WITHDRAW_LIMIT]
+
+    fun getUpdateVersion(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[VERSION]
+    fun getForceUpdate(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[FORCE_UPDATE]
     }

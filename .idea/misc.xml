@@ -9,12 +9,15 @@
         <entry key="app/src/main/res/drawable/drop_down_arrow.xml" value="0.1245" />
         <entry key="app/src/main/res/drawable/frame_layout_corner_background.xml" value="0.168" />
         <entry key="app/src/main/res/drawable/ic_officialgiftinapplogo.xml" value="0.1665" />
+        <entry key="app/src/main/res/drawable/ic_rate_influencer.xml" value="0.1665" />
+        <entry key="app/src/main/res/layout/activity_giftin_app_authority.xml" value="0.14322916666666666" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1598731884057971" />
         <entry key="app/src/main/res/layout/activity_merchant.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_signup.xml" value="0.5" />
         <entry key="app/src/main/res/layout/fragment_about.xml" value="0.15217391304347827" />
         <entry key="app/src/main/res/layout/fragment_brand_preference.xml" value="0.15217391304347827" />
+        <entry key="app/src/main/res/layout/fragment_carousel_home.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_cashout.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_customer_reward_stories.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_feedback_review.xml" value="0.19293478260869565" />
@@ -37,6 +40,7 @@
         <entry key="app/src/main/res/layout/single_item_status_list.xml" value="0.33" />
         <entry key="app/src/main/res/layout/single_item_uploaded_reward_story.xml" value="0.21105072463768115" />
         <entry key="app/src/main/res/layout/single_video_layout.xml" value="0.1421875" />
+        <entry key="app/src/main/res/layout/toolbar.xml" value="0.12708333333333333" />
         <entry key="app/src/main/res/menu/bottom_navigation_menu.xml" value="0.2828125" />
         <entry key="app/src/main/res/menu/bottom_navigation_menu_merchant.xml" value="0.2828125" />
         <entry key="app/src/main/res/menu/customer_menu_main.xml" value="0.2828125" />
