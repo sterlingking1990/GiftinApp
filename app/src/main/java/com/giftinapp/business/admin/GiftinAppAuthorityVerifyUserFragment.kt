@@ -125,7 +125,7 @@ class GiftinAppAuthorityVerifyUserFragment : Fragment(), GiftinAppAuthorityVerif
                         }
                         else{
                             //means the document does not exist, we should add it
-                            var merchantInfoUpdatePojo= MerchantInfoUpdatePojo()
+                            val merchantInfoUpdatePojo= MerchantInfoUpdatePojo()
                             merchantInfoUpdatePojo.facebook="not provided"
                             merchantInfoUpdatePojo.instagram="not provided"
                             merchantInfoUpdatePojo.whatsapp="not provided"

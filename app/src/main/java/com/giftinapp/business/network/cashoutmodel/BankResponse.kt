@@ -1,6 +1,7 @@
 package com.giftinapp.business.network.cashoutmodel
 
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
 data class BankResponse(

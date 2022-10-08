@@ -22,19 +22,8 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-        <com.synnapps.carouselview.CarouselView
-            android:id="@+id/carouselView"
-            android:layout_width="match_parent"
-            android:layout_height="600dp"
-            app:fillColor="#FFFFFFFF"
-            app:indicatorVisibility="gone"
-            app:pageColor="#00000000"
-            app:radius="6dp"
-            app:slideInterval="3000"
-            app:strokeColor="#FF777777"
-            app:strokeWidth="1dp" />
 
-        <androidx.fragment.app.FragmentContainerView
+        <fragment
             android:id="@+id/merchant_act_nav_host_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
@@ -57,13 +46,4 @@
 
     </androidx.drawerlayout.widget.DrawerLayout>
 
-    <!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
-    <!--        android:id="@+id/bottom_navigation"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_alignParentBottom="true"-->
-    <!--        android:background="@color/purple_200"-->
-    <!--        app:itemIconTint="@color/white"-->
-    <!--        app:itemTextColor="@color/white"-->
-    <!--        app:menu="@menu/bottom_navigation_menu" />-->
 </RelativeLayout>

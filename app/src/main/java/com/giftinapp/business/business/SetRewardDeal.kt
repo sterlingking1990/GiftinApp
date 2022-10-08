@@ -702,6 +702,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                 merchantStoryListPojo.storyAudioLink = binding.tvAudioDownloadUri.text.toString()
                 merchantStoryListPojo.mediaDuration = mediaDuration.toString()
                 merchantStoryListPojo.merchantStatusId = sessionManager.getEmail().toString()
+                merchantStoryListPojo.merchantOwnerId = sessionManager.getEmail().toString()
                 merchantStoryListPojo.merchantStatusImageLink = binding.tvDownloadUri.text.toString()
                 merchantStoryListPojo.merchantStatusVideoLink = binding.tvVideoDownloadUri.text.toString()
                 merchantStoryListPojo.videoArtWork = videoArtWork
@@ -710,13 +711,23 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                 merchantStoryListPojo.statusReachAndWorthPojo = statusReachAndWorthPojo
                 merchantStoryListPojo.viewers = arrayListOf()
 
-                db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document().set(merchantStoryListPojo)
-                        .addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                Toast.makeText(requireContext(), "published successfully", Toast.LENGTH_SHORT).show()
-                                fetchUploadedStatsOnLoad()
+                db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document()
+                    .id.also {id->
+                        db.collection("merchants").document(sessionManager.getEmail().toString())
+                            .collection("statuslist").document(id).set(merchantStoryListPojo)
+                            .addOnCompleteListener {it2->
+                                if (it2.isSuccessful) {
+                                    db.collection("merchants").document(sessionManager.getEmail().toString())
+                                        .collection("statuslist").document(id).update("merchantStatusId",id)
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "published successfully",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    fetchUploadedStatsOnLoad()
+                                }
                             }
-                        }
+                    }
             } else {
                 showMessageDialog("Unverified Account","You need to verify your account to publish reward stories, please check your mail to verify your account",
                     disMissable = false, posBtnText = "OK", listener = {
@@ -733,8 +744,6 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 //                val alert = builder!!.create()
 //                alert.show()
             }
-
-
         }
         else{
             showMessageDialog(title = "Empty or Low Wallet Balance", message = "Your wallet balance is lower than your status ad budget, you need to fund your wallet",
@@ -825,6 +834,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                                                             uploadedStoryAdapter.notifyDataSetChanged()
 
                                                             showCookieBar("Reward Story Removed", "You have successfully removed reward story", position = CookieBar.BOTTOM)
+                                                            fetchUploadedStatsOnLoad()
                                                         }
 
                                                     }
@@ -848,6 +858,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                                                             uploadedStoryAdapter.notifyDataSetChanged()
 
                                                             showCookieBar("Reward Story Removed", "You have successfully removed reward story", position = CookieBar.BOTTOM)
+                                                            fetchUploadedStatsOnLoad()
                                                         }
                                                     }
                                             } catch (e: Exception) {
@@ -855,6 +866,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                                                 uploadedStoryAdapter.clear(positionId)
                                                 uploadedStoryAdapter.notifyDataSetChanged()
                                                 showCookieBar("Reward Story Removed", "You have successfully removed reward story", position = CookieBar.BOTTOM)
+                                                fetchUploadedStatsOnLoad()
                                             }
                                         }
 
@@ -862,6 +874,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                                 }
                             }else{
                                 showErrorCookieBar("Deletion Error!","Unable to complete deletion, please try again")
+                                fetchUploadedStatsOnLoad()
                             }
                         }
             }
@@ -1172,18 +1185,18 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         imagesToLoadInBannerRecyclerView = arrayListOf()
         loadImagesToList()
 
-        binding.chkUsePromotionalBanner.setOnCheckedChangeListener{btnView, isChecked ->
-            if(isChecked){
-                binding.rvBanner.visibility = View.VISIBLE
-                binding.llInputRewardHint.visibility = View.GONE
-                updateImageContainerToPromotional()
-            }
-            else{
-                binding.llInputRewardHint.visibility = View.VISIBLE
-                resetDefaultViewWithOutPromotionalRecyclerView()
-            }
-
-        }
+//        binding.chkUsePromotionalBanner.setOnCheckedChangeListener{btnView, isChecked ->
+//            if(isChecked){
+//                binding.rvBanner.visibility = View.VISIBLE
+//                binding.llInputRewardHint.visibility = View.GONE
+//                updateImageContainerToPromotional()
+//            }
+//            else{
+//                binding.llInputRewardHint.visibility = View.VISIBLE
+//                resetDefaultViewWithOutPromotionalRecyclerView()
+//            }
+//
+//        }
 
         if(isMicrophonePresent() == true){
             getMicrophonePermission()

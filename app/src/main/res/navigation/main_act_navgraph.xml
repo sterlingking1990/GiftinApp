@@ -58,8 +58,4 @@
         android:id="@+id/settingsFragment"
         android:name="com.giftinapp.business.customer.SettingsFragment"
         android:label="SettingsFragment" />
-    <fragment
-        android:id="@+id/setRewardDeal"
-        android:name="com.giftinapp.business.business.SetRewardDeal"
-        android:label="SetRewardDeal" />
 </navigation>

@@ -38,6 +38,8 @@ class SessionManager(context: Context) {
 
         const val SHOW_EXPLORE_TIP = "show_explore_tip"
 
+        const val FIRST_TIME_LOGIN = "first_time_login"
+
     }
 
     /**
@@ -61,6 +63,12 @@ class SessionManager(context: Context) {
         editor.apply()
     }
 
+    fun setFirstTimeLogin(firstTimeLogin:Boolean){
+        val editor = prefs.edit()
+        editor.putBoolean(FIRST_TIME_LOGIN,firstTimeLogin)
+        editor.apply()
+    }
+
     fun willShowExploreTip():Boolean = prefs.getBoolean(SHOW_EXPLORE_TIP,true)
 
 
@@ -71,6 +79,10 @@ class SessionManager(context: Context) {
      */
     fun fetchAuthToken(): String? {
         return prefs.getString(USER_TOKEN, null)
+    }
+
+    fun isFirstTimeLogin():Boolean{
+        return prefs.getBoolean(FIRST_TIME_LOGIN,false)
     }
 
     fun fetchUserDataForSocialSignIn():String?{

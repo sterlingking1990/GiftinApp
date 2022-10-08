@@ -11,6 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -26,10 +28,8 @@ import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.MerchantStoryPojo
 import com.giftinapp.business.model.StatusReachAndWorthPojo
 import com.giftinapp.business.model.StoryHeaderPojo
-import com.giftinapp.business.utility.SessionManager
-import com.giftinapp.business.utility.StorySession
+import com.giftinapp.business.utility.*
 import com.giftinapp.business.utility.base.BaseFragment
-import com.giftinapp.business.utility.showBottomSheet
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -48,6 +48,9 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
     private lateinit var sessionManager: SessionManager
 
     private lateinit var etSearchStoryId:EditText
+    private lateinit var tvNoStory:TextView
+    private lateinit var tvNoBrandFollowed:TextView
+    private lateinit var tvNoBrandFollowedClicker:TextView
 
     lateinit var pgLoading:ProgressBar
 
@@ -57,6 +60,7 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
 
     var countDoc = 0
     var followingCount=0
+    var sizeOfDoc = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -66,7 +70,9 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
+        tvNoStory = view.findViewById(R.id.tvNoStory)
+        tvNoBrandFollowed = view.findViewById(R.id.tvNoBrandFollowed)
+        tvNoBrandFollowedClicker = view.findViewById(R.id.tvNoBrandFollowedClicker)
         merchantStoryListRecyclerView = view.findViewById(R.id.rvMerchantStoryList)
         merchantRecyclerViewLayoutManager = LinearLayoutManager(requireContext())
         merchantRecyclerViewLayoutManager.orientation = LinearLayoutManager.VERTICAL
@@ -109,12 +115,17 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
             }
         })
 
+        tvNoBrandFollowedClicker.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.brandPreferenceFragment)
+            }catch (e:Exception){
+                findNavController().navigate(R.id.brandPreferenceFragment2)
+            }
+        }
+
         checkFollowingRate()
-
         //getNumberOfFollowers()
-
         loadRewardStoryList()
-
     }
 
 
@@ -139,6 +150,8 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
                         val result: QuerySnapshot? = task.result
                         val merchantStoryPojos = ArrayList<MerchantStoryPojo>()
                         if (result != null) {
+                            var noBrandFollowed = 0
+                            sizeOfDoc = result.size()
                             for (eachRes in result) {
                                 countDoc += 1
                                 pgLoading.visibility = View.VISIBLE
@@ -146,8 +159,10 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
                                     .collection("followers").get()
                                     .addOnCompleteListener { followersTask ->
                                         if (followersTask.isSuccessful) {
+
                                             followersTask.result?.forEach { eachFollower ->
                                                 if (eachFollower.id == sessionManager.getEmail()) {
+                                                    noBrandFollowed+=1
                                                     db.collection("merchants").document(eachRes.id)
                                                         .collection("statuslist").get()
                                                         .addOnCompleteListener { task2 ->
@@ -164,6 +179,7 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
                                                                             MerchantStoryListPojo()
                                                                         merchantStoryListPojo.merchantStatusId =
                                                                             eachList.getString("merchantStatusId")
+                                                                        merchantStoryListPojo.merchantOwnerId = eachList.getString("merchantOwnerId")
                                                                         merchantStoryListPojo.seen =
                                                                             eachList.getBoolean("seen")
                                                                         merchantStoryListPojo.storyTag =
@@ -215,6 +231,7 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
                                                                         }
                                                                         pgLoading.visibility =
                                                                             View.GONE
+                                                                        tvNoStory.gone()
                                                                         merchantStoryListAdapter.setMerchantStatus(
                                                                             merchantStoryPojos,
                                                                             requireContext(),
@@ -223,6 +240,9 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
                                                                         )
                                                                         merchantStoryListRecyclerView.adapter =
                                                                             merchantStoryListAdapter
+                                                                    }else{
+                                                                            tvNoStory.visible()
+                                                                            pgLoading.gone()
                                                                     }
                                                                 } catch (e: Exception) {
                                                                     Log.d(
@@ -301,6 +321,7 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
 
     override fun onStoryClicked(merchantStoryList: ArrayList<MerchantStoryListPojo>, allList: ArrayList<MerchantStoryPojo>, currentStoryPos: Int, storyOwner: String) {
 
+        Log.d("position",currentStoryPos.toString())
            // val fragment = CustomerRewardStories()
             //val fm = fragmentManager
             val arguments = Bundle()
@@ -311,13 +332,19 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
             arguments.putInt("currentStoryPos", currentStoryPos)
             arguments.putString("storyOwner", storyOwner)
             arguments.putBoolean("hasHeader", isStoryHasHeader)
-            if (isStoryHasHeader || storyOwner == sessionManager.getEmail()) {
-                //fragmentType = R.id.fr_layout_merchant
-                Log.d("Amhere", "Am here before")
-                findNavController().navigate(R.id.customerRewardStories2,arguments)
-            }else{
-                findNavController().navigate(R.id.customerRewardStories, arguments)
-            }
+
+        try {
+            findNavController().navigate(R.id.customerRewardStories,arguments)
+        }catch (e:Exception){
+            findNavController().navigate(R.id.customerRewardStories2, arguments)
+        }
+//            if (isStoryHasHeader || storyOwner == sessionManager.getEmail()) {
+//                //fragmentType = R.id.fr_layout_merchant
+//                Log.d("Amhere", "Am here before")
+//                findNavController().navigate(R.id.customerRewardStories2,arguments)
+//            }else{
+//                findNavController().navigate(R.id.customerRewardStories, arguments)
+//            }
 
     }
 
@@ -333,8 +360,8 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
 
     private fun showMessage() {
 
-            showMessageDialog("When you publish status as a brand, it will be displayed here. Do you want to Publish your reward status now so you can begin engaging customers for more buy?", title = "Publish Brand Story",
-                hasNegativeBtn = true, negbtnText = "Later", posBtnText = "Yes",listener = {
+            showMessageDialog(title = "Stand Out as Brand", message = "Be the first to publish a story. Click OK publish some stories and get Brandible Influencers engaged with your brand?",
+                hasNegativeBtn = false, posBtnText = "OK",listener = {
                     findNavController().navigate(R.id.setRewardDeal)
                     //openFragment(SetRewardDeal())
                                                                                            }

@@ -35,7 +35,7 @@
                     android:id="@+id/et_facebook"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter Facebook"
+                    android:hint="Your Brandible ID"
                     android:imeOptions="actionNext"
                     android:inputType="text"
                     android:textColor="?attr/textColorForInputEdit"
@@ -48,6 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
+            android:visibility="gone"
             android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
@@ -75,6 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
+            android:visibility="gone"
             android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
@@ -110,11 +112,11 @@
                 android:id="@+id/tv_gifting_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="1.4"
                 android:gravity="center"
                 android:textColor="@color/tabColorLight"
                 android:layout_gravity="center"
-                android:text="Influencer Id"
+                android:text="Your Id"
                 android:textSize="16sp"
                 app:drawableEndCompat="@drawable/ic_info" />
 
@@ -123,7 +125,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_margin="10dp"
-                android:layout_weight="1"
+                android:layout_weight="0.6"
                 android:spinnerMode="dropdown" />
         </LinearLayout>
 

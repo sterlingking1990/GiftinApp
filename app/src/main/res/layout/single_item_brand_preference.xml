@@ -99,7 +99,7 @@
                     android:layout_marginStart="30dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="8dp"
-                    app:button_cornerRadius="4dp"
+                    app:button_cornerRadius="20dp"
                     app:button_duration="250"
                     app:button_scale="0.87"
                     android:textColor="?attr/actionButtonTextColor"

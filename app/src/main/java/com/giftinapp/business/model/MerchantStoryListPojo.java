@@ -11,6 +11,7 @@ import java.util.ArrayList;
  public class MerchantStoryListPojo implements Serializable {
 
     public String merchantStatusId = "";
+    public String merchantOwnerId = "";
     public String merchantStatusImageLink = null;
     public String merchantStatusVideoLink = null;
     public String videoArtWork = null;

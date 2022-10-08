@@ -54,4 +54,58 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"/>
 
+    <TextView
+        android:id="@+id/tvNoStory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No Brand Story Available at the moment, Please check back later"
+        android:textSize="25sp"
+        android:visibility="gone"
+        android:fontFamily="@font/lato"
+        android:textAllCaps="true"
+        android:textColor="@color/tabColorLight"
+        android:shadowColor="@color/tabColor"
+        android:textAlignment="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:drawableTopCompat="@drawable/nostory" />
+
+    <TextView
+        android:id="@+id/tvNoBrandFollowed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You are not following any brand at the moment, to follow one and start eaarning click"
+        android:textSize="20sp"
+        android:visibility="gone"
+        android:fontFamily="@font/lato"
+        android:textAllCaps="true"
+        android:textColor="@color/tabColorLight"
+        android:shadowColor="@color/tabColor"
+        android:textAlignment="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:drawableTopCompat="@drawable/nostory" />
+
+    <TextView
+        android:id="@+id/tvNoBrandFollowedClicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/lato"
+        android:shadowColor="@color/tabColor"
+        android:text="here"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="#a225cd"
+        android:textSize="20sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvNoBrandFollowed"
+        app:layout_constraintVertical_bias="0.071" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

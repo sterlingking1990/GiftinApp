@@ -24,20 +24,22 @@ class RemoteConfigUtil{
     private val WITHDRAW_LIMIT = "withdraw_limit"
     private val VERSION = "version"
     private val FORCE_UPDATE ="force_update"
+    private val IMAGE_VIEW_DURATION = "image_view_duration"
 
     private val DEFAULTS: HashMap<String, Any> =
         hashMapOf(
-            CAROUSEL_ONE to "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1",
-            CAROUSEL_TWO to "https://i.pinimg.com/564x/e3/ab/c1/e3abc1cfee353faf2f918a47c87ff0a7.jpg",
-            CAROUSEL_THREE to "https://i.pinimg.com/564x/61/8d/7b/618d7b2041c923d1d422fc9b40c4d17a.jpg",
+            CAROUSEL_ONE to "",
+            CAROUSEL_TWO to "",
+            CAROUSEL_THREE to "",
             BRAND_LINK to "https://zuri.health/",
             UPDATE_TITLE  to "Update Brandible",
             UPDATE_MESSAGE  to "A new version of the app is available. Please update to avoid uninterrupted services",
             REFERRAL_REWARD_BASE  to 20,
             REWARD_TO_BRC_BASE  to 2,
-            WITHDRAW_LIMIT  to 1000,
-            VERSION to 77,
-            FORCE_UPDATE  to true
+            WITHDRAW_LIMIT  to 500,
+            VERSION to 84,
+            FORCE_UPDATE  to true,
+            IMAGE_VIEW_DURATION to 100
         )
 
     //private lateinit var remoteConfig: FirebaseRemoteConfig
@@ -79,4 +81,6 @@ class RemoteConfigUtil{
 
     fun getUpdateVersion(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[VERSION]
     fun getForceUpdate(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[FORCE_UPDATE]
+
+    fun getImageViewDuration(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[IMAGE_VIEW_DURATION]
     }

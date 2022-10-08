@@ -53,6 +53,7 @@ class CustomerRewardStories : Fragment() {
     private lateinit var binding: FragmentCustomerRewardStoriesBinding
     private val playbackStateListener: Player.Listener = playbackStateListener()
     private var videoIsReady = false
+    var remoteConfigUtil: RemoteConfigUtil? = null
 
     private fun playbackStateListener() = object:Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -118,6 +119,8 @@ class CustomerRewardStories : Fragment() {
 
     var viewList = mutableListOf<View>()
 
+    var image_view_duration = 100
+
     @Inject
     lateinit var audioRecorderPlayer: AudioRecorderPlayer
 
@@ -135,7 +138,7 @@ class CustomerRewardStories : Fragment() {
 
         }
 
-        imagesList = allStories!![0].merchantStoryList ?: arrayListOf()
+        imagesList = allStories!![currentStoryPos!!].merchantStoryList ?: arrayListOf()
 
         Log.d("ImageListSize", imagesList!!.size.toString())
     }
@@ -151,6 +154,9 @@ class CustomerRewardStories : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+        remoteConfigUtil = RemoteConfigUtil()
+        image_view_duration = remoteConfigUtil!!.getImageViewDuration().asDouble().toInt()
         player = ExoPlayer.Builder(requireContext()).build()
         val anim = AnimationUtils.loadAnimation(requireContext(), R.anim.text_view_animation)
 
@@ -197,13 +203,24 @@ class CustomerRewardStories : Fragment() {
         merchantStoryListPojo.merchantStatusImageLink = imageLink
         merchantStoryListPojo.merchantStatusId = storyId
 
-        db.collection("statusowners").document(storyOwner.toString()).collection("likedBy").document(sessionManager.getEmail().toString()).set(SendGiftPojo(empty = ""))
+        val empty = SendGiftPojo("empty")
+
+        db.collection("statusowners").document(storyOwner.toString()).set(SendGiftPojo(""))
             .addOnCompleteListener {
-                if(it.isSuccessful){
-                    db.collection("statusowners").document(storyOwner.toString()).collection("likedBy").document(sessionManager.getEmail().toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
+                if (it.isSuccessful){
+                    db.collection("statusowners").document(storyOwner.toString()).collection("likedBy").document(sessionManager.getEmail().toString()).set(SendGiftPojo(empty = ""))
+                        .addOnCompleteListener {it2->
+                            if(it2.isSuccessful){
+                                db.collection("statusowners").document(storyOwner.toString()).collection("likedBy").document(sessionManager.getEmail().toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
+                                    .addOnCompleteListener { it3->
+                                        if(it3.isSuccessful){
+
+                                        }
+                                    }
+                            }
+                        }
                 }
             }
-
         updateStatusLikersRecord(storyId)
     }
 
@@ -353,15 +370,19 @@ class CustomerRewardStories : Fragment() {
                     if(it.isSuccessful) {
                         val results = it.result
                         if (results?.get("statusReachAndWorthPojo") != null) {
-                            val data: Map<String, Int> = results.get("statusReachAndWorthPojo") as Map<String, Int>
-                            for ((key2, value2) in data) {
-                                if (key2 == "status_worth") {
-                                    storyWorth = value2
-                                    Log.d("story_worth", storyWorth.toString())
-                                }
-                                if (key2 == "status_reach") {
-                                    numberOfViewsTarget = value2
-                                }
+                            val data: StatusReachAndWorthPojo? = results.get("statusReachAndWorthPojo",StatusReachAndWorthPojo::class.java)
+//                            for ((key2, value2) in data) {
+//                                if (key2 == "status_worth") {
+//                                    storyWorth = value2
+//                                    Log.d("story_worth", storyWorth.toString())
+//                                }
+//                                if (key2 == "status_reach") {
+//                                    numberOfViewsTarget = value2
+//                                }
+//                            }
+                            if(data!=null) {
+                                storyWorth = data.status_worth!!
+                                numberOfViewsTarget = data.status_reach
                             }
                         }
                     }
@@ -413,9 +434,9 @@ class CustomerRewardStories : Fragment() {
 
     private fun getProgressBarMax(index:Int): Int {
         return if (imagesList?.get(index)?.mediaDuration=="0"){
-            40
+            image_view_duration
         }else{
-            imagesList?.get(index)?.mediaDuration?.toInt()?.div(100) ?: 40
+            imagesList?.get(index)?.mediaDuration?.toInt()?.div(100) ?: image_view_duration
         }
     }
 
@@ -640,8 +661,8 @@ class CustomerRewardStories : Fragment() {
                         if (task2.isSuccessful) {
                             val referrerDoc = task2.result
                             if (referrerDoc!!.exists()) {
-                                val bonusFromDb = referrerDoc["gift_coin"] as Long
-                                val totalBonus = bonusFromDb + rewardAmount
+                                val bonusFromDb = referrerDoc.getDouble("gift_coin")
+                                val totalBonus = (bonusFromDb?.toInt()?:0) + rewardAmount
                                 db.collection("users").document(sessionManager.getEmail().toString()).collection("rewards").document("GiftinAppBonus").update("gift_coin", totalBonus, "isRedeemed", false)
                                     .addOnCompleteListener {
                                         if(it.isSuccessful){
@@ -765,9 +786,22 @@ class CustomerRewardStories : Fragment() {
         merchantStoryListPojo.merchantStatusImageLink = imageLink
         merchantStoryListPojo.merchantStatusId = storyId
 
-        db.collection("statusowners").document(storyOwner.toString()).collection("viewers").document(sessionManager.getEmail().toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
+        val empty = SendGiftPojo("empty")
+
+        db.collection("statusowners").document(storyOwner.toString()).set(SendGiftPojo(""))
+            .addOnCompleteListener {
+                if (it.isSuccessful){
+                    db.collection("statusowners").document(storyOwner.toString()).collection("viewers").document(sessionManager.getEmail().toString()).set(SendGiftPojo(""))
+                        .addOnCompleteListener { it2->
+                            if(it2.isSuccessful){
+                                db.collection("statusowners").document(storyOwner.toString()).collection("viewers").document(sessionManager.getEmail().toString()).collection("stories").document(storyId).set(merchantStoryListPojo)
+                            }
+                        }
+                }
+            }
 
         checkIfUserHasSeenThis(storyId)
+
 
     }
 
@@ -807,14 +841,15 @@ class CustomerRewardStories : Fragment() {
 
         val statusViewRecordPojo = StatusViewRecordPojo(null, sessionManager.getEmail().toString(), storyOwner.toString(), storyId)
 
-        db.collection("statusview").document(storyId).set(sendGiftPojo)
+        db.collection("statusview").document(storyId).set(SendGiftPojo(""))
                 .addOnCompleteListener(OnCompleteListener { task1: Task<Void?> ->
                     if (task1.isSuccessful) {
+                        Log.d("UpdatedView","UpdatedView")
                         db.collection("statusview").document(storyId).collection("viewers").document(sessionManager.getEmail().toString()).set(statusViewRecordPojo)
 
-                        rewardUserOrNotBasedOnStatusWorthAndReach(storyId)
                     }
                 })
+        rewardUserOrNotBasedOnStatusWorthAndReach(storyId)
     }
 
     private fun updateStatusLikersRecord(storyId: String) {
@@ -892,6 +927,8 @@ class CustomerRewardStories : Fragment() {
             binding.tvNumberOfViewers.text = numberOfStatusView.toString()
             binding.tvLikeBrandStory.text = numberOfLikes.toString()
             statusTag = imagesList?.get(mCurrentIndex)?.storyTag
+
+
         }
         //indexPos=mCurrentIndex+1
 

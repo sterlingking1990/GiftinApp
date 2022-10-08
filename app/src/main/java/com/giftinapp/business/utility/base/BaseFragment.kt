@@ -10,6 +10,7 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
 import com.giftinapp.business.dialogs.LoadingDialog
+import com.giftinapp.business.utility.RemoteConfigUtil
 import com.giftinapp.business.utility.helpers.ActivityUtilClass
 import com.giftinapp.business.utility.helpers.FragmentUtilClass
 
@@ -20,7 +21,6 @@ abstract class BaseActivity<VB: ViewBinding>: ActivityUtilClass() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-
             _binding = getActivityBinding(layoutInflater)
             return setContentView(binding.root)
         }catch (e:Exception){

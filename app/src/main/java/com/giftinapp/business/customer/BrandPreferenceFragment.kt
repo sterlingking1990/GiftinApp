@@ -125,10 +125,11 @@ open class BrandPreferenceFragment : BaseFragment<FragmentBrandPreferenceBinding
                             }
                             giftingMerchantViewPojo.giftingMerchantPojo = giftingMerchantPojo
                             giftingMerchantViewPojo.numberOfCustomerGifted = 0
+                            giftingMerchantViewPojo.merchantId = document.id
                             giftingMerchantViewPojo.giftingMerchantId =    if (document.getString("giftorId") != null) document.getString(
                                 "giftorId"
                             ) else document.id
-                            if (giftingMerchantViewPojo.giftingMerchantId != sessionManager?.getEmail()) {
+                            if (giftingMerchantViewPojo.merchantId != sessionManager?.getEmail()) {
                                 pgLoading?.visibility = View.GONE
                                 giftingMerchantViewPojos.add(giftingMerchantViewPojo)
                                 brandPreferenceAdapter?.setGiftingMerchantList(

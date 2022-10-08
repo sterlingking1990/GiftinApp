@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentSender.SendIntentException
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -24,6 +25,9 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.facebook.ads.internal.bridge.gms.AdvertisingId
+import com.facebook.shimmer.Shimmer
+import com.facebook.shimmer.ShimmerDrawable
+import com.giftinapp.business.business.SetRewardDeal
 import com.giftinapp.business.customer.AboutFragment
 import com.giftinapp.business.customer.CashoutFragment
 import com.giftinapp.business.customer.MerchantStoryList
@@ -61,13 +65,6 @@ import java.util.*
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
-var imageOne =
-    "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1"
-var imageTwo =
-    "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1"
-var imageThree =
-    "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1"
-
 @AndroidEntryPoint
 open class MainActivity : BaseActivity<ActivityMainBinding>() {
 
@@ -92,28 +89,50 @@ open class MainActivity : BaseActivity<ActivityMainBinding>() {
     var posi: Int? = null
     var mauth: FirebaseAuth? = null
     private var t: ActionBarDrawerToggle? = null
+    private var imageOne =
+        ""
+    private var imageTwo =
+        ""
+    private var imageThree =
+        ""
+    private var rewardToBrcBase = 2
 
-    var rewardToBrcBase = 2
-
-    var imageListener = ImageListener { position: Int, imageView: ImageView? ->
+    private var imageListener = ImageListener { position: Int, imageView: ImageView? ->
+        val shimmer = Shimmer.ColorHighlightBuilder()
+            .setBaseColor(Color.parseColor("#f3f3f3"))
+            .setHighlightColor(Color.parseColor("#E7E7E7"))
+            .setHighlightAlpha(1F)
+            .setRepeatCount(2)
+            .setDropoff(10F)
+            .setShape(Shimmer.Shape.RADIAL)
+            .setAutoStart(true)
+            .build()
+        val shimmerDrawable = ShimmerDrawable()
+        shimmerDrawable.setShimmer(shimmer)
         when (position) {
             0 -> {
-                val remoteConfigUtil = RemoteConfigUtil()
-                val imageOne = remoteConfigUtil.getCarouselOneImage()
+                //val remoteConfigUtil = RemoteConfigUtil()
+                imageOne = remoteConfigUtil?.getCarouselOneImage().toString()
                 Log.d("AmHere", imageOne)
-                Picasso.get().load(imageOne).into(imageView)
+                if(imageOne.isNotEmpty())
+                    Picasso.get().load(imageOne).placeholder(shimmerDrawable)
+                        .error(R.drawable.brand_img_load_error).into(imageView)
             }
             1 -> {
-                val remoteConfigUtil = RemoteConfigUtil()
-                val imageTwo = remoteConfigUtil.getCarouselTwoImage()
+                //val remoteConfigUtil = RemoteConfigUtil()
+                imageTwo = remoteConfigUtil?.getCarouselTwoImage().toString()
                 Log.d("AmHere", imageTwo)
-                Picasso.get().load(imageTwo).into(imageView)
+                if(imageTwo.isNotEmpty())
+                    Picasso.get().load(imageTwo).placeholder(shimmerDrawable)
+                        .error(R.drawable.brand_img_load_error).into(imageView)
+
             }
             2 -> {
-                val remoteConfigUtil = RemoteConfigUtil()
-                val imageThree = remoteConfigUtil.getCarouselThreeImage()
-                Log.d("AmHere", imageThree)
-                Picasso.get().load(imageThree).into(imageView)
+               // val remoteConfigUtil = RemoteConfigUtil()
+                imageThree = remoteConfigUtil?.getCarouselThreeImage().toString()
+                if(imageThree.isNotEmpty())
+                    Picasso.get().load(imageThree).placeholder(shimmerDrawable)
+                        .error(R.drawable.brand_img_load_error).into(imageView)
             }
         }
     }
@@ -321,12 +340,11 @@ open class MainActivity : BaseActivity<ActivityMainBinding>() {
                         totalGiftCoin += giftCoin!!.toLong()
                     }
 
-                    var divCoin = 1
-                        try{
-                            divCoin = ((totalGiftCoin/rewardToBrcBase).toInt())
-                        }catch (e:Exception){
-
-                        }
+                    val divCoin: Int = if(rewardToBrcBase==0){
+                        ((totalGiftCoin/1).toInt())
+                    }else{
+                        ((totalGiftCoin/rewardToBrcBase).toInt())
+                    }
                     navTextView.text = resources.getString(
                         R.string.influenca_name_and_status,
                         mauth!!.currentUser?.email ?: "",
@@ -465,11 +483,16 @@ open class MainActivity : BaseActivity<ActivityMainBinding>() {
                                                 if (counter == result.documents.size) {
                                                     sessionManager!!.setFollowingCount(following)
                                                 }
+                                                val divCoinUse = if(rewardToBrcBase==0){
+                                                    ((totalGiftCoin/1).toInt())
+                                                }else{
+                                                    ((totalGiftCoin/rewardToBrcBase).toInt())
+                                                }
                                                 navTextView.text = resources.getString(
                                                     R.string.influenca_name_and_status,
                                                         mauth!!.currentUser?.email.toString(),
                                                     sessionManager!!.getFollowingCount().toString(),
-                                                    (totalGiftCoin / rewardToBrcBase).toString()
+                                                    divCoinUse.toString()
                                                 )
                                             }
                                         }
@@ -490,6 +513,43 @@ open class MainActivity : BaseActivity<ActivityMainBinding>() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if(navController.currentDestination?.id == R.id.merchantStoryList){
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+        if(navController.currentDestination?.id == R.id.settingsFragment){
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+        if(navController.currentDestination?.id == R.id.brandPreferenceFragment){
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+
+        if(navController.currentDestination?.id == R.id.cashoutFragment){
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+
+        if(navController.currentDestination?.id == R.id.aboutFragment){
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+
+        if(navController.currentDestination?.id == R.id.myReferralDealFragment){
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 
     private val totalReferred: Unit
@@ -572,47 +632,6 @@ open class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
     }
 
-
-    private var adViewListener = ViewListener { position ->
-        @SuppressLint("InflateParams") val customView = layoutInflater.inflate(R.layout.single_item_carousel_ad_view, null)
-        val labelTextView = customView.findViewById<View>(R.id.adDescription) as TextView
-        val fruitImageView = customView.findViewById<View>(R.id.adImageView) as ImageView
-        when (position) {
-            0 -> {
-                Log.d("Pos","Zero")
-                val remoteConfigUtil = RemoteConfigUtil()
-                try {
-                    val imageFromConfig = remoteConfigUtil.getCarouselOneImage()
-                    Picasso.get().load(imageFromConfig).into(fruitImageView)
-                } catch (e: java.lang.Exception) {
-                    Picasso.get().load(imageOne).into(fruitImageView)
-                }
-            }
-            1 -> {
-                val remoteConfigUtil = RemoteConfigUtil()
-
-                //labelTextView.setText(sampleTitles[position]);
-                try {
-                    val imageFromConfig = remoteConfigUtil.getCarouselTwoImage()
-                    Picasso.get().load(imageFromConfig).into(fruitImageView)
-                } catch (e: java.lang.Exception) {
-                    Picasso.get().load(imageTwo).into(fruitImageView)
-                }
-            }
-            2 -> {
-                val remoteConfigUtil = RemoteConfigUtil()
-                try {
-                    val imageFromConfig = remoteConfigUtil.getCarouselThreeImage()
-                    Picasso.get().load(imageFromConfig).into(fruitImageView)
-                } catch (e: java.lang.Exception) {
-                    Picasso.get().load(imageThree).into(fruitImageView)
-                }
-            }
-        }
-        // binding.carouselView.indicatorGravity = Gravity.CENTER_HORIZONTAL or Gravity.TOP
-        customView
-    }
-
     private fun openPlayStore() {
         val appPackageName = packageName
 
@@ -636,14 +655,14 @@ open class MainActivity : BaseActivity<ActivityMainBinding>() {
     private fun checkAppUpdate(){
         firebaseRemoteConfig.fetchAndActivate().addOnCompleteListener {
             if (it.isSuccessful) {
-                var stringValue = ""
+                var remoteUpdateVersion = ""
 
-                stringValue = remoteConfigUtil?.getUpdateVersion()?.asString().toString()
+                remoteUpdateVersion = remoteConfigUtil?.getUpdateVersion()?.asString().toString()
                 val updateMessage = remoteConfigUtil?.getUpdateMessage()
                 val isForced = remoteConfigUtil?.getForceUpdate()?.asBoolean()
-                Log.d("Version", stringValue)
+                Log.d("Version", remoteUpdateVersion)
                 Log.d("Config", BuildConfig.VERSION_CODE.toString())
-                if (BuildConfig.VERSION_CODE.toString() != stringValue) {
+                if (BuildConfig.VERSION_CODE < remoteUpdateVersion.toInt()) {
                     if (isForced == true) {
                         showMessage(showNegBtn = false, dismissable = false, message = updateMessage.toString(), negBtnText = null) {
                             openPlayStore()
@@ -668,6 +687,7 @@ open class MainActivity : BaseActivity<ActivityMainBinding>() {
     override fun getActivityBinding(inflater: LayoutInflater): ActivityMainBinding {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
+        remoteConfigUtil = RemoteConfigUtil()
 
         val navHostFrag = supportFragmentManager.findFragmentById(R.id.main_act_nav_host_fragment) as NavHostFragment
         navController = navHostFrag.findNavController()
@@ -678,27 +698,23 @@ open class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.navView.setupWithNavController(navController)
 
         binding.carouselView.pageCount = 3
-        binding.carouselView.setViewListener(adViewListener)
-        MobileAds.initialize(this) { initializationStatus ->
-            val statusMap =
-                initializationStatus.adapterStatusMap
-            for (adapterClass in statusMap.keys) {
-                val status = statusMap[adapterClass]
-                Log.d(
-                    "MyApp", String.format(
-                        "Adapter name: %s, Description: %s, Latency: %d",
-                        adapterClass, status!!.description, status.latency
-                    )
-                )
-            }
-        }
+        binding.carouselView.setImageListener(imageListener)
+//        MobileAds.initialize(this) { initializationStatus ->
+//            val statusMap =
+//                initializationStatus.adapterStatusMap
+//            for (adapterClass in statusMap.keys) {
+//                val status = statusMap[adapterClass]
+//                Log.d(
+//                    "MyApp", String.format(
+//                        "Adapter name: %s, Description: %s, Latency: %d",
+//                        adapterClass, status!!.description, status.latency
+//                    )
+//                )
+//            }
+//        }
 
         checkAppUpdate()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-
-
-        remoteConfigUtil = RemoteConfigUtil()
         rewardToBrcBase = Math.toIntExact(remoteConfigUtil!!.rewardToBRCBase().asLong())
 
         //MediationTestSuite.launch(MainActivity.this);
@@ -711,9 +727,12 @@ open class MainActivity : BaseActivity<ActivityMainBinding>() {
             R.string.navigation_drawer_close
         )
 
+        t!!.isDrawerIndicatorEnabled=true
+
         binding.drawerLayout.addDrawerListener(object : DrawerListener {
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
             override fun onDrawerOpened(drawerView: View) {
+
                 getTotalGiftCoin()
                 numberOfFollowers
 //                binding.btnExploreBrand.translationZ = 0f
@@ -721,11 +740,14 @@ open class MainActivity : BaseActivity<ActivityMainBinding>() {
 
             override fun onDrawerClosed(drawerView: View) {
                 //binding.btnExploreBrand.translationZ = 2f
+                t!!.onDrawerClosed(drawerView)
             }
 
-            override fun onDrawerStateChanged(newState: Int) {}
+            override fun onDrawerStateChanged(newState: Int) {
+
+            }
         })
-        t!!.syncState()
+       t!!.syncState()
         binding.navView.setNavigationItemSelectedListener { item: MenuItem ->
             selectDrawerItem(item)
             true

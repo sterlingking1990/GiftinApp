@@ -135,7 +135,7 @@
                 android:id="@+id/tv_giftor_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="1.4"
                 android:gravity="center"
                 android:textColor="@color/tabColorLight"
                 android:layout_gravity="center"
@@ -148,7 +148,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_margin="10dp"
-                android:layout_weight="1"
+                android:layout_weight="0.6"
                 android:spinnerMode="dropdown" />
         </LinearLayout>
 

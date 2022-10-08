@@ -26,6 +26,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
+import java.util.Objects;
+
 public class MerchantInfoUpdate extends Fragment {
 
 
@@ -67,7 +69,7 @@ public class MerchantInfoUpdate extends Fragment {
 
         btnUpdateMerchantInfo=view.findViewById(R.id.btn_update_merchant_info);
 
-        String[] giftorId = new String[]{"use my email", "use my facebook", "use my instagram", "use my whatsapp", "use brand name"};
+        String[] giftorId = new String[]{"use my email", "use brand name"};
         ArrayAdapter<String> spGiftorAdapter = new ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, giftorId);
         spGiftorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -84,17 +86,17 @@ public class MerchantInfoUpdate extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (spGiftorAdapter.getItem(position)){
-                    case "use my facebook":
-                        selectedGiftorId = "fb: "+etFacebook.getText().toString();
-                        break;
+//                    case "use my facebook":
+//                        selectedGiftorId = "fb: "+etFacebook.getText().toString();
+//                        break;
                     case "use my email":
                         selectedGiftorId = sessionManager.getEmail();
                         break;
-                    case "use my instagram":
-                        selectedGiftorId = "ig: "+etInstagram.getText().toString();
-                        break;
-                    case "use my whatsapp":
-                        selectedGiftorId = etWhatsApp.getText().toString();
+//                    case "use my instagram":
+//                        selectedGiftorId = "ig: "+etInstagram.getText().toString();
+//                        break;
+//                    case "use my whatsapp":
+//                        selectedGiftorId = etWhatsApp.getText().toString();
                     case "use brand name":
                         selectedGiftorId = etBrandname.getText().toString();
                         break;
@@ -107,18 +109,15 @@ public class MerchantInfoUpdate extends Fragment {
             }
         });
 
-        tvGiftorId.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                builder.setMessage("This is the name influencers will search for when they want to follow your brand. " +
-                        "Make sure you select an option you are known by generally")
-                        .setCancelable(true)
-                        .setPositiveButton("OK", (dialog, id) -> {
+        tvGiftorId.setOnClickListener(v -> {
+            builder.setMessage("Brandible Influencers will find you using this., Other info will direct to your social media when clicked. " +
+                    "Ensure to set all info correctly")
+                    .setCancelable(true)
+                    .setPositiveButton("OK", (dialog, id) -> {
 
-                        });
-                AlertDialog alert = builder.create();
-                alert.show();
-            }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
         });
 
         btnUpdateMerchantInfo.setOnClickListener(v->{
@@ -128,7 +127,7 @@ public class MerchantInfoUpdate extends Fragment {
 
     }
 
-    private void updateUserInfo(String facebook, String instagram, String whatsapp, String address,String selectedGiftorId) {
+    private void updateUserInfo(String facebook, String instagram, String whatsapp, String brandId,String selectedGiftorId) {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // [END get_firestore_instance]
@@ -144,26 +143,30 @@ public class MerchantInfoUpdate extends Fragment {
         String facebookInput=facebook.isEmpty()?"not provided":facebook;
         String instagramInput = instagram.isEmpty()?"not provided":instagram;
         String whatsAppInput=whatsapp.isEmpty()?"not provided":whatsapp;
-        String addressInput=address.isEmpty()?"not provided":address;
+        //String addressInput=brandId.isEmpty()?"not provided":brandId;
         String giftorIdInput = selectedGiftorId.isEmpty()?email:selectedGiftorId;
 
         MerchantInfoUpdatePojo merchantInfoUpdatePojo=new MerchantInfoUpdatePojo();
         merchantInfoUpdatePojo.facebook=facebookInput;
         merchantInfoUpdatePojo.instagram=instagramInput;
         merchantInfoUpdatePojo.whatsapp=whatsAppInput;
-        merchantInfoUpdatePojo.address=addressInput;
+        merchantInfoUpdatePojo.address=brandId;
 
         assert email != null;
-        db.collection("merchants").document(email).update("facebook",facebookInput,"instagram",instagramInput,
-                "whatsapp",whatsAppInput,"address",addressInput,"giftorId", giftorIdInput)
-                .addOnCompleteListener(task -> {
-                    if(task.isSuccessful()){
-                        sessionManager.setGiftorId(giftorIdInput);
-                        Toast.makeText(requireContext(),"details updated successfully",Toast.LENGTH_LONG).show();
-                    }
-                });
+        if(brandId.isEmpty()){
+            Toast.makeText(requireContext(),"Invalid Entry, Please enter Valid Brand Id",Toast.LENGTH_LONG).show();
+        }else {
+            db.collection("merchants").document(email).update("facebook", facebookInput, "instagram", instagramInput,
+                            "whatsapp", whatsAppInput, "address", brandId, "giftorId", giftorIdInput)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            sessionManager.setGiftorId(giftorIdInput);
+                            Toast.makeText(requireContext(), "details updated successfully", Toast.LENGTH_LONG).show();
+                        }
+                    });
 
-        fetchInfoOnStart();
+            fetchInfoOnStart();
+        }
     }
 
     public void fetchInfoOnStart(){
@@ -176,15 +179,15 @@ public class MerchantInfoUpdate extends Fragment {
                 .build();
         db.setFirestoreSettings(settings);
 
-        db.collection("merchants").document(sessionManager.getEmail()).get()
+        db.collection("merchants").document(Objects.requireNonNull(sessionManager.getEmail())).get()
                 .addOnCompleteListener(task ->{
                     if(task.isSuccessful()){
                         DocumentSnapshot documentSnapshot =task.getResult();
                         if(documentSnapshot.exists()) {
-                            etFacebook.setText(documentSnapshot.get("facebook").toString());
-                            etInstagram.setText(documentSnapshot.get("instagram").toString());
-                            etWhatsApp.setText(documentSnapshot.get("whatsapp").toString());
-                            etBrandname.setText(documentSnapshot.get("address").toString());
+                            etFacebook.setText(Objects.requireNonNull(documentSnapshot.get("facebook")).toString());
+                            etInstagram.setText(Objects.requireNonNull(documentSnapshot.get("instagram")).toString());
+                            etWhatsApp.setText(Objects.requireNonNull(documentSnapshot.get("whatsapp")).toString());
+                            etBrandname.setText(Objects.requireNonNull(documentSnapshot.get("address")).toString());
                             String giftorText = documentSnapshot.get("giftorId") != null ? "brand Id" + "<b><p>" +  "* " + documentSnapshot.get("giftorId").toString() + "</p></b> " : "brand Id" + "<b><p>" +  "* " + documentSnapshot.getId() + "</p></b> ";
                             tvGiftorId.setText(Html.fromHtml(giftorText));
 

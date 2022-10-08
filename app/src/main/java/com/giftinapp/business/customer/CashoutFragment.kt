@@ -55,7 +55,7 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
     private lateinit var remoteConfigUtil: RemoteConfigUtil
 
     var rewardToRbcBase = 2.0
-    var amountLimitToWithdraw = 1000.0
+    var amountLimitToWithdraw = 500.0
 
     private lateinit var reference:String
 
@@ -65,8 +65,9 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
 
     private fun checkIfCanCashOut(){
         totalAmountToCashOut = sessionManager.getCashoutAmount().toString()
+        val cashoutLimit = amountLimitToWithdraw/2
         if(totalAmountToCashOut.toInt() < amountLimitToWithdraw){
-            Toast.makeText(requireContext(), "Sorry you dont have enough cash to cash out, you should have above 250 BrC before cashout", Toast.LENGTH_LONG).show()
+            showErrorCookieBar(title = "Low BrC","You don't have enough cash to cash out, you should have at least $cashoutLimit BrC before cashout")
         }
         else{
             binding.sliderAmountToCashout.isEnabled = true
@@ -114,6 +115,14 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
                 }
         }catch (e:Exception){
             Log.d("NoUser",e.message.toString())
+        }
+    }
+
+    private fun showMessageIfCantCashout(){
+        totalAmountToCashOut = sessionManager.getCashoutAmount().toString()
+        val cashoutLimit = amountLimitToWithdraw/2
+        if(totalAmountToCashOut.toInt() < amountLimitToWithdraw){
+            showErrorCookieBar(title = "Low BrC", "You don't have enough cash to cash out, you should have at least $cashoutLimit BrC before cashout")
         }
     }
 
@@ -307,7 +316,7 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
                             binding.btnVerifyAccount.text = "Verify Account"
                             binding.btnVerifyAccount.isEnabled = true
                             checkIfCanCashOut()
-                            if (totalAmountToCashOut.toInt() >= 1000) {
+                            if (totalAmountToCashOut.toInt() >= amountLimitToWithdraw) {
                                 binding.fbProcessCashout.isEnabled = true
                                 binding.fbProcessCashout.setBackgroundColor(R.color.whitesmoke)
 
@@ -522,6 +531,7 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
         sessionManager = SessionManager(requireContext())
         sessionManager.setCashoutAmount(0.0)
         loadAmountToCashOut()
+        showMessageIfCantCashout()
 
         binding.bankSpinner.onItemSelectedListener = this
         //bankListView.isEnabled = true

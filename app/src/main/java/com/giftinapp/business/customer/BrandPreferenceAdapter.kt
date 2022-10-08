@@ -30,7 +30,7 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        var inflatedTemplate =
+        val inflatedTemplate =
                 LayoutInflater.from(parent.context).inflate(R.layout.single_item_brand_preference, parent, false)
         return ViewHolder(inflatedTemplate)
     }
@@ -60,14 +60,14 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
 
             btnTogglePreference.apply {
                 setOnClickListener {
-                    clickableIcon.togglePreference(giftingMerchantList[position].giftingMerchantId, btnTogglePreference.text.toString())
+                    clickableIcon.togglePreference(giftingMerchantList[position].merchantId, btnTogglePreference.text.toString())
                     text = if(btnTogglePreference.text.toString() == "FOLLOW") "UNFOLLOW" else "FOLLOW"
                     textSize = if(btnTogglePreference.text.toString() == "UNFOLLOW") 18F else 18F
                     followingStatus.text = if(btnTogglePreference.text.toString() == "FOLLOW") "not following" else "following"
                     if(btnTogglePreference.text.toString() == "FOLLOW") followingStatus.setTextColor(context.resources.getColor(R.color.tabColor)) else followingStatus.setTextColor(context.resources.getColor(R.color.followingColor))
                 }
             }
-            checkIfUserFollowedBrand(giftingMerchantList[position].giftingMerchantId,btnTogglePreference,context,followingStatus)
+            checkIfUserFollowedBrand(giftingMerchantList[position].merchantId,btnTogglePreference,context,followingStatus)
         }
     }
 
@@ -107,11 +107,11 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
             db.collection("merchants").document(brandId).collection("followers")
                     .get()
                     .addOnCompleteListener {
-                        if (it.isSuccessful()) {
+                        if (it.isSuccessful) {
                             //now we would get the document id and then the data for the document
                             var isFollowed = false
                             for(i in it.result!!){
-                                if(i.id.equals(emailOfFollower)){
+                                if(i.id == emailOfFollower){
                                     isFollowed = true
                                 }
                             }

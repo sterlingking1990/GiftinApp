@@ -132,8 +132,9 @@ open class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                                                 username,
                                                 "customer"
                                             )
+                                            sessionManager.setFirstTimeLogin(true)
                                             val intent =
-                                                Intent(applicationContext, MainActivity::class.java)
+                                                Intent(applicationContext, InfluencerActivity::class.java)
                                             startActivity(intent)
                                         }
                                     } else {
@@ -170,6 +171,7 @@ open class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                                         updateUsersMessagingToken(username)
                                         progressDialogUtil!!.stopDialog()
                                         sessionManager.saveEmailAndUserMode(username, "business")
+                                        sessionManager.setFirstTimeLogin(true)
                                         val intent =
                                             Intent(applicationContext, MerchantActivity::class.java)
                                         startActivity(intent)

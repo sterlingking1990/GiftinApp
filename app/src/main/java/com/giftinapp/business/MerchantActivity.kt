@@ -1,51 +1,40 @@
 package com.giftinapp.business
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.IntentSender.SendIntentException
 import android.net.Uri
+import android.os.Handler
+import android.text.Html
 import android.util.Log
 import android.util.SparseArray
 import android.view.*
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import co.paystack.android.PaystackSdk
-import com.facebook.ads.internal.bridge.gms.AdvertisingId
 import com.giftinapp.business.databinding.ActivityMerchantBinding
 import com.giftinapp.business.utility.RemoteConfigUtil
 import com.giftinapp.business.utility.SessionManager
 import com.giftinapp.business.utility.base.BaseActivity
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.InstallState
-import com.google.android.play.core.install.InstallStateUpdatedListener
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.InstallStatus
-import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.squareup.picasso.Picasso
 import com.synnapps.carouselview.CarouselView
-import com.synnapps.carouselview.ViewListener
 import dagger.hilt.android.AndroidEntryPoint
-import smartdevelop.ir.eram.showcaseviewlib.GuideView
-import smartdevelop.ir.eram.showcaseviewlib.config.DismissType
+import java.util.*
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -62,125 +51,20 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
     private val mAuth = FirebaseAuth.getInstance()
     var remoteConfigUtil: RemoteConfigUtil? = null
     var btnExploreBrand: Button? = null
-    var imageOne =
-        "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1"
-    var imageTwo =
-        "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1"
-    var imageThree =
-        "https://i0.wp.com/maboplus.com/wp-content/uploads/2019/08/1-91.jpg?resize=640,740&ssl=1"
+    private var imageOne = ""
+    private var imageTwo = ""
+    private var imageThree = ""
     private var carouselViewMerchant: CarouselView? = null
     private var holderListMerchant = SparseArray<MerchantReportsViewHolder>()
     private var numberOfCustomerGifted by Delegates.notNull<Int>()
     private var totalAmountGifted by Delegates.notNull<Long>()
+    var userId = ""
     var totalWalletBalance: Long? = null
     private var t: ActionBarDrawerToggle? = null
     var counter = 0
     var following = 0
     private lateinit var navTextView: TextView
 
-
-    private var adViewListener = ViewListener { position ->
-        val customView = layoutInflater.inflate(R.layout.single_item_carousel_ad_view, null)
-        val labelTextView = customView.findViewById<View>(R.id.adDescription) as TextView
-        val merchantBrandImageView = customView.findViewById<View>(R.id.adImageView) as ImageView
-        when (position) {
-            0 -> {
-                val remoteConfigUtil = RemoteConfigUtil()
-                imageOne = remoteConfigUtil.getCarouselOneImage()
-                //labelTextView.setText(sampleTitles[position]);
-                if (imageOne != "") {
-                    Picasso.get().load(imageOne).into(merchantBrandImageView)
-                }
-                merchantBrandImageView.setOnClickListener {
-                    Toast.makeText(
-                        this@MerchantActivity,
-                        "Hello",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-            1 -> {
-                val remoteConfigUtil = RemoteConfigUtil()
-                imageTwo = remoteConfigUtil.getCarouselTwoImage()
-                //labelTextView.setText(sampleTitles[position]);
-                Picasso.get().load(imageTwo).into(merchantBrandImageView)
-            }
-            2 -> {
-                val remoteConfigUtil = RemoteConfigUtil()
-                imageThree = remoteConfigUtil.getCarouselThreeImage()
-                //labelTextView.setText(sampleTitles[position]);
-                Picasso.get().load(imageThree).into(merchantBrandImageView)
-            }
-        }
-        binding.carouselView.indicatorGravity = Gravity.CENTER_HORIZONTAL or Gravity.TOP
-        customView
-    }
-    var viewListener = ViewListener { position: Int ->
-        @SuppressLint("InflateParams") val customView =
-            layoutInflater.inflate(R.layout.single_item_merchant_carousel_report, null)
-        val holder = MerchantReportsViewHolder()
-        holder.reportValue = customView.findViewById(R.id.kpi_report_value)
-        holder.reportName = customView.findViewById(R.id.kpi_report_name)
-        holder.reportIcon = customView.findViewById(R.id.kpi_report_icon)
-        when (position) {
-            0 -> {
-                numberOfCustomersGifted
-                holder.reportName.text ="Total Influencers Rewarded"
-                holder.reportIcon.setImageResource(R.drawable.happycustomer)
-                val totalGiftCoinSum =
-                    numberOfCustomerGifted.toLong()
-                holder.reportValue.text = totalGiftCoinSum.toString()
-                holderListMerchant.put(0, holder)
-            }
-            1 -> {
-                walletBalance
-                holder.reportName.text = "Wallet Balance"
-                holder.reportValue.text = totalWalletBalance.toString()
-                holder.reportIcon.setImageResource(R.drawable.gift_coin_icon)
-                holderListMerchant.put(1, holder)
-            }
-            2 -> {
-                numberOfFollowers
-                holder.reportName.text = "Influencers following your Brand"
-                holder.reportValue.text = sessionManager!!.getFollowingCount().toString()
-                holder.reportIcon.setImageResource(R.drawable.influencer_following_brand_icon)
-                holderListMerchant.put(2, holder)
-            }
-        }
-        customView
-    }
-
-    private fun updateCounter(position: Int) {
-        when (position) {
-            0 -> {
-                run {
-                    walletBalance
-                    val walletBalanceTotal =
-                        if (totalWalletBalance == null) 0L else totalWalletBalance!!
-                    holderListMerchant[1].reportValue.text = walletBalanceTotal.toString()
-                }
-            }
-            1 -> {
-                walletBalance
-                val walletBalanceTotal =
-                    if (totalWalletBalance == null) 0L else totalWalletBalance!!
-                holderListMerchant[1].reportValue.text = walletBalanceTotal.toString()
-            }
-            2 -> {
-                numberOfFollowers
-                val numberOfFollowers = sessionManager!!.getFollowingCount()
-                holderListMerchant[2].reportValue.text = numberOfFollowers.toString()
-            }
-        }
-    }
-
-    //brand impression count is the total number of brand stories that have gotten impressions i.e views, or likes or dms
-    //usually gotten views
-    private val brandImpressionCount: Unit
-        get() {
-            //brand impression count is the total number of brand stories that have gotten impressions i.e views, or likes or dms
-            //usually gotten views
-        }
 
     class MerchantReportsViewHolder {
         lateinit var reportValue: TextView
@@ -215,57 +99,6 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
                 }
         }
 
-    private fun getTotalAmountGifted() {
-        val db = FirebaseFirestore.getInstance()
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
-        val settings = FirebaseFirestoreSettings.Builder()
-            .setPersistenceEnabled(true)
-            .build()
-        db.firestoreSettings = settings
-        db.collection("merchants").document(sessionManager!!.getEmail()!!)
-            .collection("reward_statistics").document("customers").collection("customer_details")
-            .get()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    totalAmountGifted = 0L
-                    for (queryDocumentSnapshot in task.result) {
-                        val gift_coin_amount = queryDocumentSnapshot["gift_coin"] as Long
-                        totalAmountGifted += gift_coin_amount
-                    }
-                } else {
-                    totalAmountGifted = 0L
-                }
-            }
-    }
-    // [END get_firestore_instance]
-
-    // [START set_firestore_settings]
-    private val numberOfCustomersGifted: Unit
-        get() {
-            val db = FirebaseFirestore.getInstance()
-            // [END get_firestore_instance]
-
-            // [START set_firestore_settings]
-            val settings = FirebaseFirestoreSettings.Builder()
-                .setPersistenceEnabled(true)
-                .build()
-            db.firestoreSettings = settings
-            db.collection("merchants").document(sessionManager!!.getEmail()!!)
-                .collection("reward_statistics").document("customers")
-                .collection("customer_details").get()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        numberOfCustomerGifted = 0
-                        for (queryDocumentSnapshot in task.result) {
-                            numberOfCustomerGifted += 1
-                        }
-                    } else {
-                        numberOfCustomerGifted = 0
-                    }
-                }
-        }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.merchant_menu_main, menu)
@@ -284,13 +117,11 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
             }
 
             R.id.merchant_update_info -> {
-                binding.carouselView.visibility = View.GONE
                 navController.navigate(R.id.merchantInfoUpdate)
                 return true
             }
 
             R.id.merchant_about_giftin -> {
-                binding.carouselView.visibility = View.GONE
                 navController.navigate(R.id.giftinAboutForMerchant)
                 return true
             }
@@ -311,27 +142,18 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
     }
 
     private fun selectDrawerItem(menuitem: MenuItem) {
-//        if(menuitem.getItemId()==R.id.navigation_gift_customer_fan){
-//            carouselViewMerchant.setVisibility(View.GONE);
-//            GiftACustomerFragment giftACustomer = new GiftACustomerFragment();
-//            openFragment(giftACustomer);
-//        }
 
         when(menuitem.itemId){
             R.id.navigation_wallet_info->{
-                binding.carouselView.visibility = View.GONE
                 navController.navigate(R.id.walletInfo)
             }
             R.id.navigation_set_reward_deal->{
-                binding.carouselView.visibility = View.GONE
                 navController.navigate(R.id.setRewardDeal)
             }
             R.id.navigation_view_reward_deal->{
-                binding.carouselView.visibility = View.GONE
                 navController.navigate(R.id.merchantStoryList2)
             }
             R.id.navigation_merchant_follow_brands->{
-                binding.carouselView.visibility = View.GONE
                 navController.navigate(R.id.brandPreferenceFragment2)
             }
         }
@@ -362,15 +184,63 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        if(navController.currentDestination?.id == R.id.giftinAboutForMerchant){
+            val intent = Intent(this, MerchantActivity::class.java)
+            startActivity(intent)
+        }
+        if(navController.currentDestination?.id == R.id.merchantInfoUpdate){
+            val intent = Intent(this, MerchantActivity::class.java)
+            startActivity(intent)
+        }
+        if(navController.currentDestination?.id == R.id.brandPreferenceFragment2){
+            val intent = Intent(this, MerchantActivity::class.java)
+            startActivity(intent)
+        }
+        if(navController.currentDestination?.id == R.id.walletInfo){
+            val intent = Intent(this, MerchantActivity::class.java)
+            startActivity(intent)
+        }
+        if(navController.currentDestination?.id == R.id.merchantStoryList2){
+            val intent = Intent(this, MerchantActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (data != null) {
             Log.d("Data", data.toString())
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
-    // [END get_firestore_instance]
 
-    // [START set_firestore_settings]
+    private fun getUserId(){
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+            db.collection("merchants").document(
+                    sessionManager!!.getEmail().toString()).get()
+                    .addOnCompleteListener { task: Task<DocumentSnapshot> ->
+                        if (task.isSuccessful) {
+                            val documentSnapshot = task.result
+                            if (documentSnapshot.exists()) {
+
+                                userId =
+                                    if (documentSnapshot["giftorId"] != null) documentSnapshot["giftorId"]
+                                        .toString() else  documentSnapshot.id
+                            }
+                        }
+                    }
+        }
+
     private val numberOfFollowers: Unit
         get() {
             val db = FirebaseFirestore.getInstance()
@@ -391,7 +261,7 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
                             sessionManager!!.setFollowingCount(following)
                             navTextView.text = resources.getString(
                                 R.string.brand_name_and_status,
-                               mAuth.currentUser?.email,
+                               userId,
                                 following.toString()
                             )
                         }
@@ -479,7 +349,16 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
         PaystackSdk.initialize(applicationContext)
         // Returns an intent object that you use to check for an update.
         sessionManager = SessionManager(applicationContext)
-        numberOfFollowers
+
+        if(sessionManager!!.isFirstTimeLogin()) {
+            Handler().postDelayed({
+                val i = Intent(this, MerchantActivity::class.java)
+                startActivity(i)
+                finish()
+            }, 3000)
+            sessionManager!!.setFirstTimeLogin(false)
+        }
+
         t = ActionBarDrawerToggle(
             this,
             binding.merchantNavDrawerLayout,
@@ -487,7 +366,25 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
             R.string.navigation_drawer_close
         )
 
-        binding.merchantNavDrawerLayout.addDrawerListener(t!!)
+        binding.merchantNavDrawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+            override fun onDrawerOpened(drawerView: View) {
+                getUserId()
+                numberOfFollowers
+//                binding.btnExploreBrand.translationZ = 0f
+                Log.d("userId",userId)
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                //binding.btnExploreBrand.translationZ = 2f
+                t!!.onDrawerClosed(drawerView)
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {
+
+            }
+        })
+
         t!!.syncState()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -501,26 +398,9 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
         //        Picasso.get().load(R.drawable.ic_brandible_icon).into(navImageView);
         navTextView.text = resources.getString(
             R.string.brand_name_and_status,
-            mAuth.currentUser?.email,
+            userId,
             following.toString()
         )
-        binding.carouselView.pageCount = 3
-        //binding.carouselView.setViewListener(viewListener);
-        binding.carouselView.setViewListener(adViewListener)
-        binding.carouselView.addOnPageChangeListener(object : OnPageChangeListener {
-            override fun onPageScrolled(
-                position: Int,
-                positionOffset: Float,
-                positionOffsetPixels: Int
-            ) {
-            }
-
-            override fun onPageSelected(position: Int) {
-                //updateCounter(position);
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {}
-        })
         //btnExploreBrand = findViewById(R.id.btnExploreBrand)
         remoteConfigUtil = RemoteConfigUtil()
         //binding.btnExploreBrand.setOnClickListener(View.OnClickListener { openWebView(remoteConfigUtil!!.getBrandLink()) })

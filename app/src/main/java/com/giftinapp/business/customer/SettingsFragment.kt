@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.giftinapp.business.model.DeliveryInfoPojo
 import com.google.firebase.firestore.DocumentSnapshot
 import android.text.Html
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -48,7 +49,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
         sessionManager = SessionManager(requireContext())
         builder = AlertDialog.Builder(requireContext())
         val giftinId =
-            arrayOf("use my email", "use my facebook", "use my instagram", "use my whatsapp")
+            arrayOf("use email", "use brandible id")
         val spGiftinIdAdapter =
             ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, giftinId)
         spGiftinIdAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -82,7 +83,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
             }
         })
         tvGiftingId.setOnClickListener(View.OnClickListener { v: View? ->
-            builder!!.setMessage("This is used by brands as an Id when rewarding you. Please choose options that brands can relate with easily")
+            builder!!.setMessage("This will be used as your Id for every activity across the app. Please choose option that brands can relate with easily")
                 .setCancelable(true)
                 .setPositiveButton("OK") { dialog: DialogInterface?, id: Int -> }
             val alert = builder!!.create()
@@ -96,10 +97,10 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
                 id: Long
             ) {
                 when (spGiftinIdAdapter.getItem(position)) {
-                    "use my facebook" -> selectedGiftinId = etFacebook.getText().toString()
-                    "use my email" -> selectedGiftinId = sessionManager!!.getEmail()
-                    "use my instagram" -> selectedGiftinId = etInstagram.getText().toString()
-                    "use my whatsapp" -> selectedGiftinId = etWhatsApp.getText().toString()
+                    "use brandible id" -> selectedGiftinId = etFacebook.getText().toString()
+                    "use email" -> selectedGiftinId = sessionManager!!.getEmail()
+                   // "use my instagram" -> selectedGiftinId = etInstagram.getText().toString()
+                   // "use my whatsapp" -> selectedGiftinId = etWhatsApp.getText().toString()
                 }
             }
 
@@ -117,48 +118,76 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
             .build()
         db.firestoreSettings = settings
         val email = sessionManager!!.getEmail()
-        val facebookInput = if (facebook.isEmpty()) "not provided" else facebook
-        val instagramInput = if (instagram.isEmpty()) "not provided" else instagram
-        val whatsAppInput = if (whatsapp.isEmpty()) "not provided" else whatsapp
+//        val facebookInput = facebook.ifEmpty { "not provided" }
+//        val instagramInput = instagram.ifEmpty { "not provided" }
+//        val whatsAppInput = whatsapp.ifEmpty { "not provided" }
         val giftinId =
             if (selectedGiftinId!!.isEmpty()) sessionManager!!.getEmail() else selectedGiftinId
-        if (validateDetails(facebookInput, instagramInput, whatsAppInput)) {
-            val deliveryInfoPojo = DeliveryInfoPojo()
-            deliveryInfoPojo.facebook = facebookInput
-            deliveryInfoPojo.instagram = instagramInput
-            deliveryInfoPojo.whatsapp = whatsAppInput
-            db.collection("users").document(email!!).update(
-                "facebook",
-                facebookInput,
-                "instagram",
-                instagramInput,
-                "whatsapp",
-                whatsAppInput,
-                "giftingId",
-                giftinId
-            )
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        showCookieBar(title = "Info Update Successful", message = "Your details have been updated successfully", position = CookieBar.BOTTOM)
+
+        //check if giftorIdInput already exists and is more than one- then tell the user they cant update it o
+        db.collection("users").get()
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    val allEmailResults = it.result
+                    var counter = 0
+                    for (i in allEmailResults){
+                        val giftorId = i.get("giftingId")
+                        if(giftorId == facebook && i.id != sessionManager!!.getEmail()){
+                            Log.d("GiftorId",giftorId.toString())
+                            Log.d("GiftingId",giftinId.toString())
+                            counter+=1
+                        }
                     }
-                }
-            fetchInfoOnStart()
-        } else {
-            showErrorCookieBar(title = "Invalid Entry", message = "one or more info provided is invalid, leave blank for detail you wish not to provide")
+                    if(counter>=1){
+                        showErrorCookieBar(
+                            title = "Id already exists",
+                            message = "Please select another Id as this Already exists by another user"
+                        )
+                    }else{
+                        if (validateDetails(facebook, instagram, whatsapp)) {
+                            val deliveryInfoPojo = DeliveryInfoPojo()
+                            deliveryInfoPojo.facebook = facebook
+                            deliveryInfoPojo.instagram = instagram
+                            deliveryInfoPojo.whatsapp = whatsapp
+                            db.collection("users").document(email!!).update(
+                                "facebook",
+                                facebook,
+                                "instagram",
+                                instagram,
+                                "whatsapp",
+                                whatsapp,
+                                "giftingId",
+                                giftinId
+                            )
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        showCookieBar(title = "Info Update Successful", message = "Your details have been updated successfully", position = CookieBar.BOTTOM)
+                                    }
+                                }
+                            fetchInfoOnStart()
+                        } else {
+                            showErrorCookieBar(
+                                title = "Id already exists",
+                                message = "Please select another Id as this Already exists by another user"
+                            )
 //            builder!!.setMessage("one or more info provided is invalid, leave blank for detail you wish not to provide")
 //                .setCancelable(false)
 //                .setPositiveButton("OK") { dialog: DialogInterface?, id: Int -> }
 //            val alert = builder!!.create()
 //            alert.show()
-        }
+                        }
+                    }
+                }
+            }
+
     }
 
     private fun validateDetails(
-        num1Input: String,
+        brandibleId: String,
         num2Input: String,
         addressInput: String
     ): Boolean {
-        return true
+        return brandibleId.isNotEmpty()
     }
 
     private fun fetchInfoOnStart() {
@@ -179,7 +208,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
                         etInstagram.setText(documentSnapshot["instagram"].toString())
                         etWhatsApp.setText(documentSnapshot["whatsapp"].toString())
                         val giftinIdText =
-                            "Influencer Id" + "<b><p>" + "* " + documentSnapshot.getString("giftingId") + "</p></b> "
+                            "Your Id" + "<b><p>" + "* " + documentSnapshot.getString("giftingId") + "</p></b> "
                         tvGiftingId.text = Html.fromHtml(giftinIdText)
                     }
                 }

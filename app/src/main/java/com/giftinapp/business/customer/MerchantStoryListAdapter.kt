@@ -88,17 +88,16 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 try {
 
 
-                    val merchantStoryListNoEmptyEmailId =merchantStories[position].merchantStoryList.first {
-                        !it.merchantStatusId.isNullOrEmpty()
-                    }
-                    val merchantStoryOwnerEmailId= merchantStoryListNoEmptyEmailId.merchantStatusId
+                    val merchantStoryListNoEmptyEmailId =merchantStories[position].merchantStoryList.first().merchantOwnerId
+
+                    Log.d("MerchantEmail", merchantStoryListNoEmptyEmailId)
 
 
                     val totalWorth = merchantStories[position].merchantStoryList.sumOf {
                         it.statusReachAndWorthPojo.status_worth
                     }
                     tvBrcWorth.text = (totalWorth/rewardToBaseBrc).toString() + "BrC"
-                    getNumberOfReviews(tvReviewCount,merchantStoryOwnerEmailId)
+                    getNumberOfReviews(tvReviewCount, merchantStoryListNoEmptyEmailId)
                    // Log.d("TotalWorth",totalWorth.toString())
                     merchantName.text = if (isHasStoryHeader && merchantStories[position].merchantId == sessionManager.getEmail()) (Html.fromHtml("<b>My Reward Deal</b>")) else merchantStories[position].merchantId
                     circularStatusView.setPortionsCount(merchantStories[position].merchantStoryList.size)

@@ -22,6 +22,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import com.giftinapp.business.databinding.ActivitySignupBinding
+import com.giftinapp.business.utility.ProgressDialogUtil
 import com.giftinapp.business.utility.SessionManager
 import com.giftinapp.business.utility.base.BaseActivity
 import com.google.android.gms.tasks.OnCompleteListener
@@ -37,9 +38,11 @@ class SignUpActivity : BaseActivity<ActivitySignupBinding>() {
     var emailValidator: EmailValidator? = null
     var builder: AlertDialog.Builder? = null
     var isPasswordVisible = false
+    private var progressDialogUtil: ProgressDialogUtil? = null
 
 
     private fun signUpUser(username: String, password: String) {
+        progressDialogUtil?.startDialog("Signing up...")
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
 
@@ -75,6 +78,7 @@ class SignUpActivity : BaseActivity<ActivitySignupBinding>() {
                                 db.collection("users").document(username).set(userPojo)
                                     .addOnCompleteListener { task2 ->
                                         if (task2.isSuccessful) {
+                                            progressDialogUtil?.stopDialog()
                                             showMessageDialog(title = "Temporary Registration Complete",
                                                 message = "You have been temporarily registered and can now login, " +
                                                         "However, you might not enjoy all benefits from Brandible until you verify your account. Please check email, verify your account before login; Check spam if not in inbox",
@@ -91,6 +95,7 @@ class SignUpActivity : BaseActivity<ActivitySignupBinding>() {
                             }
                         }
                 } else {
+                    progressDialogUtil?.stopDialog()
                     showErrorCookieBar("Error Completing Registration", "Registration was not successful, please try again")
                 }
             }
@@ -111,7 +116,7 @@ class SignUpActivity : BaseActivity<ActivitySignupBinding>() {
                         startActivity(intent)
                     }
                     if (modeFromSession == "customer" && currentUser.email != "giftinappinc@gmail.com") {
-                        val intent = Intent(this, MainActivity::class.java)
+                        val intent = Intent(this, InfluencerActivity::class.java)
                         startActivity(intent)
                     }
                     if (modeFromSession == "customer" && currentUser.email == "giftinappinc@gmail.com") {
@@ -133,7 +138,7 @@ class SignUpActivity : BaseActivity<ActivitySignupBinding>() {
         binding = ActivitySignupBinding.inflate(layoutInflater)
 
         //setActionBar(binding.tbSignup)
-
+        progressDialogUtil = ProgressDialogUtil(this)
         sessionManager = SessionManager(applicationContext)
         val loginMode = arrayOf("As Influencer", "As Brand")
         val loginModeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, loginMode)
@@ -146,14 +151,14 @@ class SignUpActivity : BaseActivity<ActivitySignupBinding>() {
                 Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.terms_and_condition_link)))
             )
         })
-        binding.tvPrivacyPolicy.setOnClickListener(View.OnClickListener { v: View? ->
+        binding.tvPrivacyPolicy.setOnClickListener { v: View? ->
             startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse(getString(R.string.privacy_policy_link))
                 )
             )
-        })
+        }
         binding.btnSignUp.setOnClickListener {
             if (binding.etSignupFirstname.text.toString().isEmpty() || binding.etSignupLastname.text.toString()
                     .isEmpty() || binding.etSignupPassword.text.toString().isEmpty() || binding.etSignupEmail.toString().isEmpty()
