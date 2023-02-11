@@ -18,7 +18,7 @@
         app:showAsAction="never"/>
 
     <item android:id="@+id/merchant_exit"
-        android:title="Exit"
+        android:title="Logout"
         app:showAsAction="never"/>
 
 </menu>

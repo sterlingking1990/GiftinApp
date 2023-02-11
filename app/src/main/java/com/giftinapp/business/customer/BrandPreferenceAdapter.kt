@@ -20,8 +20,10 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
     private var giftingMerchantList:MutableList<GiftingMerchantViewPojo> = ArrayList()
 
     private var giftinMerchantListAll:MutableList<GiftingMerchantViewPojo> = ArrayList()
+    private lateinit var context: Context
 
-    fun setGiftingMerchantList(giftingMerchantList:MutableList<GiftingMerchantViewPojo>){
+    fun setGiftingMerchantList(giftingMerchantList:MutableList<GiftingMerchantViewPojo>,context: Context){
+        this.context = context
         this.giftingMerchantList=giftingMerchantList
         this.giftinMerchantListAll = giftingMerchantList
     }
@@ -45,6 +47,8 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
             val giftinMerchantBusinessName =findViewById<TextView>(R.id.tv_gifting_merchant_business_name)
             giftinMerchantBusinessName.text=giftingMerchantList[position].giftingMerchantId
 
+            val animation = android.view.animation.AnimationUtils.loadAnimation(context,R.anim.bounce);
+
             iconFacebook.setOnClickListener {
                 clickableIcon.openMerchantFacebookDetail(giftingMerchantList[position].giftingMerchantPojo.facebook)
             }
@@ -60,6 +64,7 @@ class BrandPreferenceAdapter(var clickableIcon: ClickableIcon):RecyclerView.Adap
 
             btnTogglePreference.apply {
                 setOnClickListener {
+                    it.startAnimation(animation)
                     clickableIcon.togglePreference(giftingMerchantList[position].merchantId, btnTogglePreference.text.toString())
                     text = if(btnTogglePreference.text.toString() == "FOLLOW") "UNFOLLOW" else "FOLLOW"
                     textSize = if(btnTogglePreference.text.toString() == "UNFOLLOW") 18F else 18F

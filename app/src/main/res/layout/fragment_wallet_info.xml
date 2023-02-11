@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_marginTop="50dp"
-    tools:context="com.giftinapp.business.business.WalletInfo">
-
-    <!-- Nested Scroll view -->
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/tabColor"
+    tools:context="com.giftinapp.business.business.WalletInfo"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/cv_wallet_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -32,20 +24,21 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tv_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="49dp"
                 android:padding="10dp"
                 android:text="Balance"
+                android:textColor="@color/mainText"
                 android:textSize="30sp"
                 app:layout_constraintBottom_toTopOf="@+id/btn_refresh_wallet"
                 app:layout_constraintEnd_toStartOf="@id/tv_wallet_amount"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tv_wallet_amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -53,12 +46,13 @@
                 android:layout_marginBottom="160dp"
                 android:gravity="center"
                 android:textSize="30sp"
+                android:textColor="@color/mainText"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/tv_balance"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.skydoves.elasticviews.ElasticButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_refresh_wallet"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -66,8 +60,8 @@
                 app:button_cornerRadius="4dp"
                 app:button_duration="250"
                 app:button_scale="0.87"
-                android:background="@color/cardview_dark_background"
-                android:textColor="@android:color/white"
+                android:background="@drawable/rectangle_shaped_button"
+                android:textColor="@color/mainBackground"
                 android:text="refresh"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -76,7 +70,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -88,11 +82,12 @@
         android:layout_margin="30dp"
         android:id="@+id/ll_fund_wallet_range">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tv_fund_wallet_range"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="fund wallet with:"
+            android:textColor="@color/mainText"
             android:textSize="20sp"
             />
 
@@ -101,11 +96,12 @@
             android:layout_height="wrap_content"
             android:entries="@array/wallet_range"
             android:spinnerMode="dropdown"
+
             android:id="@+id/sp_wallet_range" />
 
     </LinearLayout>
 
-    <androidx.appcompat.widget.AppCompatEditText
+    <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/et_main_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -114,19 +110,23 @@
         android:layout_marginEnd="10dp"
         android:inputType="number"
         android:hint="Card Number"
+        android:textColor="@color/mainText"
+        android:textColorHint="@color/mainText"
         android:imeOptions="actionNext"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ll_fund_wallet_range" />
 
-    <androidx.appcompat.widget.AppCompatEditText
+    <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/et_main_cvv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:hint="Card CVV"
         android:imeOptions="actionNext"
+        android:textColorHint="@color/mainText"
         android:inputType="number"
+        android:textColor="@color/mainText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/et_main_card" />
@@ -154,12 +154,13 @@
             android:id="@+id/sp_main_year"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/mainText"
             android:layout_weight="1"
             android:spinnerMode="dropdown" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <com.skydoves.elasticviews.ElasticButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_process_payment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -169,8 +170,8 @@
         app:button_cornerRadius="4dp"
         app:button_duration="250"
         app:button_scale="0.87"
-        android:background="@color/cardview_dark_background"
-        android:textColor="#ffffff"
+        android:background="@drawable/rectangle_shaped_button"
+        android:textColor="@color/mainBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sp_container" />
@@ -186,7 +187,4 @@
 <!--        app:layout_constraintStart_toStartOf="parent"-->
 <!--        />-->
 
-
 </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.core.widget.NestedScrollView>
-</RelativeLayout>

@@ -21,6 +21,9 @@ import java.util.ArrayList;
     public Boolean seen;
     public ArrayList<String> viewers;
     public StatusReachAndWorthPojo statusReachAndWorthPojo;
+    public Integer taskCount = 0;
+    public SharableCondition sharableCondition = null;
+    public String publishedAt = null;
 
     public MerchantStoryListPojo (){}
 

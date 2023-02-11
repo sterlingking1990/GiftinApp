@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/tabColor"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".customer.MyReferralDealFragment">
 
@@ -15,6 +16,7 @@
         android:textSize="20sp"
         style="@style/TextAppearance.AppCompat.Title"
         android:lineSpacingExtra="10sp"
+        android:textColor="@color/mainText"
         android:letterSpacing="0.1"
         android:layout_margin="20dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -27,8 +29,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter referral reward token"
+        android:textColorHint="@color/mainText"
         android:imeOptions="actionNext"
         android:lineSpacingExtra="2dp"
+        android:textColor="@color/mainText"
         app:layout_constraintTop_toBottomOf="@id/tvGetReferralRewardHeader"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -48,8 +52,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@drawable/rectangle_shaped_button"
-        android:backgroundTint="@color/tabColor"
         android:text="Get Referral Reward"
+        android:textColor="@color/mainBackground"
         android:elevation="10dp"/>
 
 
@@ -63,6 +67,7 @@
             style="@style/TextAppearance.AppCompat.Title"
             android:lineSpacingExtra="10sp"
             android:letterSpacing="0.1"
+            android:textColor="@color/mainText"
             android:layout_margin="20dp"
             app:layout_constraintTop_toBottomOf="@id/btn_get_referral_reward"
             app:layout_constraintEnd_toEndOf="parent"
@@ -76,6 +81,7 @@
             app:layout_constraintTop_toBottomOf="@id/tvReferralDealHeader"
             app:layout_constraintStart_toStartOf="parent"
             android:gravity="start"
+            android:textColor="@color/mainText"
             android:layout_marginTop="40dp"
             android:layout_marginStart="20dp"
             style="@style/TextAppearance.AppCompat.Subhead"
@@ -96,7 +102,6 @@
             android:valueTo="100.0"
             android:stepSize="5.0"
             android:valueFrom="5.0"
-            android:backgroundTint="@color/tabColor"
             android:elevation="10dp"/>
 
         <TextView
@@ -107,6 +112,7 @@
             android:textSize="18sp"
             app:layout_constraintTop_toBottomOf="@id/referralTargetIndicator"
             android:gravity="center"
+            android:textColor="@color/mainText"
             android:lineSpacingMultiplier="1.2"
             android:layout_margin="20dp"
             app:layout_constraintStart_toStartOf="parent"
@@ -122,7 +128,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:background="@drawable/rectangle_shaped_button"
-            android:backgroundTint="@color/tabColor"
             android:text="Set my target"
+            android:textColor="@color/mainBackground"
             android:elevation="10dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

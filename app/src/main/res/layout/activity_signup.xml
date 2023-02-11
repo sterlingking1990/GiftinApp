@@ -171,14 +171,14 @@
         app:layout_constraintStart_toStartOf="parent"
         android:orientation="horizontal"
         >
-        <com.skydoves.elasticviews.ElasticButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_sign_up"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:text="@string/sign_up"
-            android:textColor="@android:color/white"
-            android:background="@color/cardview_dark_background"
+            android:textColor="@color/mainBackground"
+            android:background="@drawable/rectangle_shaped_button"
             app:layout_constraintBottom_toTopOf="@id/ll_signin_notice"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.444"
@@ -211,15 +211,15 @@
             android:text="@string/already_a_user"
             android:textSize="18sp" />
 
-        <com.skydoves.elasticviews.ElasticButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_sign_in_trigger"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:button_cornerRadius="4dp"
             app:button_duration="250"
             app:button_scale="0.87"
-            android:textColor="?attr/actionButtonTextColor"
-            android:background="?attr/actionButtonsColor"
+            android:textColor="@color/mainBackground"
+            android:background="@drawable/rectangle_shaped_button"
             android:layout_weight="1"
             android:text="@string/sign_in" />
 

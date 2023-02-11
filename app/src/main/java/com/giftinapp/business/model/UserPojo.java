@@ -20,6 +20,8 @@ public class UserPojo {
     public String whatsapp;
     public String giftingId;
     public String token;
+    public Boolean hasViewedFirstStats;
+    public Boolean hasViewedSharableGuide;
 
     public UserPojo(){}
 }

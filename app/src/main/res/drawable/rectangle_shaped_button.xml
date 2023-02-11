@@ -4,7 +4,9 @@
     android:color="@color/colorPrimaryDark">
     <item>
         <shape>
-            <corners android:radius="10dp"/>
+            <solid android:color="@color/mainText"/>
+            <corners android:radius="32dp"/>
+
             <size android:height="45dp"/>
         </shape>
     </item>

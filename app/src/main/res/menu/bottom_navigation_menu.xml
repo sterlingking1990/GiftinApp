@@ -15,19 +15,29 @@
         <item
             android:id="@+id/navigation_view_brand_preference"
             android:icon="@drawable/ic_baseline_filter_tilt_shift_24"
-            android:title="Brands"/>
+            android:title="Follow Brand"/>
 
         <item
             android:id="@+id/navigation_view_reward_deal"
             android:icon="@drawable/ic_view_reward_deal"
-            android:title="Brand Stories"/>
+            android:title="View Stories"/>
+
+<!--        <item-->
+<!--            android:id="@+id/navigation_share_n_earn"-->
+<!--            android:icon="@drawable/ic_view_reward_deal"-->
+<!--            android:title="Share n Earn"/>-->
 
         <item android:id="@+id/navigation_referral_deal"
             android:icon="@drawable/ic_referral_deal"
-            android:title="My Referral Deal" />
+            android:title="Earn with Referral"/>
+
+<!--        <item android:id="@+id/task_drop"-->
+<!--            android:icon="@drawable/ic_task_drop"-->
+<!--            android:title="Task Drop(coming soon)"/>-->
 
 
-<!--        <item-->
+
+        <!--        <item-->
 <!--            android:id="@+id/navigation_view_activity_rating"-->
 <!--            android:icon="@drawable/ic_rate_influencer"-->
 <!--            android:title="My Activity Ratings"/>-->

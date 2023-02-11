@@ -19,6 +19,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import co.paystack.android.PaystackSdk
+import com.facebook.AccessToken
 import com.giftinapp.business.databinding.ActivityMerchantBinding
 import com.giftinapp.business.utility.RemoteConfigUtil
 import com.giftinapp.business.utility.SessionManager
@@ -145,7 +146,7 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
 
         when(menuitem.itemId){
             R.id.navigation_wallet_info->{
-                navController.navigate(R.id.walletInfo)
+                navController.navigate(R.id.brandFundWalletFragment)
             }
             R.id.navigation_set_reward_deal->{
                 navController.navigate(R.id.setRewardDeal)
@@ -155,6 +156,15 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
             }
             R.id.navigation_merchant_follow_brands->{
                 navController.navigate(R.id.brandPreferenceFragment2)
+            }
+            R.id.navigation_challenge_list -> {
+                val accessToken = AccessToken.getCurrentAccessToken()
+                val isLoggedIn = (accessToken != null) && !accessToken.isExpired
+                if(isLoggedIn) {
+                    navController.navigate(R.id.merchantChallengeList)
+                }else{
+                    startActivity(Intent(this,BrandSharersActivity::class.java))
+                }
             }
         }
         binding.merchantNavDrawerLayout.close()
@@ -199,7 +209,7 @@ open class MerchantActivity : BaseActivity<ActivityMerchantBinding>() {
             val intent = Intent(this, MerchantActivity::class.java)
             startActivity(intent)
         }
-        if(navController.currentDestination?.id == R.id.walletInfo){
+        if(navController.currentDestination?.id == R.id.brandFundWalletFragment){
             val intent = Intent(this, MerchantActivity::class.java)
             startActivity(intent)
         }

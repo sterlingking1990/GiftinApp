@@ -13,7 +13,11 @@
         android:id="@+id/merchantStoryList2"
         android:name="com.giftinapp.business.customer.MerchantStoryList"
         android:label="fragment_merchant_story_list"
-        tools:layout="@layout/fragment_merchant_story_list" />
+        tools:layout="@layout/fragment_merchant_story_list" >
+        <action
+            android:id="@+id/action_merchantStoryList2_to_taskDrop"
+            app:destination="@id/taskDrop" />
+    </fragment>
     <dialog
         android:id="@+id/feedbackReviewFragment"
         android:name="com.giftinapp.business.business.FeedbackReviewFragment"
@@ -53,4 +57,24 @@
         android:name="com.giftinapp.business.business.GiftinAboutForMerchant"
         android:label="fragment_giftin_about_for_merchant"
         tools:layout="@layout/fragment_giftin_about_for_merchant" />
+    <fragment
+        android:id="@+id/merchantChallengeList"
+        android:name="com.giftinapp.business.business.MerchantChallengeList"
+        android:label="fragment_merchant_challenge_list"
+        tools:layout="@layout/fragment_merchant_challenge_list" />
+    <fragment
+        android:id="@+id/taskDrop"
+        android:name="com.giftinapp.business.customer.TaskDrop"
+        android:label="fragment_task_drop"
+        tools:layout="@layout/fragment_task_drop" />
+    <fragment
+        android:id="@+id/brandibleHome2"
+        android:name="com.giftinapp.business.homefragment.BrandibleHome"
+        android:label="fragment_brandible_home"
+        tools:layout="@layout/fragment_brandible_home" />
+    <fragment
+        android:id="@+id/brandFundWalletFragment"
+        android:name="com.giftinapp.business.business.BrandFundWalletFragment"
+        android:label="fragment_brand_fund_wallet"
+        tools:layout="@layout/fragment_brand_fund_wallet" />
 </navigation>

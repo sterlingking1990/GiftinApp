@@ -1,7 +1,10 @@
 package com.giftinapp.business
 
 import android.content.ActivityNotFoundException
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -9,6 +12,7 @@ import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
@@ -35,6 +39,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 import javax.inject.Inject
 import kotlin.properties.Delegates
+import com.facebook.AccessToken
+
+import com.facebook.LoginStatusCallback
+
+import com.facebook.login.LoginManager
+
+
+
 
 @AndroidEntryPoint
 open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
@@ -59,15 +71,20 @@ open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
     var following = 0
     var totalGiftCoin = 0L
     var userId = ""
+    var revenue_multiplier = 0.1
     private val latestAmountRedeemed: Long? = null
     @RequiresApi(api = Build.VERSION_CODES.M)
     override fun getActivityBinding(inflater: LayoutInflater): ActivityInfluencerBinding {
 
         binding = ActivityInfluencerBinding.inflate(layoutInflater)
 
-        sessionManager = SessionManager(applicationContext)
+        sessionManager = SessionManager(this)
 
 
+        builder = AlertDialog.Builder(this)
+
+        getUserId()
+        getTotalGiftCoin()
 
         if(sessionManager!!.isFirstTimeLogin()) {
             Handler().postDelayed({
@@ -79,6 +96,8 @@ open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
         }
 
         remoteConfigUtil = RemoteConfigUtil()
+
+        revenue_multiplier = remoteConfigUtil!!.getRevenueMultiplier().asDouble()
 
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -138,11 +157,38 @@ open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
         //computeInfluencerRankBasedOnActivity();
         navTextView.text = resources.getString(
             R.string.influenca_name_and_status,
-            userId, following.toString(), (totalGiftCoin / rewardToBrcBase).toString()
+            userId, following.toString(), ((totalGiftCoin - (revenue_multiplier * totalGiftCoin))/rewardToBrcBase).toString()
         )
         totalReferred
 
+        checkIfUserHasViewedStatsBefore()
+
+       // getFacebookHash()
         return binding
+    }
+
+//    private fun getFacebookHash(){
+//        FacebookSdk.sdkInitialize(applicationContext);
+//        Log.d("AppLog", "FBkey:" + FacebookSdk.getApplicationSignature(this));
+//    }
+
+    private fun checkIfUserHasViewedStatsBefore(){
+        val db = FirebaseFirestore.getInstance()
+
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("users").document(sessionManager?.getEmail().toString()).get()
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    val hasViewedFirstStats = it.result.get("hasViewedFirstStats")
+                    if(hasViewedFirstStats==null){
+                        db.collection("users").document(sessionManager?.getEmail().toString()).update("hasViewedFirstStats",false)
+                    }
+                }
+            }
     }
 
     private fun selectDrawerItem(menuitem: MenuItem) {
@@ -161,6 +207,13 @@ open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
             //binding.carouselView.visibility = View.GONE
             navController.navigate(R.id.myReferralDealFragment)
         }
+//        if (menuitem.itemId == R.id.navigation_share_n_earn) {
+//            //binding.carouselView.visibility = View.GONE
+//            Log.d("AccessToken",AccessToken.getCurrentAccessToken()?.token.toString())
+//
+//            startActivity(Intent(this,InfluencerSharersActivity::class.java))
+//            //navController.navigate(R.id.shareNEarnFragment)
+//        }
         binding.drawerLayout.close()
     }
 
@@ -202,7 +255,17 @@ open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
 
             R.id.cash_out -> {
                 //binding.carouselView.visibility = View.GONE
-                navController.navigate(R.id.cashoutFragment)
+                builder?.setTitle("Cash out?")
+                    ?.setMessage("Please select an option to cash out from")
+                    ?.setCancelable(false)
+                    ?.setPositiveButton("Naira", DialogInterface.OnClickListener { _: DialogInterface?, _: Int ->
+                        navController.navigate(R.id.cashoutFragment)
+                    })
+                    ?.setNegativeButton("Mpesa") { _: DialogInterface?, _: Int ->
+                        navController.navigate(R.id.mpesaCashoutFragment)
+                    }
+                val alert: AlertDialog? = builder?.create()
+                alert?.show()
                 return true
             }
 
@@ -361,7 +424,7 @@ open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
                                                 val divCoinUse = if(rewardToBrcBase==0){
                                                     ((totalGiftCoin/1).toInt())
                                                 }else{
-                                                    ((totalGiftCoin/rewardToBrcBase).toInt())
+                                                    ((totalGiftCoin - (revenue_multiplier * totalGiftCoin))/rewardToBrcBase).toInt()
                                                 }
                                                 navTextView.text = resources.getString(
                                                     R.string.influenca_name_and_status,
@@ -391,18 +454,17 @@ open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
                     val result = task.result
                     val eachRes = result.documents
                     var total_referred = 0
-                    for (i in eachRes.indices) {
-                        if (eachRes[i]["referrer"] != null) {
-                            try {
-                                if (eachRes[i]["referrer"] == sessionManager!!.getEmail()) {
-                                    total_referred += 1
-                                }
-                            } catch (e: Exception) {
-                                Log.d("ErrTotalReffered", e.localizedMessage)
+                    eachRes.forEach {
+                        val refererr = it.get("referrer")
+                        try {
+                            if (refererr == sessionManager!!.getEmail().toString()) {
+                                total_referred += 1
                             }
+                        } catch (e: Exception) {
+                            Log.d("ErrTotalReffered", e.localizedMessage)
                         }
                     }
-                    compareTotalReferredAgainstTarget(5)
+                    compareTotalReferredAgainstTarget(total_referred)
                 }
             }
         }
@@ -498,7 +560,7 @@ open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
                     val divCoin: Int = if(rewardToBrcBase==0){
                         ((totalGiftCoin/1).toInt())
                     }else{
-                        ((totalGiftCoin/rewardToBrcBase).toInt())
+                        ((totalGiftCoin - (revenue_multiplier * totalGiftCoin))/rewardToBrcBase).toInt()
                     }
                     navTextView.text = resources.getString(
                         R.string.influenca_name_and_status,

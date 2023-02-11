@@ -46,7 +46,7 @@
     <string name="rate_influencer">Rate Influencer</string>
     <string name="brand_name_and_status">%1$s\nFollowers (%2$s)</string>
     <string name="rated_by">Rated By: %1$s</string>
-    <string name="amount_to_cashout">cashout BrC\n(%1$s)</string>
+    <string name="amount_to_cashout">cashout %1$s BrC = #%2$s</string>
     <string name="youAreNotUpdatedMessage">There are new features now available to explore and enjoy</string>
     <string name="youAreNotUpdatedMessage1">update now</string>
     <string name="terms_and_condition"><a href="https://www.notion.so/Brandible-Terms-and-Condition-98b33ae92a73480591b64e2046095d92">Terms and Condition</a></string>
@@ -87,4 +87,24 @@
         <item>10000</item>
         <item>50000</item>
     </string-array>
+    <string name="title_activity_influencer_help_guide">InfluencerHelpGuide</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="facebook_app_id">541543441193694</string>
+    <string name="facebook_client_token">77159a0ee80c37fc3a974cc66ac2df5c</string>
+    <string name="fb_login_protocol_scheme">fb541543441193694</string>
+    <string name="brand_subscribed_msg">You subscribed to Brand updates</string>
+    <string name="brand_unsubscribed_msg">You opted out of Brand updates</string>
+    <string name="pay_amount">Fund wallet with</string>
+
+    <string name="expiry_space"> %1$s</string>
+    <string name="expiry_slash">%1$s/</string>
+    <string name="view_more">view more</string>
+    <string name="view_less">view less</string>
 </resources>

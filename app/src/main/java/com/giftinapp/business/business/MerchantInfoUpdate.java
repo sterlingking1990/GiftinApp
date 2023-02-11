@@ -11,9 +11,13 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -22,9 +26,14 @@ import android.widget.Toast;
 import com.giftinapp.business.model.MerchantInfoUpdatePojo;
 import com.giftinapp.business.R;
 import com.giftinapp.business.utility.SessionManager;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.Source;
+import com.google.firebase.ktx.Firebase;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Objects;
 
@@ -48,6 +57,8 @@ public class MerchantInfoUpdate extends Fragment {
 
     public String selectedGiftorId = "";
 
+    public CheckBox chkIsBrandSubscribed;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -59,12 +70,15 @@ public class MerchantInfoUpdate extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
+        final Animation animation = AnimationUtils.loadAnimation(requireContext(),R.anim.bounce);
+
         etFacebook=view.findViewById(R.id.et_facebook);
         etInstagram=view.findViewById(R.id.et_instagram);
         etWhatsApp=view.findViewById(R.id.et_whatsapp);
         etBrandname=view.findViewById(R.id.et_brandname);
         tvGiftorId = view.findViewById(R.id.tv_giftor_id);
 
+        chkIsBrandSubscribed = view.findViewById(R.id.chkIsBrandSubscribed);
         builder = new AlertDialog.Builder(requireContext());
 
         btnUpdateMerchantInfo=view.findViewById(R.id.btn_update_merchant_info);
@@ -121,11 +135,80 @@ public class MerchantInfoUpdate extends Fragment {
         });
 
         btnUpdateMerchantInfo.setOnClickListener(v->{
+            v.startAnimation(animation);
             updateUserInfo(etFacebook.getText().toString(),etInstagram.getText().toString(),etWhatsApp.getText().toString(),
                     etBrandname.getText().toString(),selectedGiftorId);
         });
 
+        checkIfUserIsSubscribedToBrandTopic();
+        chkIsBrandSubscribed.setOnCheckedChangeListener((compoundButton, b) -> subscribedOrUnsubscribeBrand(b));
+
     }
+
+    private void checkIfUserIsSubscribedToBrandTopic(){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("users").document(Objects.requireNonNull(sessionManager.getEmail())).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                DocumentSnapshot users = task.getResult();
+                Boolean isSubscribed = users.getBoolean("isSubscribedToBrandTopic");
+                if(Boolean.TRUE.equals(isSubscribed)){
+                    chkIsBrandSubscribed.setChecked(true);
+                    chkIsBrandSubscribed.setText(R.string.brand_subscribed_msg);
+                }
+            }
+        });
+    }
+
+    private void subscribedOrUnsubscribeBrand(Boolean isChecked){
+            if(isChecked){
+                FirebaseMessaging.getInstance().subscribeToTopic("Brand").addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                       // Toast.makeText(requireContext(),"You subscribed to Brand updates",Toast.LENGTH_LONG).show();
+                        chkIsBrandSubscribed.setText(R.string.brand_subscribed_msg);
+                        updateFirestoreSubscriptionForBrandTopic(true);
+                }
+            });
+            }else{
+                FirebaseMessaging.getInstance().unsubscribeFromTopic("Brand").addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                       // Toast.makeText(requireContext(),"You have successfully unsubscribed",Toast.LENGTH_LONG).show();
+                        chkIsBrandSubscribed.setText(R.string.brand_unsubscribed_msg);
+                        updateFirestoreSubscriptionForBrandTopic(false);
+                }
+                });
+            }
+    }
+
+    private void updateFirestoreSubscriptionForBrandTopic(Boolean isChecked){
+        String textUpdate = isChecked?"Subscribed to":"Opted out of";
+        String msg = String.format("You have successfully %s Brand updates",textUpdate);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+        db.collection("users").document(Objects.requireNonNull(sessionManager.getEmail())).update("isSubscribedToBrandTopic",isChecked).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    //Toast.makeText(requireContext(),msg,Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
 
     private void updateUserInfo(String facebook, String instagram, String whatsapp, String brandId,String selectedGiftorId) {
 

@@ -3,7 +3,11 @@ package com.giftinapp.business.network.di
 import com.giftinapp.business.network.services.cashoutservices.CashOutApiServiceMethod
 import com.giftinapp.business.network.repository.cashoutrepository.CashOutApiServiceRepository
 import com.giftinapp.business.network.repository.cashoutrepository.CashOutApiServiceRepositoryImpl
+import com.giftinapp.business.network.repository.postrepository.PostApiServiceRepo
+import com.giftinapp.business.network.repository.postrepository.PostApiServiceRepoImpl
 import com.giftinapp.business.network.services.cashoutservices.CashOutServiceMethodImpl
+import com.giftinapp.business.network.services.postservice.PostApiServiceImpl
+import com.giftinapp.business.network.services.postservice.PostApiServiceMethod
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -19,4 +23,10 @@ abstract class NetworkBinding {
 
     @Binds
     abstract fun bindCashOutApiServiceRepository(cashOutApiServiceRepositoryImpl: CashOutApiServiceRepositoryImpl): CashOutApiServiceRepository
+
+    @Binds
+    abstract fun bindPostApiServiceMethod(postApiServiceImpl: PostApiServiceImpl): PostApiServiceMethod
+
+    @Binds
+    abstract fun bindPostApiServiceRepo(postApiServiceRepoImpl: PostApiServiceRepoImpl): PostApiServiceRepo
 }

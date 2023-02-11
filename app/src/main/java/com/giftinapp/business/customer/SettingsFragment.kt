@@ -1,25 +1,27 @@
 package com.giftinapp.business.customer
 
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import android.os.Bundle
-import com.giftinapp.business.R
-import com.google.firebase.auth.FirebaseAuth
 import android.content.DialogInterface
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.giftinapp.business.model.DeliveryInfoPojo
-import com.google.firebase.firestore.DocumentSnapshot
+import android.os.Bundle
 import android.text.Html
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.Fragment
+import com.giftinapp.business.R
 import com.giftinapp.business.databinding.FragmentSettingsBinding
+import com.giftinapp.business.model.DeliveryInfoPojo
 import com.giftinapp.business.utility.SessionManager
 import com.giftinapp.business.utility.base.BaseFragment
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.ktx.messaging
 import org.aviran.cookiebar2.CookieBar
 
 class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
@@ -31,7 +33,9 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
     var sessionManager: SessionManager? = null
     var builder: AlertDialog.Builder? = null
     private lateinit var spGiftinId: Spinner
+    private lateinit var chkIsSubscribed: CheckBox
     var selectedGiftinId: String? = ""
+    var isChallenge:Boolean = false
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,11 +45,13 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val animation = android.view.animation.AnimationUtils.loadAnimation(requireContext(),R.anim.bounce);
         etFacebook = view.findViewById(R.id.et_facebook)
         etInstagram = view.findViewById(R.id.et_instagram)
         etWhatsApp = view.findViewById(R.id.et_whatsapp)
         tvGiftingId = view.findViewById(R.id.tv_gifting_id)
         btnUpdateInfo = view.findViewById(R.id.btn_update_info)
+        chkIsSubscribed = view.findViewById(R.id.chkISubscribed)
         sessionManager = SessionManager(requireContext())
         builder = AlertDialog.Builder(requireContext())
         val giftinId =
@@ -56,18 +62,22 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
         spGiftinId = view.findViewById(R.id.sp_gifting_id)
         spGiftinId.adapter = spGiftinIdAdapter
         fetchInfoOnStart()
-        btnUpdateInfo.setOnClickListener(View.OnClickListener { v: View? ->
+        btnUpdateInfo.setOnClickListener { v: View? ->
+            v?.startAnimation(animation)
             if (FirebaseAuth.getInstance().currentUser!!
                     .isEmailVerified
             ) {
                 updateUserInfo(
-                    etFacebook.getText().toString(),
-                    etInstagram.getText().toString(),
-                    etWhatsApp.getText().toString()
+                    etFacebook.text.toString(),
+                    etInstagram.text.toString(),
+                    etWhatsApp.text.toString()
                 )
             } else {
-                showMessageDialog(title = "Unverified Account", message = "You need to verify your account before updating your info, please check your mail to verify your account",
-                    disMissable = false, posBtnText = "OK", listener = {
+                showMessageDialog(title = "Unverified Account",
+                    message = "You need to verify your account before updating your info, please check your mail to verify your account",
+                    disMissable = false,
+                    posBtnText = "OK",
+                    listener = {
                         FirebaseAuth.getInstance().currentUser!!
                             .sendEmailVerification()
                     }
@@ -81,7 +91,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
 //                val alert = builder!!.create()
 //                alert.show()
             }
-        })
+        }
         tvGiftingId.setOnClickListener(View.OnClickListener { v: View? ->
             builder!!.setMessage("This will be used as your Id for every activity across the app. Please choose option that brands can relate with easily")
                 .setCancelable(true)
@@ -106,6 +116,79 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+
+        checkIfSubscribedToTopic()
+        chkIsSubscribed.setOnCheckedChangeListener{ _, isChecked ->
+            subscribeOrUnsubscribe(isChecked)
+        }
+    }
+
+    private fun checkIfSubscribedToTopic(){
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("users").document(sessionManager?.getEmail().toString()).get().addOnCompleteListener {
+            if(it.isSuccessful){
+                val users = it.result
+                val isSubscribed = users.getBoolean("isSubscribedToInfluencerTopic")
+                if(isSubscribed == true){
+                    chkIsSubscribed.isChecked = true
+                    chkIsSubscribed.text = "You Subscribed to Influencer Updates"
+                }
+            }
+        }
+    }
+
+    private fun subscribeOrUnsubscribe(isChecked:Boolean){
+        if(isChecked){
+            Firebase.messaging.subscribeToTopic("Influencer")
+                .addOnCompleteListener { task ->
+                    var msg = "You will receive updates about Influencers"
+                    if (!task.isSuccessful) {
+                        msg = "Subscribe failed"
+                    }
+                    Log.d("InfluencerSub", msg)
+                    //Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+                    chkIsSubscribed.text = "You subscribed to Influencer updates"
+                    updateFBWithSubscriptionDetails(true)
+                }
+        }else{
+            FirebaseMessaging.getInstance().unsubscribeFromTopic("Influencer")
+                .addOnCompleteListener{
+                    if(it.isSuccessful){
+                        //Toast.makeText(requireContext(),"You have successfully unsubscribed",Toast.LENGTH_LONG).show()
+                        chkIsSubscribed.text = "You opted out of Influencer updates"
+                        updateFBWithSubscriptionDetails(false)
+                    }
+                }
+        }
+    }
+
+    private fun updateFBWithSubscriptionDetails(isSubscribed:Boolean){
+        val textUpdate = if (isSubscribed) "Subscribed to" else "Opted out of"
+        val msg = "You have successfully $textUpdate Influencer updates"
+        val db = FirebaseFirestore.getInstance()
+        // [END get_firestore_instance]
+
+        // [START set_firestore_settings]
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("users").document(sessionManager?.getEmail().toString()).update("isSubscribedToInfluencerTopic",isSubscribed)
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    Log.d("FBUpdate","True")
+                    //Toast.makeText(requireContext(),msg,Toast.LENGTH_LONG).show()
+                }
+            }
     }
 
     private fun updateUserInfo(facebook: String, instagram: String, whatsapp: String) {
@@ -219,4 +302,5 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
         inflater: LayoutInflater,
         container: ViewGroup?
     ): FragmentSettingsBinding = FragmentSettingsBinding.inflate(layoutInflater,container,false)
+
 }

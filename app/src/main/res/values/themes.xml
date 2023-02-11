@@ -2,8 +2,8 @@
     <!-- Base application theme. -->
     <style name="Theme.Merchant" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/tabColorLight</item>
-        <item name="colorPrimaryVariant">@color/tabColor</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -15,11 +15,11 @@
 
         <item name="actionButtonsColor">@color/cardview_dark_background</item>
         <item name="actionButtonTextColor">@color/whitesmoke</item>
-        <item name="cardBackground">@color/tabColorLight</item>
-        <item name="followingButton">@color/tabColorLight</item>
-        <item name="textColorForInputEdit">@color/tabColorLight</item>
+        <item name="cardBackground">@color/colorPrimary</item>
+        <item name="followingButton">@color/colorPrimary</item>
+        <item name="textColorForInputEdit">@color/colorPrimary</item>
         <item name="inputEditBackground">@color/cardview_dark_background</item>
-        <item name="hintColorForTextInput">@color/tabColor</item>
+        <item name="hintColorForTextInput">@color/colorPrimary</item>
         <item name="drawerBackground">@color/drawerBackgroundLight</item>
     </style>
 
@@ -43,29 +43,29 @@
         <item name="colorControlActivated">@color/tabColor</item>
     </style>
 
-        <style name="TextView" />
+    <style name="TextView" />
 
-        <style name="TextView.Label">
-            <item name="android:layout_alignParentLeft">true</item>
-            <item name="android:layout_alignParentTop">true</item>
-            <item name="android:layout_marginLeft">10dp</item>
-            <item name="android:layout_marginTop">30dp</item>
-            <item name="android:textSize">24sp</item>
-            <item name="android:paddingLeft">10dp</item>
-            <item name="android:paddingRight">10dp</item>
-            <item name="android:paddingTop">5dp</item>
-            <item name="android:paddingBottom">5dp</item>
-            <item name="android:background">#44FFFFFF</item>
-            <item name="android:fontFamily">sans-serif-thin</item>
-            <item name="android:textColor">@android:color/white</item>
-        </style>
+    <style name="TextView.Label">
+        <item name="android:layout_alignParentLeft">true</item>
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginTop">30dp</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:background">#44FFFFFF</item>
+        <item name="android:fontFamily">sans-serif-thin</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
 
-<!--    <style name="Widget.MaterialComponents.TextInputLayout.FilledBox" parent="Base.Widget.MaterialComponents.TextInputLayout">-->
-<!--        &lt;!&ndash; underline color in FilledBox style &ndash;&gt;-->
-<!--        <item name="boxStrokeColor">@color/white</item>-->
+    <!--    <style name="Widget.MaterialComponents.TextInputLayout.FilledBox" parent="Base.Widget.MaterialComponents.TextInputLayout">-->
+    <!--        &lt;!&ndash; underline color in FilledBox style &ndash;&gt;-->
+    <!--        <item name="boxStrokeColor">@color/white</item>-->
 
-<!--        &lt;!&ndash; The color of the label when it is collapsed and the text field is active &ndash;&gt;-->
-<!--    </style>-->
+    <!--        &lt;!&ndash; The color of the label when it is collapsed and the text field is active &ndash;&gt;-->
+    <!--    </style>-->
 
     <style name="dialog_style" parent="@android:style/Theme.Dialog">
         <item name="android:windowAnimationStyle">@style/dialog_animation</item>
@@ -75,9 +75,30 @@
         <item name="android:windowEnterAnimation">@anim/slide_in_up</item>
         <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
     </style>
+
     <style name="TextInputStyling" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
         <item name="boxStrokeColor">@color/tabColor</item>
     </style>
 
-    
+    <style name="Theme.Merchant.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Merchant.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.Merchant.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+
+    <style name="spinner_style" parent="Theme.AppCompat">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/gradient_spinner</item>
+        <item name="android:layout_margin">10dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:popupBackground">#DFFFFFFF</item>
+    </style>
 </resources>

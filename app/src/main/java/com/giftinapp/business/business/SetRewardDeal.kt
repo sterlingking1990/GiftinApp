@@ -2,6 +2,7 @@ package com.giftinapp.business.business
 
 import android.Manifest
 import android.app.Activity.RESULT_OK
+import android.app.PendingIntent
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -22,6 +23,8 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
@@ -29,13 +32,17 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.giftinapp.business.InfluencerActivity
+import com.giftinapp.business.MerchantActivity
+import com.giftinapp.business.PaymentApp.CHANNEL_1_ID
+import com.giftinapp.business.PaymentApp.CHANNEL_2_ID
 import com.giftinapp.business.R
 import com.giftinapp.business.databinding.FragmentSetRewardDealBinding
 import com.giftinapp.business.model.BannerPojo
 import com.giftinapp.business.model.MerchantStoryListPojo
+import com.giftinapp.business.model.SharableCondition
 import com.giftinapp.business.model.StatusReachAndWorthPojo
 import com.giftinapp.business.utility.*
 import com.giftinapp.business.utility.base.BaseFragment
@@ -50,12 +57,11 @@ import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import org.aviran.cookiebar2.CookieBar
-import smartdevelop.ir.eram.showcaseviewlib.GuideView
-import smartdevelop.ir.eram.showcaseviewlib.config.DismissType
 import wseemann.media.FFmpegMediaMetadataRetriever
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 import kotlin.concurrent.timerTask
@@ -85,6 +91,8 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
     var photoFile: File? = null
 
     var totalStatusWorthAndReachProduct:Long = 0L
+
+    var totalChallengeWorth:Long = 0L
 
     var merchantWallet:Long = 0L
 
@@ -121,6 +129,19 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
     private var videoString:String? = null
     private var videoArtWork:String = ""
     private var mmr = FFmpegMediaMetadataRetriever()
+    var challengeWorthCustomizable = 50
+
+    var isChallenge:Boolean = false
+    var isSharable:Boolean = false
+
+    var remoteConfigUtil: RemoteConfigUtil? = null
+
+    var sharableSetting=SharableCondition(null,null,null,null)
+
+    lateinit var notificationManagerCompat:NotificationManagerCompat
+
+
+    var artWorkBitmap:Bitmap? = null
 
     private val resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -453,7 +474,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 
         val data = outputStream.toByteArray()
 
-        val path = "rewardmemes/" + UUID.randomUUID() + ".png"
+        val path = "mediafiles/" + UUID.randomUUID() + ".png"
 
         val pathRef = storage.getReference(path)
 
@@ -514,7 +535,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_ARTIST)
 
         return mmr.getFrameAtTime(
-            1000000,
+            10000000,
             FFmpegMediaMetadataRetriever.OPTION_CLOSEST
         )
         //val artwork = mmr.embeddedPicture
@@ -522,13 +543,15 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 
     private fun uploadVideoCaptionProvided(){
         binding.pgUploading.visibility = View.VISIBLE
-        firebaseMediaUploader.uploadVideo(videoUriToUpload.toString(),{ success->
+        val videoUploadTask = firebaseMediaUploader.uploadVideo(videoUriToUpload.toString(),{ success->
             binding.tvVideoDownloadUri.text = success
             binding.pgUploading.visibility = View.GONE
 
-            val bmp = getBmpArtWorkFromMedia()
-            mmr.release()
-            firebaseMediaUploader.uploadImage(bmp,{
+            if(artWorkBitmap==null) {
+                artWorkBitmap = getBmpArtWorkFromMedia()
+                mmr.release()
+            }
+            firebaseMediaUploader.uploadImage(artWorkBitmap!!,{
                 videoArtWork = it
                 uploadUriAndStoryTagToFireStore()
             },{
@@ -537,12 +560,94 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 
         },{
 
-
         })
     }
 
+    private fun uploadVideo(url: String){
+        val reference = storage.getReference("mediafiles/" + UUID.randomUUID() + ".mp4")
+        val uploadTask = reference.putFile(Uri.parse(url))
+        binding.pgUploading.visibility = View.VISIBLE
+        uploadTask.addOnCompleteListener(requireActivity()){it->
+
+            if(it.isSuccessful){
+                Log.d("VU","SuccessfullyUploaded")
+                binding.pgUploading.visibility = View.GONE
+            }
+        }
+        uploadTask.continueWithTask { task->
+            if(!task.isSuccessful){
+                task.exception?.let {
+                    throw it
+                }
+            }
+            reference.downloadUrl
+        }.addOnCompleteListener { task ->
+        if(task.isSuccessful){
+            val downloadUri = task.result
+            binding.tvVideoDownloadUri.text = downloadUri.toString()
+            binding.pgUploading.visibility = View.GONE
+            //uploadUriAndStoryTagToFireStore()
+            if(artWorkBitmap==null) {
+                artWorkBitmap = getBmpArtWorkFromMedia()
+                mmr.release()
+            }
+            uploadArtWord(artWorkBitmap!!)
+//            firebaseMediaUploader.uploadImage(bmp,{
+//                videoArtWork = it
+//                uploadUriAndStoryTagToFireStore()
+//            },{
+//
+//            })
+        }else{
+            showErrorCookieBar("Video Uri Error", "Could not get uri of video, please try uploading again")
+            binding.pgUploading.visibility = View.GONE
+        }
+
+        }
+    }
+
+    private fun uploadArtWord(bmp: Bitmap) {
+        val outputStream = ByteArrayOutputStream()
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+
+        val data = outputStream.toByteArray()
+
+
+       // val path = "mediafiles/" + UUID.randomUUID() + ".png"
+        storage = FirebaseStorage.getInstance()
+
+        val pathRef = storage.getReference("mediafiles/" + UUID.randomUUID() + ".png")
+
+        val uploadTask = pathRef.putBytes(data)
+
+        binding.pgUploading.visibility = View.VISIBLE
+        binding.btnSaveRewardStatusHint.isEnabled = false
+
+        uploadTask.addOnCompleteListener(requireActivity()) { it ->
+
+            if (it.isSuccessful) {
+                Log.d("RM", "successfullyUploadedArtwork")
+                binding.pgUploading.visibility = View.GONE
+            }
+        }
+
+        uploadTask.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let {
+                    throw it
+                }
+            }
+            pathRef.downloadUrl
+        }.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                videoArtWork = task.result.toString()
+                uploadUriAndStoryTagToFireStore()
+            }
+        }
+    }
+
     private fun uploadAudio(file: File?,uri:Uri?) {
-        val audioPath = "rewardmemes/" + UUID.randomUUID() + ".3gp"
+        val audioPath = "mediafiles/" + UUID.randomUUID() + ".3gp"
         val reference = storage.getReference(audioPath)
         val uploadTask = if(file!=null){
             reference.putFile(Uri.fromFile(file))}
@@ -582,17 +687,47 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         }
     }
 
+    private fun fetchUploadedChallengeTotalWorth(){
+        val db = FirebaseFirestore.getInstance()
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("merchants").document(sessionManager.getEmail().toString()).collection("challengelist").get()
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    totalChallengeWorth = 0L
+                    for (eachChallenge in it.result!!) {
+                        val eachChallengeData = eachChallenge.data
+                        var challengeWorth = 0
+                        var challengeReach = 0
+
+                        for ((key, value) in eachChallengeData) {
+                            if (key == "statusReachAndWorthPojo") {
+                                val data: Map<String, Int> = value as Map<String, Int>
+                                for ((eachKey, eachValue) in data.entries) {
+                                    if (eachKey == "status_worth") {
+                                        challengeWorth = eachValue
+                                    }
+                                    if (eachKey == "status_reach") {
+                                        challengeReach = eachValue
+                                    }
+                                    totalChallengeWorth += (challengeWorth * challengeReach)
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+    }
+
     private fun fetchUploadedStatsOnLoad() {
         checkWalletBalanceAgainstProposedAdCost()
 
         binding.pgUploading.visibility = View.VISIBLE
         val db = FirebaseFirestore.getInstance()
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
         val settings = FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build()
@@ -604,6 +739,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
                             val listOfStats = ArrayList<MerchantStoryListPojo>()
+                            totalStatusWorthAndReachProduct = 0L
                             for (eachStatus in it.result!!) {
                                 val merchantStoryListPojo = MerchantStoryListPojo()
                                 merchantStoryListPojo.merchantStatusImageLink = eachStatus.getString("merchantStatusImageLink")?:""
@@ -613,6 +749,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                                 merchantStoryListPojo.videoArtWork = eachStatus.getString("videoArtWork")?:""
                                 merchantStoryListPojo.seen = eachStatus.getBoolean("seen")
                                 merchantStoryListPojo.merchantStatusId = eachStatus.id
+                                merchantStoryListPojo.publishedAt = eachStatus.getString("publishedAt")?:"12-24-2022 12:00"
 
                                 val map: Map<String, Any> = eachStatus.data
                                 var statusWorth = 0
@@ -682,8 +819,15 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 
     private fun uploadUriAndStoryTagToFireStore() {
         //check if wallet balance is higher than proposed advert cost( status_worth*num_of_reach for all status )
+        //and all challengePublished, publication Cost yet to be made
+        val statusWorth = binding.statusWorthIndicator.value.toInt()
+        val reach = binding.numberOfReachindicator.value.toInt()
+        val proposedCostForPublishing = statusWorth*reach
 
-        if (merchantWallet > totalStatusWorthAndReachProduct) {
+        val totalAmountOnPublication = totalStatusWorthAndReachProduct + proposedCostForPublishing.toLong() + totalChallengeWorth
+        Log.d("TotalAmtOnPublication",totalAmountOnPublication.toString())
+
+        if (merchantWallet > totalAmountOnPublication) {
 
             val db = FirebaseFirestore.getInstance()
 
@@ -709,30 +853,67 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                 statusReachAndWorthPojo.status_worth = binding.statusWorthIndicator.value.toInt()
                 statusReachAndWorthPojo.status_reach = binding.numberOfReachindicator.value.toInt()
                 merchantStoryListPojo.statusReachAndWorthPojo = statusReachAndWorthPojo
+                merchantStoryListPojo.sharableCondition = sharableSetting
                 merchantStoryListPojo.viewers = arrayListOf()
+                merchantStoryListPojo.publishedAt = setPublishedAtDate()
 
-                db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").document()
-                    .id.also {id->
-                        db.collection("merchants").document(sessionManager.getEmail().toString())
-                            .collection("statuslist").document(id).set(merchantStoryListPojo)
-                            .addOnCompleteListener {it2->
-                                if (it2.isSuccessful) {
-                                    db.collection("merchants").document(sessionManager.getEmail().toString())
-                                        .collection("statuslist").document(id).update("merchantStatusId",id)
-                                    Toast.makeText(
-                                        requireContext(),
-                                        "published successfully",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    fetchUploadedStatsOnLoad()
+                if(isChallenge){
+                    if(statusWorth < challengeWorthCustomizable){
+                        Toast.makeText(requireContext(),"Challenge should worth more than 50",Toast.LENGTH_LONG).show()
+                    }else{
+                    //check if merchantWallet is greater than (totalStatusWorthAndReachProduct+challengeWorthSet)
+                    db.collection("merchants").document(sessionManager.getEmail().toString())
+                        .collection("challengelist").document()
+                        .id.also { id ->
+                            db.collection("merchants")
+                                .document(sessionManager.getEmail().toString())
+                                .collection("challengelist").document(id).set(merchantStoryListPojo)
+                                .addOnCompleteListener { it2 ->
+                                    if (it2.isSuccessful) {
+                                        db.collection("merchants")
+                                            .document(sessionManager.getEmail().toString())
+                                            .collection("challengelist").document(id)
+                                            .update("merchantStatusId", id)
+                                        showCookieBar(title = "Challenge Published Successfully", message = "Check Challenge List to view and manage the challenges you have published.", position = CookieBar.BOTTOM, delay = 5000L)
+                                        sendNotificationForSharable(sharableSetting.shareStartTime,sharableSetting.shareDuration)
+                                        clearUri()
+                                        fetchUploadedChallengeTotalWorth()
+                                    }
                                 }
-                            }
-                    }
+                        }
+                }
+                }else {
+                    db.collection("merchants").document(sessionManager.getEmail().toString())
+                        .collection("statuslist").document()
+                        .id.also { id ->
+                            db.collection("merchants")
+                                .document(sessionManager.getEmail().toString())
+                                .collection("statuslist").document(id).set(merchantStoryListPojo)
+                                .addOnCompleteListener { it2 ->
+                                    if (it2.isSuccessful) {
+                                        db.collection("merchants")
+                                            .document(sessionManager.getEmail().toString())
+                                            .collection("statuslist").document(id)
+                                            .update("merchantStatusId", id)
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "published successfully",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        sendNotificationForStoryPublished()
+                                        clearUri()
+                                        fetchUploadedStatsOnLoad()
+                                        fetchUploadedChallengeTotalWorth()
+                                    }
+                                }
+                        }
+                }
             } else {
                 showMessageDialog("Unverified Account","You need to verify your account to publish reward stories, please check your mail to verify your account",
                     disMissable = false, posBtnText = "OK", listener = {
                         FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
                         binding.pgUploading.visibility = View.GONE
+
                     }
                 )
 //                builder!!.setMessage("You need to verify your account to publish reward stories, please check your mail to verify your account")
@@ -760,14 +941,112 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         }
     }
 
+    private fun setPublishedAtDate():String{
+        val sdf = SimpleDateFormat("MM-dd-yyyy HH:mm");
+        val now = Date()
+        val cal: Calendar =
+            GregorianCalendar()
+
+        cal.time = now
+
+        return sdf.format(cal.time)
+    }
+
+    private fun sendNotificationForSharable(shareStartTime: String?, shareDuration: Int?) {
+        var contentText = "A new sharable has been published by a brand, will start at $shareStartTime \nto end after $shareDuration min"
+        var contentTitle = "New Sharable Published"
+        if(shareDuration==null){
+            contentText = "A new task has been published, participate in it as fast as possible to earn BrC"
+            contentTitle = "New Task Published"
+        }
+
+        Log.d("ContentText",contentText)
+        Log.d("ContentTitle",contentTitle)
+        try {
+            val activityIntent = Intent(requireContext(), InfluencerActivity::class.java)
+            val contentIntent = PendingIntent.getActivity(
+                requireContext(),
+                0,
+                activityIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val notification = NotificationCompat.Builder(requireContext(), CHANNEL_2_ID)
+                .setSmallIcon(R.drawable.ic_brandible_icon)
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .setContentIntent(contentIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setAutoCancel(true)
+                .build()
+
+            notificationManagerCompat.notify(2, notification)
+        }catch (e:Exception){
+            val activityIntent = Intent(requireContext(), MerchantActivity::class.java)
+            val contentIntent = PendingIntent.getActivity(
+                requireContext(),
+                0,
+                activityIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val notification = NotificationCompat.Builder(requireContext(), CHANNEL_2_ID)
+                .setSmallIcon(R.drawable.ic_brandible_icon)
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .setContentIntent(contentIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setAutoCancel(true)
+                .build()
+
+            notificationManagerCompat.notify(2, notification)
+        }
+    }
+
+
+    private fun sendNotificationForStoryPublished(){
+
+        try {
+            val activityIntent = Intent(requireContext(), InfluencerActivity::class.java)
+            val contentIntent = PendingIntent.getActivity(requireContext(),0,activityIntent,PendingIntent.FLAG_IMMUTABLE)
+            val notification = NotificationCompat.Builder(requireContext(), CHANNEL_1_ID)
+                .setSmallIcon(R.drawable.ic_brandible_icon)
+                .setContentTitle("New Story Published")
+                .setContentText("A new story has been published by a brand, quickly check it out to earn BrC")
+                .setContentIntent(contentIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setAutoCancel(true)
+                .build()
+
+            notificationManagerCompat.notify(1, notification)
+        }catch (e:Exception){
+            val activityIntent = Intent(requireContext(), MerchantActivity::class.java)
+            val contentIntent = PendingIntent.getActivity(requireContext(),0,activityIntent,PendingIntent.FLAG_IMMUTABLE)
+            val notification = NotificationCompat.Builder(requireContext(), CHANNEL_1_ID)
+                .setSmallIcon(R.drawable.ic_brandible_icon)
+                .setContentTitle("New Story Published")
+                .setContentText("A new story has been published by a brand, quickly check it out to earn BrC")
+                .setContentIntent(contentIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setAutoCancel(true)
+                .build()
+
+            notificationManagerCompat.notify(1, notification)
+        }
+    }
+    private fun clearUri() {
+        binding.tvAudioDownloadUri.text = ""
+        binding.tvVideoDownloadUri.text = ""
+        binding.tvDownloadUri.text = ""
+        binding.btnSaveRewardStatusHint.isEnabled = true
+    }
+
     private fun checkWalletBalanceAgainstProposedAdCost(){
         val db = FirebaseFirestore.getInstance()
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
         val settings = FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build()
@@ -787,6 +1066,8 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
     }
 
     override fun deleteLink(link: String, videoLink:String, audioLink:String, artWorkLink:String, id: String, positionId: Int) {
+        Log.d("LinkIs",link)
+        Log.d("VideoLinkIs",videoLink)
         var mediaLink = ""
         mediaLink = link.ifEmpty {
             videoLink
@@ -823,21 +1104,45 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                                     try {
                                         mediaRef.delete().addOnCompleteListener { deleteVideo ->
                                             if (deleteVideo.isSuccessful) {
-                                                val artWorkRef: StorageReference =
-                                                    FirebaseStorage.getInstance()
-                                                        .getReferenceFromUrl(artWork)
-                                                artWorkRef.delete()
-                                                    .addOnCompleteListener { deleteArtWork ->
-                                                        if (deleteArtWork.isSuccessful) {
-                                                            binding.pgUploading.visibility = View.GONE
-                                                            uploadedStoryAdapter.clear(positionId)
-                                                            uploadedStoryAdapter.notifyDataSetChanged()
+                                                if(artWork.isNotEmpty()) {
+                                                    val artWorkRef: StorageReference =
+                                                        FirebaseStorage.getInstance()
+                                                            .getReferenceFromUrl(artWork)
+                                                    artWorkRef.delete()
+                                                        .addOnCompleteListener { deleteArtWork ->
+                                                            if (deleteArtWork.isSuccessful) {
+                                                                binding.pgUploading.visibility =
+                                                                    View.GONE
+                                                                uploadedStoryAdapter.clear(
+                                                                    positionId
+                                                                )
+                                                                uploadedStoryAdapter.notifyDataSetChanged()
 
-                                                            showCookieBar("Reward Story Removed", "You have successfully removed reward story", position = CookieBar.BOTTOM)
-                                                            fetchUploadedStatsOnLoad()
+                                                                showCookieBar(
+                                                                    "Reward Story Removed",
+                                                                    "You have successfully removed reward story",
+                                                                    position = CookieBar.BOTTOM
+                                                                )
+                                                                fetchUploadedStatsOnLoad()
+                                                                fetchUploadedChallengeTotalWorth()
+                                                            }
+
                                                         }
-
-                                                    }
+                                                }else{
+                                                    binding.pgUploading.visibility =
+                                                        View.GONE
+                                                    uploadedStoryAdapter.clear(
+                                                        positionId
+                                                    )
+                                                    uploadedStoryAdapter.notifyDataSetChanged()
+                                                    showCookieBar(
+                                                        "Reward Story Removed",
+                                                        "You have successfully removed reward story",
+                                                        position = CookieBar.BOTTOM
+                                                    )
+                                                    fetchUploadedStatsOnLoad()
+                                                    fetchUploadedChallengeTotalWorth()
+                                                }
                                             }
                                         }
                                     }catch (e:Exception){
@@ -859,6 +1164,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 
                                                             showCookieBar("Reward Story Removed", "You have successfully removed reward story", position = CookieBar.BOTTOM)
                                                             fetchUploadedStatsOnLoad()
+                                                            fetchUploadedChallengeTotalWorth()
                                                         }
                                                     }
                                             } catch (e: Exception) {
@@ -867,6 +1173,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                                                 uploadedStoryAdapter.notifyDataSetChanged()
                                                 showCookieBar("Reward Story Removed", "You have successfully removed reward story", position = CookieBar.BOTTOM)
                                                 fetchUploadedStatsOnLoad()
+                                                fetchUploadedChallengeTotalWorth()
                                             }
                                         }
 
@@ -875,6 +1182,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                             }else{
                                 showErrorCookieBar("Deletion Error!","Unable to complete deletion, please try again")
                                 fetchUploadedStatsOnLoad()
+                                fetchUploadedChallengeTotalWorth()
                             }
                         }
             }
@@ -987,6 +1295,17 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
             }
     }
 
+    override fun notifyExpiredStory() {
+        builder!!.setTitle("Story is Outdated?")
+            .setMessage("Influencers can no longer see this story on your status. \nTo engage Influencers, delete outdated story and publish fresh status of your brand")
+            .setCancelable(true)
+            .setPositiveButton("Ok") { dialog: DialogInterface?, id: Int ->
+
+            }
+        val alert = builder!!.create()
+        alert.show()
+    }
+
 
     private fun uploadImageFromGallery() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -1019,6 +1338,32 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUriFromSource)
         fragment.startActivityForResult(intent, IMAGE_CHOOSE)
 
+    }
+
+    private fun checkIfMerchantPublishedAtLeastOneStatusStory() {
+        val db = FirebaseFirestore.getInstance()
+
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        if (FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
+            //delete gift from cart
+            sessionManager.getEmail()?.let {
+                db.collection("merchants").document(it).collection("statuslist").get()
+                    .addOnCompleteListener { statusList ->
+                        if(statusList.result.isEmpty){
+                            Toast.makeText(requireContext(),"Please publish at least one Status Story before publishing a Challenge",Toast.LENGTH_LONG).show()
+                            binding.chkIsChallenge.isChecked = false
+                            isChallenge = false
+                        }else{
+                            setSharableNoteAndCondition()
+                        }
+                    }
+
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -1116,11 +1461,23 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         player = null
     }
 
+    private fun setSharableNoteAndCondition(){
+        showBottomSheet(SharableConditionFragment.newInstance(::onSharableConditionCompleted))
+    }
+
+    private fun onSharableConditionCompleted(sharableCondition: SharableCondition) {
+        sharableSetting = sharableCondition
+        Toast.makeText(requireContext(),"Share settings have been saved",Toast.LENGTH_LONG).show()
+
+    }
+
     override fun getFragmentBinding(
         inflater: LayoutInflater,
         container: ViewGroup?
     ): FragmentSetRewardDealBinding {
         binding = FragmentSetRewardDealBinding.inflate(layoutInflater,container,false)
+        notificationManagerCompat = NotificationManagerCompat.from(requireContext())
+
         storage = FirebaseStorage.getInstance()
 
         uploadedStoryRecyclerViewLayoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
@@ -1138,6 +1495,8 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         builder = AlertDialog.Builder(requireContext())
 
         sessionManager = SessionManager(requireContext())
+
+        remoteConfigUtil = RemoteConfigUtil()
 
         binding.tvDownloadUri.visibility = View.GONE
         binding.tvAudioDownloadUri.visibility = View.GONE
@@ -1157,7 +1516,8 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
             if(binding.viewImage.isVisible) {
                 uploadRewardMemeAndAudioIfProvided()
             }else{
-                uploadVideoCaptionProvided()
+                uploadVideo(videoUriToUpload.toString())
+//                uploadVideoCaptionProvided()
             }
         }
 
@@ -1166,6 +1526,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         }
 
         fetchUploadedStatsOnLoad()
+        fetchUploadedChallengeTotalWorth()
 
         handleStatusWorthSlider()
         handleNumberOfViewSlider()
@@ -1196,6 +1557,21 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 //                resetDefaultViewWithOutPromotionalRecyclerView()
 //            }
 //
+//        }
+
+        binding.chkIsChallenge.setOnCheckedChangeListener{ _, isChecked ->
+            if(isChecked){
+                //check if owner has published at least one story
+                checkIfMerchantPublishedAtLeastOneStatusStory()
+            }
+            isChallenge = isChecked
+        }
+
+//        binding.chkIsSharable.setOnCheckedChangeListener { _, isChecked ->
+//            if(isChecked){
+//                setSharableNoteAndCondition()
+//            }
+//            isSharable = isChecked
 //        }
 
         if(isMicrophonePresent() == true){

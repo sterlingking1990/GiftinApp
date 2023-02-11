@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/tabColor"
     tools:context=".customer.CashoutFragment">
 
 
@@ -63,7 +64,7 @@
             android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.skydoves.elasticviews.ElasticButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnVerifyAccount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -71,9 +72,9 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         app:button_cornerRadius="4dp"
+        android:background="@drawable/rectangle_shaped_button"
         app:button_duration="250"
-        android:background="@color/cardview_dark_background"
-        android:textColor="@android:color/white"
+        android:textColor="@color/mainBackground"
         app:button_scale="0.87"
         app:layout_constraintTop_toBottomOf="@id/tl_accountNumber"
         app:layout_constraintStart_toStartOf="@id/tl_accountNumber"
@@ -88,7 +89,6 @@
         android:layout_height="wrap_content"
         android:text="your details"
         android:textSize="18sp"
-        android:textColor="?attr/textColorForInputEdit"
         android:textStyle="bold"
         android:layout_marginTop="30dp"
         android:layout_marginStart="32dp"
@@ -116,7 +116,6 @@
             android:layout_height="wrap_content"
             android:hint="Account Name"
             android:imeOptions="actionNext"
-            android:textColor="?attr/textColorForInputEdit"
             android:enabled="false"
             android:inputType="number"
             android:maxLines="1"
@@ -140,11 +139,12 @@
         <TextView
             android:id="@+id/tvAmountToCashout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1.5"
             android:layout_gravity="center_vertical"
             android:textColor="?attr/textColorForInputEdit"
             android:layout_margin="10dp"
+            android:textSize="20sp"
             android:text="Amount to cashout"
             />
         <com.google.android.material.slider.Slider
@@ -155,18 +155,18 @@
             android:layout_weight="0.5"
             app:trackColor="?attr/textColorForInputEdit"
             android:value="1000.0"
+            android:visibility="gone"
             android:valueTo="10000.0"
             android:stepSize="1000"
             android:valueFrom="1000"
             android:elevation="10dp"/>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <com.skydoves.elasticviews.ElasticFloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fbProcessCashout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        app:backgroundTint="@color/cardview_dark_background"
         app:button_cornerRadius="4dp"
         app:button_duration="250"
         app:button_scale="0.87"

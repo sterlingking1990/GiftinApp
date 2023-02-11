@@ -141,6 +141,10 @@ class RateInfluencerFragment : Fragment(), UploadedRewardStoryListAdapter.Clicka
         }
     }
 
+    override fun notifyExpiredStory() {
+        TODO("Not yet implemented")
+    }
+
     private fun fetchUploadedStatsOnLoad() {
 
         pgUploading.visibility = View.VISIBLE

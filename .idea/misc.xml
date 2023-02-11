@@ -6,19 +6,32 @@
         <entry key="../../Library/Android/sdk/platforms/android-31/data/res/layout/simple_spinner_dropdown_item.xml" value="0.24230072463768115" />
         <entry key="../../Library/Android/sdk/platforms/android-31/data/res/layout/simple_spinner_item.xml" value="0.24230072463768115" />
         <entry key="app/src/main/res/drawable-v24/rectangle_grey_full.xml" value="0.168" />
+        <entry key="app/src/main/res/drawable/btn_border_blue_background.xml" value="0.1645" />
+        <entry key="app/src/main/res/drawable/btn_round_opaque.xml" value="0.1645" />
         <entry key="app/src/main/res/drawable/drop_down_arrow.xml" value="0.1245" />
         <entry key="app/src/main/res/drawable/frame_layout_corner_background.xml" value="0.168" />
+        <entry key="app/src/main/res/drawable/gradient_spinner.xml" value="0.1645" />
         <entry key="app/src/main/res/drawable/ic_officialgiftinapplogo.xml" value="0.1665" />
         <entry key="app/src/main/res/drawable/ic_rate_influencer.xml" value="0.1665" />
+        <entry key="app/src/main/res/drawable/input_with_border_pay.xml" value="0.1645" />
+        <entry key="app/src/main/res/drawable/rectangle_shaped_button.xml" value="0.1645" />
+        <entry key="app/src/main/res/layout/activity_brand_guide.xml" value="0.19293478260869565" />
+        <entry key="app/src/main/res/layout/activity_brand_sharers.xml" value="0.2028985507246377" />
         <entry key="app/src/main/res/layout/activity_giftin_app_authority.xml" value="0.14322916666666666" />
+        <entry key="app/src/main/res/layout/activity_how_to_earn_more.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_how_to_use_sharable.xml" value="0.2028985507246377" />
         <entry key="app/src/main/res/layout/activity_influencer.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_influencer_guide.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_influencer_sharers.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1598731884057971" />
         <entry key="app/src/main/res/layout/activity_merchant.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_signup.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_about.xml" value="0.15217391304347827" />
+        <entry key="app/src/main/res/layout/fragment_brand_fund_wallet.xml" value="0.2028985507246377" />
         <entry key="app/src/main/res/layout/fragment_brand_preference.xml" value="0.25" />
-        <entry key="app/src/main/res/layout/fragment_carousel_home.xml" value="0.21" />
+        <entry key="app/src/main/res/layout/fragment_brandible_home.xml" value="0.19293478260869565" />
+        <entry key="app/src/main/res/layout/fragment_carousel_home.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_cashout.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_customer_reward_stories.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_feedback_review.xml" value="0.19293478260869565" />
@@ -26,21 +39,38 @@
         <entry key="app/src/main/res/layout/fragment_giftin_about_for_merchant.xml" value="0.5" />
         <entry key="app/src/main/res/layout/fragment_gifting_merchant.xml" value="0.14322916666666666" />
         <entry key="app/src/main/res/layout/fragment_loading_dialog.xml" value="0.19293478260869565" />
+        <entry key="app/src/main/res/layout/fragment_merchant_challenge_list.xml" value="0.29791666666666666" />
         <entry key="app/src/main/res/layout/fragment_merchant_gift_stats.xml" value="0.14488348530901723" />
         <entry key="app/src/main/res/layout/fragment_merchant_info_update.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_merchant_story_list.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/fragment_mpesa_cashout.xml" value="0.24574096679687502" />
+        <entry key="app/src/main/res/layout/fragment_my_referral_deal.xml" value="0.22" />
         <entry key="app/src/main/res/layout/fragment_rate_influencer.xml" value="0.17447916666666666" />
+        <entry key="app/src/main/res/layout/fragment_responders_list.xml" value="0.5" />
         <entry key="app/src/main/res/layout/fragment_review.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_set_reward_deal.xml" value="0.31351776123046876" />
         <entry key="app/src/main/res/layout/fragment_settings.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_sharable_condition.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_sharable_guide.xml" value="0.2028985507246377" />
+        <entry key="app/src/main/res/layout/fragment_share_n_earn.xml" value="0.2028985507246377" />
+        <entry key="app/src/main/res/layout/fragment_task_drop.xml" value="0.19293478260869565" />
+        <entry key="app/src/main/res/layout/fragment_time_picker.xml" value="0.14375" />
+        <entry key="app/src/main/res/layout/fragment_view_responders_and_respond.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/fragment_wallet_info.xml" value="0.2028985507246377" />
         <entry key="app/src/main/res/layout/main_nav_header_menu.xml" value="0.33" />
         <entry key="app/src/main/res/layout/single_item_brand_preference.xml" value="0.21" />
+        <entry key="app/src/main/res/layout/single_item_brandible_update.xml" value="0.19293478260869565" />
         <entry key="app/src/main/res/layout/single_item_carousel_ad_view.xml" value="0.13145896656534956" />
         <entry key="app/src/main/res/layout/single_item_customer_carousel_report.xml" value="0.15217391304347827" />
         <entry key="app/src/main/res/layout/single_item_gift_history.xml" value="0.15806159420289856" />
+        <entry key="app/src/main/res/layout/single_item_guide_layout.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/single_item_merchant_challenge_list.xml" value="0.5" />
         <entry key="app/src/main/res/layout/single_item_merchant_gift_stats.xml" value="0.21105072463768115" />
+        <entry key="app/src/main/res/layout/single_item_responders.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/single_item_responders_and_respond_view.xml" value="0.33" />
         <entry key="app/src/main/res/layout/single_item_review.xml" value="0.33" />
         <entry key="app/src/main/res/layout/single_item_status_list.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/single_item_task_drop.xml" value="0.33" />
         <entry key="app/src/main/res/layout/single_item_uploaded_reward_story.xml" value="0.21105072463768115" />
         <entry key="app/src/main/res/layout/single_my_gift_detail.xml" value="0.15806159420289856" />
         <entry key="app/src/main/res/layout/single_video_layout.xml" value="0.1421875" />
@@ -52,6 +82,7 @@
         <entry key="app/src/main/res/menu/giftin_authority_menu_main.xml" value="0.2828125" />
         <entry key="app/src/main/res/menu/merchant_menu_main.xml" value="0.2828125" />
         <entry key="app/src/main/res/xml/ad_network_security_config.xml" value="0.15217391304347827" />
+        <entry key="app/src/main/res/xml/file_provider_path.xml" value="0.2028985507246377" />
         <entry key="app/src/main/res/xml/rectangle_grey_full.xml" value="0.15217391304347827" />
         <entry key="app/src/main/res/xml/shortcuts.xml" value="0.1" />
       </map>

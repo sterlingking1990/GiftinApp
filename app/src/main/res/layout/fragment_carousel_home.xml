@@ -6,6 +6,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/rvPostList"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="5dp"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
+<!--    <ProgressBar-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        android:id="@+id/pgLoadingPost"/>-->
 
     <com.synnapps.carouselview.CarouselView
         android:id="@+id/carouselView"
@@ -22,18 +38,18 @@
         app:strokeColor="#FF777777"
         app:strokeWidth="1dp"/>
 
-    <com.skydoves.elasticviews.ElasticButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnExploreBrand"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:background="@color/cardview_dark_background"
+        android:background="@drawable/rectangle_shaped_button"
         android:elevation="100dp"
         android:fontFamily="sans-serif-light"
         android:text="Explore Brand"
         android:textAllCaps="false"
-        android:textColor="@android:color/white"
+        android:textColor="@color/mainBackground"
         android:textSize="16sp"
         android:translationZ="0dp"
         app:button_cornerRadius="20dp"

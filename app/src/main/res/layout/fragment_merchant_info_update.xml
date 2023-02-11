@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_marginTop="50dp"
+    android:background="@color/tabColor"
     tools:context="com.giftinapp.business.business.MerchantInfoUpdate">
 
     <!-- Nested Scroll view -->
@@ -35,7 +35,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Facebook handle"
-                    android:textColor="?attr/textColorForInputEdit"
+                    android:textColor="@color/mainText"
                     android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1"
@@ -53,6 +53,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/TextInputStyling"
                 android:layout_width="match_parent"
+                android:textColorHint="?attr/hintColorForTextInput"
                 android:layout_height="wrap_content">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -60,7 +61,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Instagram handle"
-                    android:textColor="?attr/textColorForInputEdit"
+                    android:textColor="@color/mainText"
                     android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1"
@@ -77,6 +78,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/TextInputStyling"
                 android:layout_width="match_parent"
+                android:textColorHint="?attr/hintColorForTextInput"
                 android:layout_height="wrap_content">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -85,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Enter WhatsApp"
                     android:imeOptions="actionNext"
-                    android:textColor="?attr/textColorForInputEdit"
+                    android:textColor="@color/mainText"
                     android:inputType="number"
                     android:maxLines="1"
                     android:textSize="16sp" />
@@ -102,6 +104,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/TextInputStyling"
                 android:layout_width="match_parent"
+                android:textColorHint="?attr/hintColorForTextInput"
                 android:layout_height="wrap_content">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -109,7 +112,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Enter Brand name"
-                    android:textColor="?attr/textColorForInputEdit"
+                    android:textColor="@color/mainText"
                     android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1"
@@ -137,7 +140,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1.4"
                 android:gravity="center"
-                android:textColor="@color/tabColorLight"
+                android:textColor="@color/mainText"
                 android:layout_gravity="center"
                 android:text="brand id"
                 android:textSize="16sp"
@@ -149,11 +152,30 @@
                 android:layout_height="40dp"
                 android:layout_margin="10dp"
                 android:layout_weight="0.6"
+                android:textColorHint="?attr/hintColorForTextInput"
                 android:spinnerMode="dropdown" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/ll_subscribe"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:weightSum="2">
 
-        <com.skydoves.elasticviews.ElasticButton
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/chkIsBrandSubscribed"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:checked="false"
+                android:textColor="@color/mainText"
+                android:text="You opted out of Brand updates"/>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_update_merchant_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -162,8 +184,8 @@
             app:button_cornerRadius="4dp"
             app:button_duration="250"
             app:button_scale="0.87"
-            android:textColor="?attr/actionButtonTextColor"
-            android:background="?attr/actionButtonsColor"
+            android:textColor="@color/mainBackground"
+            android:background="@drawable/rectangle_shaped_button"
             android:textAlignment="center"
             android:textSize="20dp" />
 

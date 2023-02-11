@@ -3,14 +3,16 @@ package com.giftinapp.business.homefragment
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
-import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.navigation.fragment.findNavController
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.GraphRequest
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
 import com.facebook.shimmer.Shimmer
 import com.facebook.shimmer.ShimmerDrawable
 import com.giftinapp.business.R
@@ -19,19 +21,23 @@ import com.giftinapp.business.utility.RemoteConfigUtil
 import com.giftinapp.business.utility.base.BaseFragment
 import com.squareup.picasso.Picasso
 import com.synnapps.carouselview.ImageListener
-import smartdevelop.ir.eram.showcaseviewlib.GuideView
-import smartdevelop.ir.eram.showcaseviewlib.config.DismissType
+import java.util.*
+
 
 class CarouselHome : BaseFragment<FragmentCarouselHomeBinding>() {
 
+//    private val getPostListViewModel: GetPostsViewModel by viewModels()
+//    lateinit var postListAdapter:PostListAdapter
     private lateinit var binding: FragmentCarouselHomeBinding
     private lateinit var remoteConfigUtil: RemoteConfigUtil
-    private lateinit var imageList:List<Uri>
+    //private lateinit var imageList:List<Uri>
     private var imageOne =
-        "https://zuri.health/wp-content/uploads/2022/08/Vera-services.jpg"
+        "https://www.brandibleinc.com/brandiblehosts/kilishimperio/kilishi_imperio.jpg"
     private var imageTwo =
-        "https://i.pinimg.com/564x/61/8d/7b/618d7b2041c923d1d422fc9b40c4d17a.jpg"
-    private var imageThree ="https://wallpaperaccess.com/full/526285.jpg"
+        "https://www.brandibleinc.com/brandiblehosts/kilishimperio/kilishi_imperio2.jpg"
+    private var imageThree ="https://www.brandibleinc.com/brandiblehosts/kilishimperio/kilishi_imperio3.jpg"
+
+
 
     override fun getFragmentBinding(
         inflater: LayoutInflater,
@@ -39,13 +45,31 @@ class CarouselHome : BaseFragment<FragmentCarouselHomeBinding>() {
     ): FragmentCarouselHomeBinding {
         binding = FragmentCarouselHomeBinding.inflate(layoutInflater,container,false)
 
+
+
+
+
+        val animation = android.view.animation.AnimationUtils.loadAnimation(requireContext(),R.anim.bounce);
+
+//        postListAdapter = PostListAdapter()
+//        binding.rvPostList.adapter = postListAdapter
+//        binding.rvPostList.layoutManager = GridLayoutManager(requireContext(),2)
+//
+//        getPostListViewModel.getPostList()
+//        //fetchPost()
+//
+//        observePosts()
+
+
         remoteConfigUtil = RemoteConfigUtil()
 
         binding.carouselView.pageCount = 3
         binding.carouselView.setImageListener(imageListener)
 
         binding.btnExploreBrand.setOnClickListener {
+            it.startAnimation(animation)
             openWebView(remoteConfigUtil.getBrandLink())
+
         }
 
         showHelpBar(
@@ -56,6 +80,28 @@ class CarouselHome : BaseFragment<FragmentCarouselHomeBinding>() {
 
         return binding
     }
+
+//    private fun observePosts(){
+//        getPostListViewModel.postListResponse.observe(viewLifecycleOwner) {
+//            when(it.status){
+//                Resource.Status.LOADING -> {
+//                    Log.d("ItLoaded","Loading")
+//                    binding.pgLoadingPost.visible()
+//                }
+//                Resource.Status.SUCCESS -> {
+//                    binding.pgLoadingPost.gone()
+//                    Log.d("Data",it.data.toString())
+//                    it.data?.let { it1 -> postListAdapter.setRespondersList(it1) }
+//                    postListAdapter.notifyDataSetChanged()
+//                }
+//                Resource.Status.ERROR -> {
+//                    binding.pgLoadingPost.gone()
+//                    Toast.makeText(requireContext(),"Unable to load posts",Toast.LENGTH_LONG).show()
+//                    Log.d("Error",it.message.toString())
+//                }
+//            }
+//        }
+//    }
 
     private var imageListener = ImageListener { position: Int, imageView: ImageView? ->
         imageView?.scaleType = ImageView.ScaleType.FIT_XY
@@ -75,9 +121,15 @@ class CarouselHome : BaseFragment<FragmentCarouselHomeBinding>() {
                 val remoteConfigUtil = RemoteConfigUtil()
                 imageOne = remoteConfigUtil.getCarouselOneImage()
 //                Log.d("AmHere", imageOne)
-                if(imageOne.isNotEmpty())
+                if(imageOne.isNotEmpty()) {
                     Picasso.get().load(imageOne).placeholder(shimmerDrawable)
                         .error(R.drawable.brand_img_load_error).into(imageView)
+                }else{
+                    val imageOne =
+                        "https://www.brandibleinc.com/brandiblehosts/kilishimperio/kilishi_imperio.jpg"
+                    Picasso.get().load(imageOne).placeholder(shimmerDrawable)
+                        .error(R.drawable.brand_img_load_error).into(imageView)
+                }
             }
             1 -> {
                 val remoteConfigUtil = RemoteConfigUtil()
@@ -103,6 +155,6 @@ class CarouselHome : BaseFragment<FragmentCarouselHomeBinding>() {
         intent.data = Uri.parse(brandLink)
         intent.action = Intent.ACTION_VIEW
         startActivity(intent)
-    }
 
+    }
 }

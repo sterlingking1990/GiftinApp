@@ -17,6 +17,9 @@ def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
     signingConfigs {
         debug {
             storeFile file('/Users/macuser/Documents/giftinappks')
@@ -39,8 +42,8 @@ android {
         applicationId "com.giftinapp.business"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 86
-        versionName "1.8"
+        versionCode 105
+        versionName "1.91"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -84,7 +87,13 @@ android {
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.8.0'
-    implementation platform('com.google.firebase:firebase-bom:26.1.1')
+    // Import the BoM for the Firebase platform
+    implementation platform('com.google.firebase:firebase-bom:31.0.2')
+
+
+    // Add the dependency for the App Check library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+
     implementation 'androidx.appcompat:appcompat:1.5.0'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -186,7 +195,7 @@ dependencies {
 
     implementation 'com.github.javiersantos:AppUpdater:2.7'
 
-    implementation 'com.google.android.play:integrity:1.0.1'
+    implementation 'com.google.android.play:integrity:1.0.2'
 
     def searchable_spinner_version = "1.3.1"
     implementation "com.toptoche.searchablespinner:searchablespinnerlibrary:$searchable_spinner_version"
@@ -211,6 +220,15 @@ dependencies {
 
     implementation("net.thauvin.erik:bitly-shorten:0.9.3")
 
+    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
+    implementation 'com.facebook.android:facebook-login:latest.release'
+
+    implementation 'com.facebook.android:facebook-share:latest.release'
+
+}
+
+configurations.all {
+    exclude group: 'com.google.android.gms', module: 'play-services-safetynet'
 }
 
 repositories {

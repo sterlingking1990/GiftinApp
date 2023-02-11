@@ -13,7 +13,7 @@ class CashOutServiceMethodImpl @Inject constructor(private val cashOutApiService
     }
 
     override suspend fun getBankLists(): FetchBanksResponse {
-        return cashOutApiService.getBankLists()
+        return cashOutApiService.getBankLists("nigeria")
     }
 
     override suspend fun initiateTransferProcess(authorization:String,transferRequestModel: InitiateTransferRequestModel): Response<InitiateTransferResponseModel> {

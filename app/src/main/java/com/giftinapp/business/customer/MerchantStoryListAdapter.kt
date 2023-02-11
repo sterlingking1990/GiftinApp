@@ -22,6 +22,7 @@ import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.MerchantStoryPojo
 import com.giftinapp.business.utility.RemoteConfigUtil
 import com.giftinapp.business.utility.SessionManager
+import com.giftinapp.business.utility.visible
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.squareup.picasso.Picasso
@@ -64,6 +65,9 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 val imgReview = findViewById<ImageView>(R.id.imgReview)
                 val tvReviewCount = findViewById<TextView>(R.id.tvReviewCount)
                 val tvBrcWorth = findViewById<TextView>(R.id.tvBrcWorth)
+                val ivTaskDropIcon = findViewById<ImageView>(R.id.ivTaskDropIcon)
+                val tvViewTaskDrop = findViewById<TextView>(R.id.tvViewTaskDrop)
+
 
                 val anim = AnimationUtils.loadAnimation(context, R.anim.text_view_animation)
                 imgReview.animation = anim
@@ -84,6 +88,7 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                 shimmerDrawable.setShimmer(shimmer)
 
                 val rewardToBaseBrc = remoteConfigUtil.rewardToBRCBase().asLong()
+                val revenue_multiplier = remoteConfigUtil.getRevenueMultiplier().asDouble()
 
                 try {
 
@@ -96,7 +101,8 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                     val totalWorth = merchantStories[position].merchantStoryList.sumOf {
                         it.statusReachAndWorthPojo.status_worth
                     }
-                    tvBrcWorth.text = (totalWorth/rewardToBaseBrc).toString() + "BrC"
+
+                    tvBrcWorth.text = ((totalWorth - (revenue_multiplier * totalWorth))/rewardToBaseBrc).toString() + "BrC"
                     getNumberOfReviews(tvReviewCount, merchantStoryListNoEmptyEmailId)
                    // Log.d("TotalWorth",totalWorth.toString())
                     merchantName.text = if (isHasStoryHeader && merchantStories[position].merchantId == sessionManager.getEmail()) (Html.fromHtml("<b>My Reward Deal</b>")) else merchantStories[position].merchantId
@@ -117,6 +123,15 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
 
                     imgReview.setOnClickListener {
                         storyClickable.onReviewClicked(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, merchantStories[position].storyOwner)
+                    }
+
+                    checkIfThereIsChallengeSetBy(merchantStories[position].storyOwner,ivTaskDropIcon,tvViewTaskDrop)
+
+                    ivTaskDropIcon.setOnClickListener {
+                        storyClickable.loadTaskDrop(merchantStories[position].storyOwner)
+                    }
+                    tvViewTaskDrop.setOnClickListener {
+                        storyClickable.loadTaskDrop(merchantStories[position].storyOwner)
                     }
 
                     checkIfStatusSeen(merchantStories[position].merchantStoryList as ArrayList<MerchantStoryListPojo>, context, circularStatusView, merchantStories[position].storyOwner)
@@ -142,8 +157,35 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
         fun onStoryStarred(merchantStoryList: ArrayList<MerchantStoryListPojo>){
 
         }
+        fun loadTaskDrop(storyOwner: String){
+
+        }
     }
 
+    private fun checkIfThereIsChallengeSetBy(
+        storyOwner: String,
+        ivTaskDropIcon: ImageView,
+        tvViewTaskDrop: TextView
+    ){
+        val db = FirebaseFirestore.getInstance()
+
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("merchants").document(storyOwner)
+            .collection("challengelist").get()
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    val challengeList = it.result
+                    if(!challengeList.isEmpty && sessionManager.getUserMode() == "customer"){
+                        ivTaskDropIcon.visible()
+                        tvViewTaskDrop.visible()
+                    }
+                }
+            }
+    }
     private fun checkIfStatusSeen(merchantStoryList: ArrayList<MerchantStoryListPojo>,
                                   context: Context,
                                   circularStatusView: CircularStatusView, owner: String) {

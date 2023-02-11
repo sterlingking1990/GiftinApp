@@ -3,147 +3,167 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/tabColor"
     android:layout_height="match_parent">
-<LinearLayout android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="10dp"
-    android:orientation="vertical"
-    tools:context="com.giftinapp.business.customer.SettingsFragment">
 
-
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="10dp"
+        tools:context="com.giftinapp.business.customer.SettingsFragment">
+
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="horizontal">
+            android:layout_gravity="center_vertical"
+            android:gravity="center"
+            android:orientation="vertical">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/TextInputStyling"
+            <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColorHint="?attr/hintColorForTextInput"
-                >
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_facebook"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Your Brandible ID"
-                    android:imeOptions="actionNext"
-                    android:inputType="text"
-                    android:textColor="?attr/textColorForInputEdit"
-                    android:maxLines="1"
-                    android:textSize="16sp" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:visibility="gone"
-            android:orientation="horizontal">
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/TextInputStyling"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColorHint="?attr/hintColorForTextInput"
-                >
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_instagram"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Enter Instagram"
-                    android:imeOptions="actionNext"
-                    android:textColor="?attr/textColorForInputEdit"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:textSize="16sp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:visibility="gone"
-            android:orientation="horizontal">
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/TextInputStyling"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColorHint="?attr/hintColorForTextInput"
-                >
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_whatsapp"
-                    android:layout_width="match_parent"
-                    android:textColor="?attr/textColorForInputEdit"
-                    android:layout_height="wrap_content"
-                    android:hint="Enter WhatsApp"
-                    android:imeOptions="actionNext"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:textSize="16sp" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <LinearLayout
-            android:id="@+id/ll_settings_giting"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            android:padding="5dp"
-            android:weightSum="2">
-
-            <TextView
-                android:id="@+id/tv_gifting_id"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.4"
-                android:gravity="center"
-                android:textColor="@color/tabColorLight"
-                android:layout_gravity="center"
-                android:text="Your Id"
-                android:textSize="16sp"
-                app:drawableEndCompat="@drawable/ic_info" />
-
-            <Spinner
-                android:id="@+id/sp_gifting_id"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
                 android:layout_margin="10dp"
-                android:layout_weight="0.6"
-                android:spinnerMode="dropdown" />
-        </LinearLayout>
+                android:orientation="horizontal">
 
-        <com.skydoves.elasticviews.ElasticButton
-            android:id="@+id/btn_update_info"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            app:button_cornerRadius="4dp"
-            app:button_duration="250"
-            app:button_scale="0.87"
-            android:textColor="?attr/actionButtonTextColor"
-            android:background="?attr/actionButtonsColor"
-            android:text="Update Info"
-            android:textAlignment="center"
-            android:textSize="20dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/TextInputStyling"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColorHint="?attr/hintColorForTextInput">
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_facebook"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Your Brandible ID"
+                        android:imeOptions="actionNext"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="@color/mainText"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
 
-</LinearLayout>
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/TextInputStyling"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColorHint="?attr/hintColorForTextInput">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_instagram"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Enter Instagram"
+                        android:imeOptions="actionNext"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="?attr/textColorForInputEdit"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/TextInputStyling"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColorHint="?attr/hintColorForTextInput">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_whatsapp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Enter WhatsApp"
+                        android:imeOptions="actionNext"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="?attr/textColorForInputEdit"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <LinearLayout
+                android:id="@+id/ll_settings_giting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:padding="5dp"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/tv_gifting_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1.4"
+                    android:gravity="center"
+                    android:text="Your Id"
+                    android:textColor="@color/mainText"
+                    android:textSize="16sp"
+                    app:drawableEndCompat="@drawable/ic_info" />
+
+                <Spinner
+                    android:id="@+id/sp_gifting_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_margin="10dp"
+                    android:layout_weight="0.6"
+                    android:backgroundTint="#DA5F47"
+                    android:spinnerMode="dropdown"
+                    app:backgroundTint="#DA5F47" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_subscribe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:padding="5dp"
+                android:weightSum="2">
+
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/chkISubscribed"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:checked="false"
+                    android:textColor="@color/mainText"
+                    android:text="You Opted out of Influencer updates"/>
+            </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_update_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/rectangle_shaped_button"
+                android:text="Update Info"
+                android:textAlignment="center"
+                android:textColor="@color/mainBackground"
+                android:textSize="20dp"
+                app:button_cornerRadius="4dp"
+                app:button_duration="250"
+                app:button_scale="0.87" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </LinearLayout>
 </ScrollView>

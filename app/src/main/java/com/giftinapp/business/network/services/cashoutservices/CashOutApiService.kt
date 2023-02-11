@@ -11,8 +11,8 @@ interface CashOutApiService {
     suspend fun verifyAccountNumber(@Header("Authorization") authorization: String, @Query("account_number") account_number:String,
                                     @Query("bank_code") bank_code:String): Response<VerifyAccountResponse>
 
-    @GET("/bank?country=nigeria")
-    suspend fun getBankLists():FetchBanksResponse
+    @GET("/bank")
+    suspend fun getBankLists(@Query("country") country:String):FetchBanksResponse
 
     @POST("transferrecipient")
     suspend fun initiateTransferProcess(@Header("Authorization") authorization: String, @Body transferRequestModel: InitiateTransferRequestModel):Response<InitiateTransferResponseModel>

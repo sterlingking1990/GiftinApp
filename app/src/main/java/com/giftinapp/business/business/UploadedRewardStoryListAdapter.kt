@@ -1,5 +1,6 @@
 package com.giftinapp.business.business
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
 import com.giftinapp.business.model.MerchantStoryListPojo
+import com.giftinapp.business.utility.visible
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUploadedStory):RecyclerView.Adapter<UploadedRewardStoryListAdapter.ViewHolder>() {
@@ -28,8 +33,19 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
         holder.itemView.apply {
             val tvLink = findViewById<TextView>(R.id.tvStoryLink)
             val ivDelete = findViewById<ImageView>(R.id.ivDeleteStory)
+            val ivExpiredStory = findViewById<ImageView>(R.id.ivExpiredStory)
+            val publishedAt: String = merchantStoryListPojo[position].publishedAt
 
-            tvLink.text = merchantStoryListPojo[position].storyTag
+            Log.d("PublishedAt",publishedAt)
+            if(!isWithinTime(publishedAt)){
+                ivExpiredStory.visible()
+            }
+
+            if(merchantStoryListPojo[position].storyTag.isNullOrEmpty()){
+                tvLink.text = "Tag is Empty- Click to view Story"
+            }else {
+                tvLink.text = merchantStoryListPojo[position].storyTag
+            }
 
             tvLink.setOnClickListener {
                 if (merchantStoryListPojo[position].statusReachAndWorthPojo != null) {
@@ -62,6 +78,10 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
                         merchantStoryListPojo[position].merchantStatusId.toString(),
                         position)
             }
+
+            ivExpiredStory.setOnClickListener {
+                clickableUploadedStory.notifyExpiredStory()
+            }
         }
     }
 
@@ -72,6 +92,7 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
     interface ClickableUploadedStory{
         fun deleteLink(link: String, videoLink:String,audioLink:String,artWorkLink:String, id: String, positionId: Int)
         fun displayImage(url: String, videoLink:String, audioLink:String,tag: String, status_worth:Int?, status_reach:Int?, status_id:String?)
+        fun notifyExpiredStory()
     }
 
     fun clear(position:Int) {
@@ -80,6 +101,27 @@ class UploadedRewardStoryListAdapter(val clickableUploadedStory: ClickableUpload
             merchantStoryListPojo.remove(merchantStoryListPojo[position])
             notifyItemRemoved(position)
         }
+    }
+
+    private fun isWithinTime(publishedDate:String):Boolean{
+        val sdf = SimpleDateFormat("MM-dd-yyyy HH:mm");
+        val pubDate = sdf.parse(publishedDate);
+
+
+        val calendar = Calendar.getInstance();
+
+        calendar.time = pubDate!!;
+        calendar.add(Calendar.HOUR, 24);
+
+        val now = Date()
+        val cal: Calendar =
+            GregorianCalendar()
+
+        cal.time = now
+
+        Log.d("IsWithinTime", (cal.time<=calendar.time).toString())
+
+        return cal.time<=calendar.time
     }
 
 }

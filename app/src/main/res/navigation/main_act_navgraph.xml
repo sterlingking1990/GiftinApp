@@ -12,6 +12,9 @@
         <action
             android:id="@+id/action_merchantStoryList_to_carouselHome2"
             app:destination="@id/carouselHome" />
+        <action
+            android:id="@+id/action_merchantStoryList_to_taskDrop2"
+            app:destination="@id/taskDrop2" />
     </fragment>
     <fragment
         android:id="@+id/myReferralDealFragment"
@@ -58,4 +61,32 @@
         android:id="@+id/settingsFragment"
         android:name="com.giftinapp.business.customer.SettingsFragment"
         android:label="SettingsFragment" />
+    <fragment
+        android:id="@+id/taskDrop2"
+        android:name="com.giftinapp.business.customer.TaskDrop"
+        android:label="fragment_task_drop"
+        tools:layout="@layout/fragment_task_drop" >
+        <action
+            android:id="@+id/action_taskDrop2_to_merchantStoryList"
+            app:destination="@id/merchantStoryList" />
+    </fragment>
+    <fragment
+        android:id="@+id/shareNEarnFragment"
+        android:name="com.giftinapp.business.customer.ShareNEarnFragment"
+        android:label="fragment_share_n_earn"
+        tools:layout="@layout/fragment_share_n_earn" />
+    <fragment
+        android:id="@+id/sharableGuideFragment"
+        android:name="com.giftinapp.business.customer.SharableGuideFragment"
+        android:label="fragment_sharable_guide"
+        tools:layout="@layout/fragment_sharable_guide" >
+        <action
+            android:id="@+id/action_sharableGuideFragment_to_taskDrop2"
+            app:destination="@id/taskDrop2" />
+    </fragment>
+    <fragment
+        android:id="@+id/mpesaCashoutFragment"
+        android:name="com.giftinapp.business.customer.MpesaCashoutFragment"
+        android:label="fragment_mpesa_cashout"
+        tools:layout="@layout/fragment_mpesa_cashout" />
 </navigation>

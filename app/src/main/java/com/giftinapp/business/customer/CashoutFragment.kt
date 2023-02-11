@@ -2,10 +2,14 @@ package com.giftinapp.business.customer
 
 import android.content.DialogInterface
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -44,6 +48,7 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
 
     private var bankName: String? = null
     private var bankCode: String? = null
+    var rewardCoin:Double? = 0.0
 
     private lateinit var totalAmountToCashOut:String
 
@@ -56,6 +61,8 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
 
     var rewardToRbcBase = 2.0
     var amountLimitToWithdraw = 500.0
+    var revenue_multiplier = 0.1
+    var cashOutBrC = 500.0
 
     private lateinit var reference:String
 
@@ -64,19 +71,17 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
     }
 
     private fun checkIfCanCashOut(){
-        totalAmountToCashOut = sessionManager.getCashoutAmount().toString()
-        val cashoutLimit = amountLimitToWithdraw/2
-        if(totalAmountToCashOut.toInt() < amountLimitToWithdraw){
-            showErrorCookieBar(title = "Low BrC","You don't have enough cash to cash out, you should have at least $cashoutLimit BrC before cashout")
+        if(cashOutBrC < amountLimitToWithdraw){
+            showErrorCookieBar(title = "Low BrC","You don't have enough cash to cash out, you should have at least $amountLimitToWithdraw BrC before cashout")
         }
         else{
             binding.sliderAmountToCashout.isEnabled = true
-            binding.sliderAmountToCashout.valueTo = (totalAmountToCashOut.toDouble().div(rewardToRbcBase)).toFloat()
-            binding.sliderAmountToCashout.valueFrom = ((totalAmountToCashOut.toDouble().div(rewardToRbcBase))/2.toFloat()).toFloat()
-            binding.sliderAmountToCashout.value = (totalAmountToCashOut.toDouble().div(rewardToRbcBase)).toFloat()
-            binding.sliderAmountToCashout.stepSize = ((totalAmountToCashOut.toDouble().div(rewardToRbcBase))/2.toFloat()).toFloat()
+            binding.sliderAmountToCashout.valueTo = (cashOutBrC.div(rewardToRbcBase)).toFloat()
+            binding.sliderAmountToCashout.valueFrom = ((cashOutBrC/2.toFloat()).toFloat())
+            binding.sliderAmountToCashout.value = cashOutBrC.toFloat()
+            binding.sliderAmountToCashout.stepSize = ((cashOutBrC/2.toFloat()).toFloat())
 
-            binding.tvAmountToCashout.text = resources.getString(R.string.amount_to_cashout, binding.sliderAmountToCashout.value.toString())
+            binding.tvAmountToCashout.text = resources.getString(R.string.amount_to_cashout, cashOutBrC.toInt().toString(),totalAmountToCashOut.toInt().toString())
 
         }
     }
@@ -102,15 +107,16 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
                 .collection("rewards").get()
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
-                        var totalCashout = 0.0
+                        val totalCashout = 0.0
                         for (eachBusinessThatGiftedCustomer in it.result!!) {
-                            val rewardCoin = eachBusinessThatGiftedCustomer.getDouble("gift_coin")
+                            rewardCoin = eachBusinessThatGiftedCustomer.getDouble("gift_coin")
                             Log.d("reward", rewardCoin.toString())
                             if (rewardCoin != null) {
-                                totalCashout += rewardCoin
+                                //totalCashout += rewardCoin
+                                sessionManager.setCashoutAmount(rewardCoin!!)
                             }
                         }
-                        sessionManager.setCashoutAmount(totalCashout)
+
                     }
                 }
         }catch (e:Exception){
@@ -120,9 +126,11 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
 
     private fun showMessageIfCantCashout(){
         totalAmountToCashOut = sessionManager.getCashoutAmount().toString()
-        val cashoutLimit = amountLimitToWithdraw/2
-        if(totalAmountToCashOut.toInt() < amountLimitToWithdraw){
-            showErrorCookieBar(title = "Low BrC", "You don't have enough cash to cash out, you should have at least $cashoutLimit BrC before cashout")
+        //get amount in BRC
+        cashOutBrC = (totalAmountToCashOut.toLong() - (revenue_multiplier * totalAmountToCashOut.toLong()))/rewardToRbcBase
+        Log.d("CashoutAmt", totalAmountToCashOut)
+        if(cashOutBrC < amountLimitToWithdraw){
+            showErrorCookieBar(title = "Low BrC", "You don't have enough cash to cash out, you should have at least $amountLimitToWithdraw BrC before cashout")
         }
     }
 
@@ -133,9 +141,10 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
     }
 
 
-    private fun handleClicks(){
+    private fun handleClicks(animation: Animation) {
 
         binding.btnVerifyAccount.setOnClickListener {
+            it.startAnimation(animation)
             accountNumber = binding.etAccountNumber.text.toString()
             if(accountNumber.isEmpty() || bankCode.isNullOrEmpty()){
                 Toast.makeText(requireContext(), "Bank and Account Number must be provided", Toast.LENGTH_LONG).show()
@@ -145,11 +154,12 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
             }
         }
 
-        binding.sliderAmountToCashout.addOnChangeListener { slider, value, fromUser ->
-            binding.tvAmountToCashout.text = resources.getString(R.string.amount_to_cashout, value.toString())
-        }
+//        binding.sliderAmountToCashout.addOnChangeListener { _, value, _ ->
+//            binding.tvAmountToCashout.text = resources.getString(R.string.amount_to_cashout, value.toString())
+//        }
 
         binding.fbProcessCashout.setOnClickListener {
+            it.startAnimation(animation)
             initiateTransfer()
         }
 
@@ -168,7 +178,7 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
     private fun updateInfluencerBalance(){
         val amountToOffsetLong: Float = binding.sliderAmountToCashout.value
 
-        var amountToOffset:Double = amountToOffsetLong.toDouble()
+        var amountToOffset:Double = totalAmountToCashOut.toDouble()
 
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
@@ -217,7 +227,8 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
 
 
     private fun updateCustomersRedeemedRecord(){
-        val amountToOffsetLong: Float = binding.sliderAmountToCashout.value
+        //val amountToOffsetLong: Float = binding.sliderAmountToCashout.value
+        val amountToOffsetLong:Float = totalAmountToCashOut.toFloat()
 
         val db = FirebaseFirestore.getInstance()
         // [END get_firestore_instance]
@@ -316,7 +327,7 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
                             binding.btnVerifyAccount.text = "Verify Account"
                             binding.btnVerifyAccount.isEnabled = true
                             checkIfCanCashOut()
-                            if (totalAmountToCashOut.toInt() >= amountLimitToWithdraw) {
+                            if (cashOutBrC >= amountLimitToWithdraw) {
                                 binding.fbProcessCashout.isEnabled = true
                                 binding.fbProcessCashout.setBackgroundColor(R.color.whitesmoke)
 
@@ -467,7 +478,8 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
     private fun proceedToTransfer(){
         Log.d("RecipientCode",recipientCode)
         Log.d("AuthKey",BuildConfig.PSTACK_TEST_AUTHKEY)
-        val amount = truncate(binding.sliderAmountToCashout.value).toInt()*100
+        //val amount = truncate(binding.sliderAmountToCashout.value).toInt()*100
+        val amount = totalAmountToCashOut.toInt() * 100
         Log.d("Amount",amount.toString())
         val transferRequest = TransferModel("balance", amount.toString(), recipientCode, "Brandible cashout")
         transferViewModel.transferToBank("Bearer ${BuildConfig.PSTACK_TEST_AUTHKEY}", transferRequest)
@@ -523,15 +535,21 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
     ): FragmentCashoutBinding {
         binding = FragmentCashoutBinding.inflate(layoutInflater,container,false)
 
-
+        val animation = AnimationUtils.loadAnimation(requireContext(),R.anim.bounce);
         remoteConfigUtil = RemoteConfigUtil()
         rewardToRbcBase = remoteConfigUtil.rewardToBRCBase().asDouble()
         amountLimitToWithdraw = remoteConfigUtil.getWithdrawLimit().asDouble()
+        revenue_multiplier = remoteConfigUtil.getRevenueMultiplier().asDouble()
 
         sessionManager = SessionManager(requireContext())
-        sessionManager.setCashoutAmount(0.0)
+        //sessionManager.setCashoutAmount(0.0)
         loadAmountToCashOut()
-        showMessageIfCantCashout()
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed({
+            // do something after 1000ms
+            showMessageIfCantCashout()
+        }, 3000)
+
 
         binding.bankSpinner.onItemSelectedListener = this
         //bankListView.isEnabled = true
@@ -546,9 +564,10 @@ class CashoutFragment : BaseFragment<FragmentCashoutBinding>(), AdapterView.OnIt
 
         disableOnLoad()
 
-        handleClicks()
+        handleClicks(animation)
 
         return binding
     }
+
 
 }

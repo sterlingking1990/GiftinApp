@@ -16,7 +16,7 @@ class FirebaseMediaUploader {
                     onUploadSuccess: (mediaUrl: String) -> Unit,
                     onUploadFailure: (message: String) -> Unit){
 
-        val reference = storage.getReference("rewardmemes/" + UUID.randomUUID() + ".mp4")
+        val reference = storage.getReference("mediafiles/" + UUID.randomUUID() + ".mp4")
         val uploadTask = reference.putFile(Uri.parse(uri))
 
         uploadTask.addOnFailureListener{
@@ -35,7 +35,7 @@ class FirebaseMediaUploader {
         onUploadFailure: (message: String) -> Unit
     ) {
 
-        val reference = storage.getReference("rewardmemes/" + UUID.randomUUID() + ".jpg")
+        val reference = storage.getReference("mediafiles/" + UUID.randomUUID() + ".jpg")
         val baos = ByteArrayOutputStream()
         imageData.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val data = baos.toByteArray()

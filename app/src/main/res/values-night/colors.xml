@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="whitesmoke">#f5f5f5</color>
+    <color name="main_blue">#0E2F91</color>
+    <color name="main_blue_opaque">#660E2F91</color>
+
+<!--    <color name="colorPrimary">#263238</color>-->
+<!--    <color name="colorPrimaryDark">#000a12</color>-->
+
+
+
+    <color name="colorPrimary">#EA5934</color>
+    <color name="colorPrimaryDark">#EA5934</color>
+    <color name="colorPrimaryLight">#EA5934</color>
+
+    <color name="tabColor">#EB2D211A</color>
+    <color name="tabColorLight">#EB2D211A</color>
+    <color name="colorAccent">#03a9f4</color>
+    
+    <color name="mainText">#FFFFFF</color>
+    <color name="altText">#EB2D211A</color>
+    <color name="mainBackground">#FFFFFF</color>
+
+    <color name="grey_500">#9E9E9E</color>
+
+    <color name="startGradient">#CCBD99</color>
+    <color name="endGradient">#9E9E9E</color>
+    <color name="btn_login_color">#5297B6</color>
+
+    <color name="secondColorType">#5297B6</color>
+
+    <color name="backgroundNew">#F8F8F8</color>
+    <color name="followingColor">#DD6D40</color>
+    <color name="drawerBackgroundDark">#4f5b62</color>
+    <color name="drawerBackgroundLight">#F8F8F8</color>
+
+    <color name="red">#FF0000</color>
+
+</resources>

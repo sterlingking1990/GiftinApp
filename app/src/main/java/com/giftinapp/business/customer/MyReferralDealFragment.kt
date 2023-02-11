@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -61,6 +62,7 @@ open class MyReferralDealFragment : BaseFragment<FragmentMyReferralDealBinding>(
     //3. create new user document for the collection referralRewards with document details-> referralTarget, rewardAmount, rewardToken
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val animation = AnimationUtils.loadAnimation(requireContext(),R.anim.bounce);
 
         etReferralRewardToken = view.findViewById(R.id.et_reward_token)
         btnGetReferralReward = view.findViewById(R.id.btn_get_referral_reward)
@@ -77,9 +79,11 @@ open class MyReferralDealFragment : BaseFragment<FragmentMyReferralDealBinding>(
         getTotalReferred()
 
         btnSetReferralTarget.setOnClickListener {
+            it.startAnimation(animation)
             setReferralTarget()
         }
         btnGetReferralReward.setOnClickListener {
+            it.startAnimation(animation)
             if(!etReferralRewardToken.text.isNullOrEmpty()) {
                 redeemReferralReward()
             }else{
@@ -307,6 +311,7 @@ open class MyReferralDealFragment : BaseFragment<FragmentMyReferralDealBinding>(
         inflater: LayoutInflater,
         container: ViewGroup?
     ): FragmentMyReferralDealBinding = FragmentMyReferralDealBinding.inflate(layoutInflater,container,false)
+
 
 
 }

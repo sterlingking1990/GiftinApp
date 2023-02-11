@@ -8,14 +8,24 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="whitesmoke">#f5f5f5</color>
+    <color name="main_blue">#0E2F91</color>
+    <color name="main_blue_opaque">#660E2F91</color>
 
-    <color name="colorPrimary">#263238</color>
-    <color name="colorPrimaryDark">#000a12</color>
-    <color name="colorPrimaryLight">#4f5b62</color>
+<!--    <color name="colorPrimary">#263238</color>-->
+<!--    <color name="colorPrimaryDark">#000a12</color>-->
 
-    <color name="tabColor">#DE000000</color>
+
+    <color name="colorPrimary">#E95434</color>
+    <color name="colorPrimaryDark">#E95434</color>
+    <color name="colorPrimaryLight">#E95434</color>
+
+    <color name="tabColor">#CCBD99</color>
     <color name="tabColorLight">#EB2D211A</color>
     <color name="colorAccent">#03a9f4</color>
+
+    <color name="mainText">#2d313d</color>
+    <color name="altText">#8d8f97</color>
+    <color name="mainBackground">#FFFFFF</color>
 
     <color name="grey_500">#9E9E9E</color>
 

@@ -3,9 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.giftinapp.business">
 
+    <queries>
+        <package android:name="com.facebook.katana.provider.PlatformProvider" />
+    </queries>
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
@@ -15,13 +20,43 @@
         android:icon="@mipmap/ic_brandible_icon_anydpi"
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/ad_network_security_config"
+        android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.Merchant"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
         <activity
+            android:name=".BrandSharersActivity"
+            android:exported="false" />
+
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
+
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name" />
+        <activity
+            android:name=".InfluencerSharersActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Merchant" />
+        <activity
+            android:name=".BrandGuideActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HowToEarnMoreActivity"
+            android:exported="false" />
+        <activity
+            android:name=".InfluencerGuideActivity"
+            android:exported="false" />
+        <activity
             android:name=".InfluencerActivity"
-            android:exported="false"  android:theme="@style/Theme.Merchant">
+            android:exported="false"
+            android:theme="@style/Theme.Merchant">
             <intent-filter>
                 <action android:name="InfluencerActivity" />
 
@@ -88,6 +123,22 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <provider
+            android:name="com.facebook.FacebookContentProvider"
+            android:authorities="com.facebook.app.FacebookContentProvider541543441193694"
+            android:exported="true" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_path" />
+        </provider>
+
+        <receiver android:name=".NotificationReciever" />
     </application>
 
 </manifest>

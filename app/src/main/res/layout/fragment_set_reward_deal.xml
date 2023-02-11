@@ -225,6 +225,7 @@
                 android:layout_weight="1.5"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="10dp"
+                android:textColor="@color/mainText"
                 android:text="@string/status_worth"
                 />
             <com.google.android.material.slider.Slider
@@ -233,10 +234,10 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:layout_weight="0.5"
-                android:value="2.0"
-                android:valueTo="100.0"
+                android:value="4.0"
+                android:valueTo="500.0"
                 android:stepSize="2.0"
-                android:valueFrom="2.0"
+                android:valueFrom="4.0"
                 android:backgroundTint="@color/tabColor"
                 android:elevation="10dp"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
@@ -259,6 +260,7 @@
                 android:layout_weight="1.5"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="10dp"
+                android:textColor="@color/mainText"
                 android:text="@string/number_of_reach"
                 />
             <com.google.android.material.slider.Slider
@@ -276,7 +278,7 @@
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/ll_promotionalBanner"
+            android:id="@+id/ll_makeChallenge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -286,20 +288,21 @@
             app:layout_constraintStart_toStartOf="parent"
             >
 
-<!--            <CheckBox-->
-<!--                android:id="@+id/chkUsePromotionalBanner"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                app:buttonTint="@color/tabColor"-->
-<!--                android:checked="false"-->
-<!--                android:text="Use promotional banner"/>-->
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/chkIsChallenge"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:checked="false"
+                android:textColor="@color/mainText"
+                android:text="make this a sharable for Influencers"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/ll_rvBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/ll_promotionalBanner"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/ll_makeChallenge"
             android:orientation="horizontal">
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_banner"
@@ -327,7 +330,7 @@
                 android:layout_margin="10dp"
                 android:imeOptions="actionDone"
                 android:background="@drawable/rectangle_shaped_button"
-                android:backgroundTint="@color/tabColor"
+                android:textColor="@color/mainBackground"
                 android:text="@string/publish_reward_deal"
                 android:elevation="10dp"/>
         </androidx.appcompat.widget.LinearLayoutCompat>

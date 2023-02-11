@@ -1,6 +1,7 @@
 package com.giftinapp.business.network.di
 
 import com.giftinapp.business.network.services.cashoutservices.CashOutApiService
+import com.giftinapp.business.network.services.postservice.PostApiService
 import com.giftinapp.business.utility.BASE_URL
 import dagger.Module
 import dagger.Provides
@@ -39,5 +40,11 @@ object Network {
     @Singleton
     fun providesPostsService(retrofit: Retrofit): CashOutApiService {
         return retrofit.create(CashOutApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBrandiblePosts(): PostApiService{
+        return PostApiService.create()
     }
 }

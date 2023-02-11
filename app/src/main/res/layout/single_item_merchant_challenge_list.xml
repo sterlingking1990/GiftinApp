@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    android:layout_marginStart="5dp"
+    android:layout_marginEnd="5dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/ll_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/frame_layout_corner_background"
+        android:orientation="horizontal"
+        android:layout_gravity="top"
+        >
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            app:cardCornerRadius="25dp"
+            android:layout_gravity="fill"
+            android:elevation="50dp"
+            >
+
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/viewVideo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_gravity="center_vertical"/>
+
+            <ImageView
+                android:id="@+id/viewImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleType="fitXY"
+                android:elevation="10dp"
+                android:visibility="visible"
+                android:layout_centerHorizontal="true"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/giftpack"/>
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/ivPlayVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:alpha="0.9"
+            android:elevation="100dp"
+            app:backgroundTint="@color/white"
+            app:srcCompat="@drawable/ic_play_video" />
+
+
+        <TextView
+            android:id="@+id/tvImageText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:layout_margin="20dp"
+            android:alpha=".75"
+            android:ellipsize="end"
+            android:maxLength="180"
+            android:maxLines="5"
+            android:textStyle="bold"
+            android:background="@color/black"
+            android:elevation="100dp"
+            android:text="I am a verified Brand from Brandible, patronise me"
+            android:textColor="@color/whitesmoke"
+            android:textSize="18sp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            app:backgroundTint="@color/whitesmoke"
+            android:id="@+id/playAudioBtn"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/play_back_icon"
+            android:contentDescription="Play Audio" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="58dp"
+        android:layout_gravity="top"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="3">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/tvNumberOfApprovedResponders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.2"
+            android:drawableTint="@color/black"
+            android:text="0"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:visibility="visible"
+            app:drawableStartCompat="@drawable/ic_task_drop" />
+
+        <TextView
+            android:id="@+id/tvNumberOfResponders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.2"
+            android:drawableTint="@color/black"
+            android:text="0"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:visibility="visible"
+            app:drawableStartCompat="@drawable/ic_chat_with_business" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="10dp"
+                android:elevation="100dp"
+                android:src="@drawable/gift_coin_icon" />
+
+            <TextView
+                android:id="@+id/tvBrcWorth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/mainText"
+                android:text="500 Brc" />
+
+            <ImageView
+                android:id="@+id/fbShareBtn"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_share_task"
+                android:visibility="gone"
+                android:elevation="100dp"/>
+            <TextView
+                android:id="@+id/tvShareTimeLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:textColor="@color/mainText"
+                android:text="5 min left" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginEnd="20dp"
+            android:weightSum="2">
+
+            <ImageView
+                android:id="@+id/ivDeleteMerchantChallenge"
+                android:layout_marginStart="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_delete_story"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

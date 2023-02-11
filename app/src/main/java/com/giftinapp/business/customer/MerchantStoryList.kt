@@ -1,6 +1,5 @@
 package com.giftinapp.business.customer
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -12,17 +11,12 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.giftinapp.business.R
-import com.giftinapp.business.SignUpActivity
-import com.giftinapp.business.business.SetRewardDeal
+import com.facebook.AccessToken
+import com.giftinapp.business.*
 import com.giftinapp.business.databinding.FragmentMerchantStoryListBinding
 import com.giftinapp.business.model.MerchantStoryListPojo
 import com.giftinapp.business.model.MerchantStoryPojo
@@ -35,6 +29,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.QuerySnapshot
 import java.io.Serializable
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.util.*
 
 open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(), MerchantStoryListAdapter.StoryClickable {
     lateinit var merchantStoryListAdapter:MerchantStoryListAdapter
@@ -126,18 +124,13 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
         checkFollowingRate()
         //getNumberOfFollowers()
         loadRewardStoryList()
+
     }
 
 
     private fun loadRewardStoryList() {
 
         val db = FirebaseFirestore.getInstance()
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
-        // [END get_firestore_instance]
-
-        // [START set_firestore_settings]
         val settings = FirebaseFirestoreSettings.Builder()
             .setPersistenceEnabled(true)
             .build()
@@ -193,12 +186,17 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
                                                                         merchantStoryListPojo.videoArtWork = eachList.getString("videoArtWork")?:""
                                                                         merchantStoryListPojo.statusReachAndWorthPojo =
                                                                             eachList.get("statusReachAndWorthPojo",StatusReachAndWorthPojo::class.java)
-                                                                        //val merchantStoryListPojo = eachList.toObject(MerchantStoryListPojo::class.java)
-//                                                                        merchantStoryListPojo.merchantStatusId =
-//                                                                            eachList.id
-                                                                        merchantStoryListPojos.add(
-                                                                            merchantStoryListPojo
-                                                                        )
+                                                                        merchantStoryListPojo.publishedAt = eachList.getString("publishedAt")?:"2022-12-25 07:00"
+                                                                        Log.d("PublishedAt",merchantStoryListPojo.publishedAt)
+                                                                       val isWithinTime = merchantStoryListPojoIsWithin24hrsAfterPublicationAdd(merchantStoryListPojo.publishedAt)
+
+
+                                                                        if(isWithinTime) {
+                                                                            merchantStoryListPojos.add(
+                                                                                merchantStoryListPojo
+                                                                            )
+                                                                        }
+                                                                       // }
 
                                                                     }
 
@@ -265,7 +263,7 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
 
                 }
         } else {
-            showMessageDialog(title = "Not Verified", message = "You need to be a verified user in other to view brand stories, promotions and deals so at to get rewards",
+            showMessageDialog(title = "Not Verified Yet", message = "A verification link has been sent to your email, please click to get verified and re-login to continue.",
             disMissable = false, posBtnText = "Ok", listener = {
                     FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
                     pgLoading.visibility = View.GONE
@@ -281,12 +279,38 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
         }
     }
 
+    private fun merchantStoryListPojoIsWithin24hrsAfterPublicationAdd(publishedDate:String):Boolean{
+        val sdf = SimpleDateFormat("MM-dd-yyyy HH:mm");
+        val pubDate = sdf.parse(publishedDate);
+
+
+        val calendar = Calendar.getInstance();
+
+        calendar.time = pubDate!!;
+        calendar.add(Calendar.HOUR, 24);
+
+        val now = Date()
+        val cal: Calendar =
+            GregorianCalendar()
+
+        cal.time = now
+
+        Log.d("IsWithinTime", (cal.time<=calendar.time).toString())
+
+        return cal.time<=calendar.time
+    }
+
     private fun checkFollowingRate(){
         if(sessionManager.getFollowingCount()==0 && sessionManager.getUserMode()=="customer"){
             pgLoading.visibility = View.GONE
             showMessageDialog(title = "Follow Brands", message = "You are not following any brands yet,. You will be directed to list of Brands to follow",
                 hasNegativeBtn = false, posBtnText = "OK", disMissable = false, listener = {
-                    findNavController().navigate(R.id.brandPreferenceFragment)
+                    try {
+                        findNavController().navigate(R.id.brandPreferenceFragment)
+                    }catch (e:Exception){
+                        findNavController().navigate(R.id.brandPreferenceFragment2)
+                    }
+
                     //openFragmentForInfluencer(BrandPreferenceFragment())
                 }
             )
@@ -304,7 +328,11 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
                     pgLoading.visibility = View.GONE
             showMessageDialog(title = "Follow Brands", message = "You are not following any brands yet,. You will be directed to list of Brands to follow",
                 hasNegativeBtn = false, posBtnText = "OK", disMissable = false, listener = {
-                    findNavController().navigate(R.id.brandPreferenceFragment)
+                    try {
+                        findNavController().navigate(R.id.brandPreferenceFragment)
+                    }catch (e:Exception){
+                        findNavController().navigate(R.id.brandPreferenceFragment2)
+                    }
                     //openFragment(BrandPreferenceFragment())
                 }
             )
@@ -353,8 +381,53 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
         storyOwner: String
     ) {
 
-        showBottomSheet(ReviewFragment.newInstance(storyOwner))
+        showBottomSheet(ReviewFragment.newInstance(storyOwner,::onReviewSubmitted))
         //Toast.makeText(requireContext(),"I am going to take user to reviews and ability to leave a review sticker",Toast.LENGTH_LONG).show()
+    }
+
+    private fun onReviewSubmitted(reviewSubmitted:Boolean){
+        if(reviewSubmitted){
+            loadRewardStoryList()
+        }
+
+    }
+
+    override fun loadTaskDrop(storyOwner: String) {
+        val arguments = Bundle()
+        arguments.putString("storyOwner", storyOwner)
+        Log.d("ViewingTasDrop", storyOwner)
+
+        val accessToken = AccessToken.getCurrentAccessToken()
+        val isLoggedIn = (accessToken != null) && !accessToken.isExpired
+        Log.d("AccessToken",accessToken?.token.toString())
+        if(isLoggedIn){
+            //check if user has seen the taskdrop guide
+            val db = FirebaseFirestore.getInstance()
+
+            val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+            db.firestoreSettings = settings
+
+            db.collection("users").document(sessionManager.getEmail().toString()).get()
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        val hasViewedSharableGuide = it.result.get("hasViewedSharableGuide")
+                        Log.d("hasViewedSharableGuide", hasViewedSharableGuide.toString())
+                            if ((hasViewedSharableGuide == false || hasViewedSharableGuide==null) && sessionManager.getUserMode() == "customer") {
+                               findNavController().navigate(R.id.sharableGuideFragment,arguments)
+                            }else {
+                                try {
+                                    findNavController().navigate(R.id.taskDrop, arguments)
+                                } catch (e: Exception) {
+                                    findNavController().navigate(R.id.taskDrop2, arguments)
+                                }
+                            }
+                    }
+                }
+        }else{
+            startActivity(Intent(requireContext(), InfluencerSharersActivity::class.java))
+        }
     }
 
 
@@ -416,5 +489,6 @@ open class MerchantStoryList : BaseFragment<FragmentMerchantStoryListBinding>(),
         inflater: LayoutInflater,
         container: ViewGroup?
     ): FragmentMerchantStoryListBinding = FragmentMerchantStoryListBinding.inflate(layoutInflater,container,false)
+
 
 }

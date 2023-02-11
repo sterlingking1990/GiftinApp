@@ -45,6 +45,8 @@ class ReviewFragment : BottomSheetDialogFragment(), ReviewAdapter.ClickableRevie
 
     var reviewStatus = false
 
+    private var callback: ((reviewSubmitted: Boolean) -> Unit)? = null
+
 
 
     override fun onCreateView(
@@ -109,6 +111,7 @@ class ReviewFragment : BottomSheetDialogFragment(), ReviewAdapter.ClickableRevie
                         //getReviews(db)
                     }
                     reviewState.updateSentReviewState(true)
+                    callback?.invoke(true)
                 }
 
             }
@@ -212,11 +215,12 @@ class ReviewFragment : BottomSheetDialogFragment(), ReviewAdapter.ClickableRevie
 
         private const val OWNER = "owner"
 
-        fun newInstance(storyOwner: String): ReviewFragment {
+        fun newInstance(storyOwner: String,callback:(Boolean)->Unit): ReviewFragment {
             val args = Bundle()
             args.putString(OWNER,storyOwner)
 
             val fragment = ReviewFragment()
+            fragment.callback = callback
             fragment.arguments = args
             return fragment
         }

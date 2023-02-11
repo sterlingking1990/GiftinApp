@@ -133,7 +133,7 @@ open class BrandPreferenceFragment : BaseFragment<FragmentBrandPreferenceBinding
                                 pgLoading?.visibility = View.GONE
                                 giftingMerchantViewPojos.add(giftingMerchantViewPojo)
                                 brandPreferenceAdapter?.setGiftingMerchantList(
-                                    giftingMerchantViewPojos
+                                    giftingMerchantViewPojos,requireContext()
                                 )
                                 rvBrands?.adapter = brandPreferenceAdapter
                                 brandPreferenceAdapter?.notifyDataSetChanged()
@@ -263,5 +263,6 @@ open class BrandPreferenceFragment : BaseFragment<FragmentBrandPreferenceBinding
         inflater: LayoutInflater,
         container: ViewGroup?
     ): FragmentBrandPreferenceBinding = FragmentBrandPreferenceBinding.inflate(layoutInflater,container,false)
+
 
 }

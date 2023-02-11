@@ -27,6 +27,7 @@ import com.giftinapp.business.utility.SessionManager
 import com.giftinapp.business.utility.base.BaseActivity
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
+import com.google.android.material.animation.AnimationUtils
 import java.util.*
 import java.util.regex.Pattern
 
@@ -75,13 +76,14 @@ class SignUpActivity : BaseActivity<ActivitySignupBinding>() {
                                 userPojo.lastName = binding.etSignupLastname.text.toString()
                                 userPojo.giftingId = username
                                 userPojo.token = "empty"
+                                userPojo.hasViewedFirstStats = false
                                 db.collection("users").document(username).set(userPojo)
                                     .addOnCompleteListener { task2 ->
                                         if (task2.isSuccessful) {
                                             progressDialogUtil?.stopDialog()
                                             showMessageDialog(title = "Temporary Registration Complete",
-                                                message = "You have been temporarily registered and can now login, " +
-                                                        "However, you might not enjoy all benefits from Brandible until you verify your account. Please check email, verify your account before login; Check spam if not in inbox",
+                                                message = "You have been temporarily registered " +
+                                                        "Please check email, verify your account before login; Check spam if not in inbox",
                                                 posBtnText = "OK", disMissable = false, listener = {
                                                     val intent = Intent(
                                                         applicationContext,
@@ -137,6 +139,7 @@ class SignUpActivity : BaseActivity<ActivitySignupBinding>() {
     override fun getActivityBinding(inflater: LayoutInflater): ActivitySignupBinding {
         binding = ActivitySignupBinding.inflate(layoutInflater)
 
+        val animation = android.view.animation.AnimationUtils.loadAnimation(this,R.anim.bounce);
         //setActionBar(binding.tbSignup)
         progressDialogUtil = ProgressDialogUtil(this)
         sessionManager = SessionManager(applicationContext)
@@ -160,6 +163,7 @@ class SignUpActivity : BaseActivity<ActivitySignupBinding>() {
             )
         }
         binding.btnSignUp.setOnClickListener {
+            it.startAnimation(animation)
             if (binding.etSignupFirstname.text.toString().isEmpty() || binding.etSignupLastname.text.toString()
                     .isEmpty() || binding.etSignupPassword.text.toString().isEmpty() || binding.etSignupEmail.toString().isEmpty()
             ) {
@@ -218,6 +222,7 @@ class SignUpActivity : BaseActivity<ActivitySignupBinding>() {
             false
         })
         binding.btnSignInTrigger.setOnClickListener { v: View? ->
+            v?.startAnimation(animation)
             val intent = Intent(applicationContext, LoginActivity::class.java)
             startActivity(intent)
         }

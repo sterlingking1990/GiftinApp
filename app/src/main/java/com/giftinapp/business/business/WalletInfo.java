@@ -29,6 +29,7 @@ import java.util.Objects;
 import co.paystack.android.Paystack;
 import co.paystack.android.PaystackSdk;
 import co.paystack.android.Transaction;
+import co.paystack.android.exceptions.ExpiredAccessCodeException;
 import co.paystack.android.model.Card;
 import co.paystack.android.model.Charge;
 
@@ -46,6 +47,7 @@ public class WalletInfo extends Fragment {
     public SessionManager sessionManager;
 
     private Spinner spFundWalletRange;
+    private Transaction tranz = null;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -144,7 +146,7 @@ public class WalletInfo extends Fragment {
     }
 
     private void chargeCard(int amountInKobo) {
-
+        tranz = null;
         String cardCvv = etCardCvv.getText().toString().trim();
         String cardNumber = etCardNumber.getText().toString().trim();
         String month, year;
@@ -182,6 +184,7 @@ public class WalletInfo extends Fragment {
                             @Override
                             public void onSuccess(Transaction transaction) {
                                 btnProceed.setEnabled(true);
+                                tranz = transaction;
                                 snackBar("Successfully funded your wallet, you can add brand stories now");
                                 updateWallet(amountInKobo/100);
                                 refreshWallet();
@@ -197,6 +200,11 @@ public class WalletInfo extends Fragment {
                                 btnProceed.setEnabled(true);
                                 snackBar(error.getMessage());
 
+                                tranz = transaction;
+                                if (error.equals(ExpiredAccessCodeException.class)) {
+                                    chargeCard(Integer.parseInt(spFundWalletRange.getSelectedItem().toString()));
+                                    return;
+                                }
                             }
                         });
                     } else {

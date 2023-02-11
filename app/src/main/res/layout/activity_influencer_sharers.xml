@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".InfluencerSharersActivity">
+
+    <ImageView
+        android:id="@+id/brandibleSharable"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:src="@drawable/ic_set_task_for_influencer"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/tvAgreement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="There are some activities for you on Brandible which requires you to login with your facebook to be able to participate. \n\nThis is just one time and once you are done, you will be able to participate in those rewarding activities like Sharables. \n\nSharables allow you to share brand stories on your facebook and earn BrC for them"
+        android:textSize="20sp"
+        android:textColor="@color/mainText"
+        android:textAlignment="center"
+        android:fontFamily="@font/mtnbrightersansegular"
+        app:layout_constraintTop_toBottomOf="@id/brandibleSharable"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="50dp"
+        />
+
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/btnLoginFb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tvAgreement"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Login" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

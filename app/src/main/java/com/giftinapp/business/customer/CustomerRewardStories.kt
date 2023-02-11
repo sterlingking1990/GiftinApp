@@ -23,10 +23,14 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.navigation.fragment.findNavController
+import co.paystack.android.PaystackSdk.applicationContext
 import com.facebook.ads.AdSettings
 import com.facebook.ads.AudienceNetworkAds
+import com.giftinapp.business.HowToEarnMoreActivity
+import com.giftinapp.business.InfluencerGuideActivity
 import com.giftinapp.business.R
 import com.giftinapp.business.databinding.FragmentCustomerRewardStoriesBinding
+import com.giftinapp.business.dialogs.MessageDialog
 import com.giftinapp.business.model.*
 import com.giftinapp.business.utility.*
 import com.giftinapp.business.utility.base.BaseFragment
@@ -39,6 +43,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -54,6 +59,8 @@ class CustomerRewardStories : Fragment() {
     private val playbackStateListener: Player.Listener = playbackStateListener()
     private var videoIsReady = false
     var remoteConfigUtil: RemoteConfigUtil? = null
+
+    private var messageDialog: MessageDialog? = null
 
     private fun playbackStateListener() = object:Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -121,6 +128,8 @@ class CustomerRewardStories : Fragment() {
 
     var image_view_duration = 100
 
+    var revenue_multiplier = 0.1
+
     @Inject
     lateinit var audioRecorderPlayer: AudioRecorderPlayer
 
@@ -157,6 +166,7 @@ class CustomerRewardStories : Fragment() {
 
         remoteConfigUtil = RemoteConfigUtil()
         image_view_duration = remoteConfigUtil!!.getImageViewDuration().asDouble().toInt()
+        revenue_multiplier = remoteConfigUtil!!.getRevenueMultiplier().asDouble()
         player = ExoPlayer.Builder(requireContext()).build()
         val anim = AnimationUtils.loadAnimation(requireContext(), R.anim.text_view_animation)
 
@@ -225,7 +235,12 @@ class CustomerRewardStories : Fragment() {
     }
 
     private fun initializePlayer(s: String) {
+        Log.d("PlayS",s)
+
         try {
+            if(player==null){
+                player = ExoPlayer.Builder(requireContext()).build()
+            }
             binding.llStatus.removeAllViews()
                 player
                 .also { exoPlayer ->
@@ -306,6 +321,7 @@ class CustomerRewardStories : Fragment() {
                                 if(it.getString("merchant_email")==storyOwner){
                                     Log.d("StoryOwner",storyOwner.toString())
                                     val adUnit: String = it.getString("ad_unit")?:""
+                                    //val adUnit = "ca-app-pub-3940256099942544/5224354917"
                                     //load the ad
                                     //AdSettings.addTestDevice("1a40ceb6-2f05-4581-84d9-b5a0c2f45fb5")
                                     AdSettings.clearTestDevices()
@@ -334,15 +350,17 @@ class CustomerRewardStories : Fragment() {
         loadAd()
         audioLinks.clear()
         videoLinks.clear()
+        viewList.clear()
         imagesList?.forEach { imageUrl ->
+            Log.d("IsImageUrl", imageUrl.merchantStatusImageLink.isNullOrEmpty().toString())
             if(imageUrl.merchantStatusImageLink.isNullOrEmpty()){
-                val viewPlayer = LayoutInflater.from(activity).inflate(R.layout.single_video_layout, null, false);
+                val viewPlayer = LayoutInflater.from(requireContext()).inflate(R.layout.single_video_layout, null, false);
                 videoPlayerView = viewPlayer.rootView as PlayerView;
                 videoLinks.add(imageUrl.merchantStatusVideoLink)
                 audioLinks.add("")
                 viewList.add(videoPlayerView)
             }else {
-                imageStatusView = ImageView(requireContext())
+                imageStatusView = ImageView(activity)
                 imageStatusView.layoutParams = ViewGroup.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
@@ -467,6 +485,7 @@ class CustomerRewardStories : Fragment() {
                 binding.llStatus.removeAllViews()
                 mCurrentIndex++
                 if(viewList[mCurrentIndex] is ImageView) {
+                    Log.d("SecondStatIsImage", (viewList[mCurrentIndex] is ImageView).toString())
                     imagesList?.get(mCurrentIndex)?.merchantStatusImageLink?.let {
                         imageStatusView.loadImage(
                             it
@@ -481,12 +500,14 @@ class CustomerRewardStories : Fragment() {
         } else {
             runOnUiThread {
                 if(currentStoryPos!! < (allStories?.size?.minus(1)!!)) {
+                    Log.d("AmBeforeLast","last")
                     updateStoryAsViewed(mCurrentIndex) //find a way to get to the next brand and start displaying its status story
                     currentSlide = true
                     releasePlayer()
                     displayAd(currentSlide!!)
                 }
                 else {
+                    Log.d("AmAtLast","last")
                     releasePlayer()
                     updateStoryAsViewed(mCurrentIndex)
                     //implement admob here before disposing
@@ -505,7 +526,7 @@ class CustomerRewardStories : Fragment() {
                 val totalStoryList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList?.size}
                 compareNumberOfTimesUserGotRewardOnTotalBrandStatusAgainstTotalBrandStatusList(numberOfTimeUserGotRewardOnABrandStatus,totalStoryList)
                 if(currentSlide) {
-
+                    Log.d("AmCurrentSlide",currentSlide.toString())
                     imagesList?.clear()
                     currentStoryPos = currentStoryPos!! +1
                     imagesList = currentStoryPos?.let { allStories?.get(it)?.merchantStoryList
@@ -522,7 +543,6 @@ class CustomerRewardStories : Fragment() {
                     storyOwner =  currentStoryPos?.let { allStories?.get(it)?.storyOwner
 
                     }
-
                     mDisposable = null
                     mCurrentProgress = 0L
                     mCurrentIndex = 0
@@ -538,11 +558,12 @@ class CustomerRewardStories : Fragment() {
                     //last slide in the reward stories list
                     mDisposable?.dispose()
                     mDisposable = null
-                    try {
-                        findNavController().navigate(R.id.merchantStoryList)
-                    }catch (e:Exception){
-                        findNavController().navigate(R.id.merchantStoryList2)
-                    }
+                    checkIfUserHasViewedFirstStats()
+//                    try {
+//                        findNavController().navigate(R.id.merchantStoryList)
+//                    }catch (e:Exception){
+//                        findNavController().navigate(R.id.merchantStoryList2)
+//                    }
                 }
 
             }
@@ -563,10 +584,10 @@ class CustomerRewardStories : Fragment() {
 
         if (mRewardedAd != null) {
             mRewardedAd?.show(requireActivity()) {
-                val rewardAmount = it.amount
+                val adRewardAmount = it.amount
                 var rewardType = it.type
 
-                Log.d("CustomerRewardStoriesAd", "User earned the reward. $rewardAmount")
+                Log.d("CustomerRewardStoriesAd", "User earned the reward. $adRewardAmount")
             }
         } else {
             Log.d("CustomerRewardStoriesAd", "The rewarded ad wasn't ready yet.")
@@ -603,16 +624,68 @@ class CustomerRewardStories : Fragment() {
                 //last slide in the reward stories list
                 mDisposable?.dispose()
                 mDisposable = null
-                try {
-                    findNavController().navigate(R.id.merchantStoryList)
-                }catch (e:Exception){
-                    findNavController().navigate(R.id.merchantStoryList2)
-                }
+
+                //check if user have viewed status before - if true then do try block, else show another activity of
+                //how to increase your BrC
+
+                checkIfUserHasViewedFirstStats()
+//                try {
+//                    findNavController().navigate(R.id.merchantStoryList)
+//                }catch (e:Exception){
+//                    findNavController().navigate(R.id.merchantStoryList2)
+//                }
             }
             //do the normal flow
         }
     }
 
+    private fun checkIfUserHasViewedFirstStats(){
+        val db = FirebaseFirestore.getInstance()
+
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("users").document(sessionManager.getEmail().toString()).get()
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    val hasViewedFirstStats = it.result.get("hasViewedFirstStats")
+                    Log.d("HasViewedStats",hasViewedFirstStats.toString())
+                        if ((hasViewedFirstStats == false || hasViewedFirstStats==null) && sessionManager.getUserMode() == "customer") {
+                            //means the user just finish viewing first stats, now we want the user to see how to earn more
+                            messageDialog = MessageDialog.newInstance(
+                                "You have earned your first few BrC's, you can even earn more, let me show you how",
+                                "Congratulations",
+                                false,
+                                null,
+                                "Show Me",
+                                {
+                                    activity?.let { act ->
+                                        val intent = Intent(
+                                            act,
+                                            HowToEarnMoreActivity::class.java
+                                        )
+                                        startActivity(intent)
+                                        act.finish()
+                                    }
+                                },
+                                false
+                            )
+                            messageDialog?.show(
+                                requireActivity().supportFragmentManager,
+                                MessageDialog::javaClass.name
+                            )
+                        } else {
+                            try {
+                                findNavController().navigate(R.id.merchantStoryList)
+                            } catch (e: Exception) {
+                                findNavController().navigate(R.id.merchantStoryList2)
+                            }
+                        }
+                }
+            }
+    }
     private fun compareNumberOfTimesUserGotRewardOnTotalBrandStatusAgainstTotalBrandStatusList(numberOfTimeUserGotRewardOnABrandStatus: Int, totalStoryList: Int?) {
         val db = FirebaseFirestore.getInstance()
 
@@ -632,8 +705,8 @@ class CustomerRewardStories : Fragment() {
                     .addOnCompleteListener(OnCompleteListener { task2: Task<DocumentSnapshot?> ->
                         if (task2.isSuccessful) {
                             val referrerDoc = task2.result
-                            val alphaInfluencerCount: Int = if (referrerDoc?.get("alpha_influencer_level_count") == null) 0 else referrerDoc["alpha_influencer_level_count"] as Int
-                            val totalAlphaInfluencerLevelCount: Int = alphaInfluencerCount + 1
+                            val alphaInfluencerCount: Long = if (referrerDoc?.get("alpha_influencer_level_count") == null) 0L else referrerDoc["alpha_influencer_level_count"] as Long
+                            val totalAlphaInfluencerLevelCount: Int = alphaInfluencerCount.toInt() + 1
                             db.collection("influenca_activity_track").document(sessionManager.getEmail().toString()).update("alpha_influencer_level_count", totalAlphaInfluencerLevelCount)
                         }
                             else {
@@ -646,7 +719,7 @@ class CustomerRewardStories : Fragment() {
     }
 
 
-    private fun updateUserGiftinBonus(rewardAmount: Int) {
+    private fun updateUserGiftinBonus(rewardAmount: Double) {
         val db = FirebaseFirestore.getInstance()
 
         val settings = FirebaseFirestoreSettings.Builder()
@@ -668,7 +741,7 @@ class CustomerRewardStories : Fragment() {
                                         if(it.isSuccessful){
                                             numberOfTimeUserGotRewardOnABrandStatus+=1
                                             updateInfluencerActivityForFirstToSeeBrandParticularStatus()
-                                            updateStoryOwnerWalletBasedOnView(rewardAmount)
+                                            updateStoryOwnerWalletBasedOnView(storyWorth)
                                             playCongratulationsMusic()
                                             storyWorth = 0
                                         }
@@ -897,7 +970,8 @@ class CustomerRewardStories : Fragment() {
 
                             }
                             if(numberOfViewsTarget > totalViewers.size){
-                                updateUserGiftinBonus(storyWorth)
+                                val latestWorth = storyWorth - (revenue_multiplier*storyWorth)
+                                updateUserGiftinBonus(latestWorth)
                                 //play animation sound
                             }
                         }
@@ -907,6 +981,7 @@ class CustomerRewardStories : Fragment() {
 
     private fun updateProgress(progress: Long) {
         Log.d("CurrentProgress", progress.toString())
+        Log.d("StatusTag",imagesList?.get(mCurrentIndex)?.storyTag.toString())
         if (videoLinks[mCurrentIndex].isEmpty()) {
             mCurrentProgress = progress
             runOnUiThread {
@@ -927,19 +1002,19 @@ class CustomerRewardStories : Fragment() {
             binding.tvNumberOfViewers.text = numberOfStatusView.toString()
             binding.tvLikeBrandStory.text = numberOfLikes.toString()
             statusTag = imagesList?.get(mCurrentIndex)?.storyTag
-
-
         }
         //indexPos=mCurrentIndex+1
 
     }
 
     private fun playAudio(audioStoryLink: String?) {
+        Log.d("AudioStoryLink",audioStoryLink.toString())
         if(!audioStoryLink.isNullOrEmpty() ){
             context?.let {
             audioRecorderPlayer.playRecordingFromFirebase(audioStoryLink.toString())
             }
-        }else if(!videoLinks[mCurrentIndex].isEmpty()){
+        }else if(videoLinks[mCurrentIndex].isNotEmpty()){
+            Log.d("VideoLinkIs", videoLinks[mCurrentIndex])
             initializePlayer(videoLinks[mCurrentIndex])
         }
     }
@@ -961,6 +1036,7 @@ class CustomerRewardStories : Fragment() {
     }
 
     private fun startViewing() {
+        Log.d("IsImageView", (viewList).toString())
         if(viewList[0] is ImageView) {
             imagesList?.get(0)?.merchantStatusImageLink?.let {
                 imageStatusView.loadImage(
