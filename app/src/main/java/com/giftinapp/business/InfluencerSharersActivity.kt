@@ -34,7 +34,10 @@ class InfluencerSharersActivity : AppCompatActivity() {
         btnLoginFb.setOnClickListener {
 
             LoginManager.getInstance().logInWithReadPermissions(this,
-                listOf("email","public_profile"))
+                listOf("email","public_profile","user_posts"))
+
+//            LoginManager.getInstance().logInWithReadPermissions(this,
+//                listOf("email","public_profile"))
         }
 
 //        "pages_show_list","pages_read_engagement","pages_manage_posts"

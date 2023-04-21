@@ -4,42 +4,91 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.FileProvider
+import com.facebook.*
+import com.facebook.share.ShareApi
+import com.facebook.share.Sharer
 import com.facebook.share.model.ShareHashtag
 import com.facebook.share.model.ShareLinkContent
+import com.facebook.share.model.SharePhoto
+import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.widget.ShareDialog
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URLDecoder
 
 object ImageShareUtil {
-    fun shareImageOnPost(merchantStatusImageLink: String?, storyTag: String?,context: Activity) {
-        var storyQuote = "Hey I am a brandible biz patronize me"
-        if(storyTag!=null){
-            storyQuote = storyTag
-        }
-        val content =  ShareLinkContent.Builder()
-            .setContentUrl(Uri.parse(merchantStatusImageLink))
-            .setQuote(storyQuote)
+    fun shareImageOnPost(merchantStatusImageLink: String?,
+                         storyTag: String?,
+                         context: Activity, callback:(postId: String?,objectId:String?)->Unit) {
+        Log.d("ImageLink",merchantStatusImageLink.toString())
+        val imageFile = merchantStatusImageLink?.let { File(it) }
+        val imageUri = Uri.fromFile(imageFile)
+
+        val content = SharePhotoContent.Builder()
+            .addPhoto(
+                SharePhoto.Builder()
+                .setBitmap(null)
+                .setImageUrl(imageUri)
+                .build())
             .setShareHashtag(
                 ShareHashtag.Builder()
                     .setHashtag("#Brandible")
                     .build())
-            .build();
-        ShareDialog.show(context,content)
+            .build()
+        val shareDialog = ShareDialog(context)
+        shareDialog.registerCallback(CallbackManager.Factory.create(), object : FacebookCallback<Sharer.Result> {
+            override fun onCancel() {
+               Log.d("Cancel","Cancelled")
+            }
+
+            override fun onError(error: FacebookException) {
+                Log.d("Error",error.toString())
+            }
+
+            override fun onSuccess(result: Sharer.Result) {
+                val postIdRequest = GraphRequest.newGraphPathRequest(
+                    AccessToken.getCurrentAccessToken(),
+                    "me",
+                    object : GraphRequest.Callback {
+                        override fun onCompleted(response: GraphResponse) {
+                            val data = response.getJSONObject()?.getJSONObject("posts")?.getJSONArray("data")
+                            Log.d("FBData",data.toString())
+                            val postId = data?.getJSONObject(0)?.getString("id")
+                            val objectId = data?.getJSONObject(0)?.getString("object_id")
+                            // Handle the post ID as needed
+                            callback(postId,objectId)
+                        }
+                })
+                val parameters = Bundle()
+                parameters.putString("fields", "id,posts{id,object_id}")
+                postIdRequest.parameters = parameters
+                postIdRequest.executeAsync()
+            }
+
+        })
+
+        // Show the share dialog
+        shareDialog.show(content)
     }
 
-    fun shareImageOnStory(merchantStatusImageLink: String?, merchantStatusId: String?,context: Context,activity: Activity) {
+    fun shareImageOnStory(merchantStatusImageLink: String?,
+                          merchantStatusId: String?,
+                          context: Context,activity: Activity,
+                          callback:(storyId: String?,storyObjectId:String?)->Unit
+    ) {
         // show loading
         showWarning("Loading, wait...",context)
 
@@ -72,7 +121,25 @@ object ImageShareUtil {
                     grantPermission(providerBackgroundAssetUri,context)
 
                     // open intent
-                    openIntent(shareIntent,context,activity)
+                    val storyDetails = openIntent(shareIntent,context,activity)
+                    Log.d("StoryDetals",storyDetails.toString())
+                    val storyIdRequest = GraphRequest.newGraphPathRequest(
+                        AccessToken.getCurrentAccessToken(),
+                        "me",
+                        object : GraphRequest.Callback {
+                            override fun onCompleted(response: GraphResponse) {
+                                val data = response.getJSONObject()?.getJSONObject("posts")?.getJSONArray("data")
+                                Log.d("FBData",data.toString())
+                                val storyId = data?.getJSONObject(0)?.getString("id")
+                                val storyObjectId = data?.getJSONObject(0)?.getString("object_id")
+                                // Handle the post ID as needed
+                                callback(storyId,storyObjectId)
+                            }
+                        })
+                    val parameters = Bundle()
+                    parameters.putString("fields", "id,posts{story,id,object_id}")
+                    storyIdRequest.parameters = parameters
+                    storyIdRequest.executeAsync()
                 }
             } else {
                 withContext(Dispatchers.Main) {
@@ -157,12 +224,26 @@ object ImageShareUtil {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
     }
 
-    private fun openIntent(shareIntent: Intent, context: Context,activity: Activity) {
+    private fun openIntent(shareIntent: Intent, context: Context,activity: Activity): Pair<String?,String?>? {
         if (context.packageManager?.resolveActivity(shareIntent, 0) != null) {
             startActivityForResult(activity, shareIntent, 0, null)
-           showSuccess("Done!", context)
-        } else {
-           showError("Cannot start activity with the required intent!", context)
+            val storyId = shareIntent.let {
+                val extras = it.extras
+                if (extras != null && extras.containsKey("com.facebook.platform.extra.STORY_ID")) {
+                    extras.getString("com.facebook.platform.extra.STORY_ID")
+                } else {
+                    null
+                }
+            }
+            val storyDetails = shareIntent.extras?.getString("com.facebook.platform.extra.STORY_ENCODED_PATH")
+            val jsonObject = if (storyDetails != null) {
+                JSONObject(URLDecoder.decode(storyDetails, "UTF-8"))
+            } else {
+                null
+            }
+            val objectId = jsonObject?.optString("object_id")
+            return Pair(storyId, objectId)
         }
+        return null
     }
 }

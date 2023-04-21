@@ -18,11 +18,11 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/main_act_nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="end"
         app:navGraph="@navigation/main_act_navgraph"
         tools:layout_editor_absoluteX="22dp"

@@ -5,12 +5,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.facebook.shimmer.ShimmerFrameLayout
 import com.giftinapp.business.R
 import com.giftinapp.business.model.posts.Post
+import com.giftinapp.business.utility.gone
 import com.squareup.picasso.Picasso
 
-class PostListAdapter():RecyclerView.Adapter<PostListAdapter.ViewItemHolder>() {
+class PostListAdapter(private val clickablePost: ClickablePost):RecyclerView.Adapter<PostListAdapter.ViewItemHolder>() {
 
     private var postList = listOf<Post>()
 
@@ -30,12 +34,21 @@ class PostListAdapter():RecyclerView.Adapter<PostListAdapter.ViewItemHolder>() {
             val postImage = this.findViewById<ImageView>(R.id.ivPostImage)
             val postTitle = this.findViewById<TextView>(R.id.tvPostTitle)
 
-            Picasso.get().load(postList[position].jetpackFeaturedMediaUrl).into(postImage)
-            postTitle.text = postList[position].title.rendered
+            Glide.with(holder.itemView).load(postList[position].jetpackFeaturedMediaUrl).into(postImage)
+            val content = HtmlCompat.fromHtml(postList[position].content.rendered, HtmlCompat.FROM_HTML_MODE_LEGACY)
+            postTitle.text = content
+
+            postImage.setOnClickListener {
+                clickablePost.onPostClicked(postList[position].title.rendered,postList[position].content.rendered,postList[position].jetpackFeaturedMediaUrl)
+            }
         }
     }
 
     override fun getItemCount(): Int {
         return postList.size
+    }
+
+    interface ClickablePost{
+        fun onPostClicked(postTitle:String,postContent:String,postImage:String)
     }
 }

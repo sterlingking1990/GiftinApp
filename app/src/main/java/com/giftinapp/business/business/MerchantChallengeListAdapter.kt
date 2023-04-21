@@ -143,7 +143,7 @@ class MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):R
                     audioBtn.setOnClickListener {
                         merchantChallengeListPojo[position].storyAudioLink?.let { it1 ->
                             clickableChallenge.onAudioClicked(
-                                it1
+                                it1,it
                             )
                         }
                     }
@@ -200,7 +200,7 @@ class MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):R
     interface ClickableChallenge{
         fun deleteChallenge(link: String, videoLink:String,audioLink:String,artWorkLink:String, id: String, positionId: Int)
         fun viewResponders(challengeOwner:String?,challengeId:String?,challengeWorth:Int?)
-        fun onAudioClicked(audioLink:String)
+        fun onAudioClicked(audioLink:String, audioBtn:View)
         fun deleteMerchantChallenge(challengeId:String, positionId:Int)
         fun sharePostToFb(taskDrop:MerchantChallengeListPojo)
     }

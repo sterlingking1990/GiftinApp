@@ -23,6 +23,10 @@ class GetPostsViewModel @Inject constructor(private val postApiServiceRepo: Post
     val postListResponse:LiveData<Resource<List<Post>>>
         get() = _postListResponse
 
+    private var _postDetailResponse = MutableLiveData<Resource<Post>>()
+    val postDetailResponse:LiveData<Resource<Post>>
+    get() = _postDetailResponse
+
     fun getPostList(){
         if (networkHelper.isNetworkConnected()) {
             _postListResponse.postValue(Resource.loading(null))
@@ -41,6 +45,29 @@ class GetPostsViewModel @Inject constructor(private val postApiServiceRepo: Post
             }
         } else {
             _postListResponse.postValue(
+                (Resource.error("No network connectivity"))
+            )
+        }
+    }
+
+    fun getPostDetail(postId:Int){
+        if (networkHelper.isNetworkConnected()) {
+            _postListResponse.postValue(Resource.loading(null))
+            viewModelScope.launch {
+                with(Dispatchers.IO) {
+                    runCatching {
+                        postApiServiceRepo.getPostDetail(postId)
+                    }.onSuccess {
+                        Log.d("BanksResponse",it.toString())
+                        _postDetailResponse.postValue(Resource.success(it))
+                    }
+                        .onFailure {
+                            _postDetailResponse.postValue(Resource.error(it.localizedMessage))
+                        }
+                }
+            }
+        } else {
+            _postDetailResponse.postValue(
                 (Resource.error("No network connectivity"))
             )
         }

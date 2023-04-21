@@ -8,4 +8,6 @@ import retrofit2.Response
 interface PostApiServiceRepo {
 
     suspend fun fetchPosts(): List<Post>
+
+    suspend fun getPostDetail(postId: Int): Post
 }

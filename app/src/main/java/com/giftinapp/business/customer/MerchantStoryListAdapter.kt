@@ -112,9 +112,9 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
                                 .load(merchantStories[position].merchantStoryList[0].merchantStatusImageLink)
                                 .into(frontImage)
                     }else{
-                        Picasso.get()
-                            .load(merchantStories[position].merchantStoryList[0].videoArtWork)
-                            .into(frontImage)
+                        //load story cover from remote config or users own story cover
+                        getStoryCover(frontImage)
+
                     }
 
                     frontImage.setOnClickListener {
@@ -310,6 +310,14 @@ class MerchantStoryListAdapter(var storyClickable: StoryClickable):RecyclerView.
 
         //lets count the values in the users story watched which has the story owner
 
+    }
+
+    private fun getStoryCover(frontImage: CircleImageView) {
+        val remoteConfigUtil = RemoteConfigUtil()
+        val storyCover = remoteConfigUtil.getStoryCover()
+        Picasso.get()
+            .load(storyCover)
+            .into(frontImage)
     }
 
 }

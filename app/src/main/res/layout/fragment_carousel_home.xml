@@ -1,63 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-<!--    <androidx.recyclerview.widget.RecyclerView-->
-<!--        android:id="@+id/rvPostList"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="5dp"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
-<!--    <ProgressBar-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        android:id="@+id/pgLoadingPost"/>-->
-
-    <com.synnapps.carouselview.CarouselView
-        android:id="@+id/carouselView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:fillColor="#FFFFFFFF"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:indicatorVisibility="gone"
-        app:pageColor="#00000000"
-        app:radius="6dp"
-        app:slideInterval="3000"
-        app:strokeColor="#FF777777"
-        app:strokeWidth="1dp"/>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnExploreBrand"
+    <LinearLayout
+        android:id="@+id/llCarouselStats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:background="@drawable/rectangle_shaped_button"
-        android:elevation="100dp"
-        android:fontFamily="sans-serif-light"
-        android:text="Explore Brand"
-        android:textAllCaps="false"
-        android:textColor="@color/mainBackground"
-        android:textSize="16sp"
-        android:translationZ="0dp"
-        app:button_cornerRadius="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_marginTop="5dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.947" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        >
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            app:cardCornerRadius="8dp"
+            android:background="@drawable/sketchy_background">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+            <TextView
+                android:id="@+id/tvBrandFollowing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Brands Following \n3"
+                android:textAlignment="center"
+                android:fontFamily="@font/lato"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@color/mainText"
+                />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            app:cardCornerRadius="8dp"
+            android:background="@drawable/sketchy_background">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+            <TextView
+                android:id="@+id/tvBrcTotal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="Your BrC \n0"
+                android:textColor="@color/mainText"
+                android:fontFamily="@font/lato"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/llCarouselStats"
+        >
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPostList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:spanCount="2"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        >
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/pgLoadingPost"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/rlNoPost"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:gravity="center"
+        android:orientation="vertical"
+        >
+
+        <ImageView
+            android:id="@+id/imageView_no_post"
+            android:layout_width="wrap_content"
+            android:layout_height="250dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/no_result" />
+
+        <TextView
+            android:id="@+id/textView_no_post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imageView_no_post"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:text="No post found, \ncheck back later"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
+    </RelativeLayout>
+    <!--    <com.synnapps.carouselview.CarouselView-->
+<!--        android:id="@+id/carouselView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        app:fillColor="#FFFFFFFF"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:indicatorVisibility="gone"-->
+<!--        app:pageColor="#00000000"-->
+<!--        app:radius="6dp"-->
+<!--        app:slideInterval="3000"-->
+<!--        app:strokeColor="#FF777777"-->
+<!--        app:strokeWidth="1dp"/>-->
+
+<!--    <com.google.android.material.button.MaterialButton-->
+<!--        android:id="@+id/btnExploreBrand"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginStart="10dp"-->
+<!--        android:layout_marginEnd="10dp"-->
+<!--        android:background="@drawable/rectangle_shaped_button"-->
+<!--        android:elevation="100dp"-->
+<!--        android:fontFamily="sans-serif-light"-->
+<!--        android:text="Explore Brand"-->
+<!--        android:textAllCaps="false"-->
+<!--        android:textColor="@color/mainBackground"-->
+<!--        android:textSize="16sp"-->
+<!--        android:translationZ="0dp"-->
+<!--        app:button_cornerRadius="20dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintHorizontal_bias="0.0"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintVertical_bias="0.947" />-->
+
+</RelativeLayout>

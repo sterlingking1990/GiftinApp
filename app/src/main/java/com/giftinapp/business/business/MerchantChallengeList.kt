@@ -1,25 +1,33 @@
 package com.giftinapp.business.business
 
+import android.Manifest
 import android.content.DialogInterface
+import android.content.pm.PackageManager
+import android.media.AudioAttributes
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
-import com.giftinapp.business.model.MerchantChallengeListPojo
-import com.giftinapp.business.model.SharableCondition
-import com.giftinapp.business.model.StatusReachAndWorthPojo
+import com.giftinapp.business.model.*
 import com.giftinapp.business.utility.*
+import com.giftinapp.business.utility.helpers.DateHelper
+import com.giftinapp.business.utility.helpers.ImageDownloaderUtil
 import com.giftinapp.business.utility.helpers.ImageShareUtil
 import com.giftinapp.business.utility.helpers.VideoShareUtil
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -45,6 +53,10 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
     var numberOfApproved:Int? = null
 
     var builder: AlertDialog.Builder? = null
+
+    var mediaPlayer:MediaPlayer?=null
+
+    var storyId:String? = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -300,7 +312,29 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
         }
     }
 
-    override fun onAudioClicked(audioLink: String) {
+    override fun onAudioClicked(audioLink: String,audioBtn:View) {
+        if (mediaPlayer == null || !mediaPlayer!!.isPlaying) {
+            // if not playing or MediaPlayer is null, create a new instance and start playing the audio
+            mediaPlayer = MediaPlayer().apply {
+                setAudioAttributes(AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
+                setDataSource(audioLink)
+                prepare()
+                start()
+            }
+            // update the button text to show "Stop" since the audio is now playing
+            val audioButtonView = audioBtn as FloatingActionButton
+            audioButtonView.setImageResource(R.drawable.stop_icon)
+        } else {
+            // if MediaPlayer is already playing, stop it and release the resources
+            mediaPlayer!!.stop()
+            mediaPlayer!!.release()
+            mediaPlayer = null
+            // update the button text to show "Play" since the audio is now stopped
+            val audioButtonView = audioBtn as FloatingActionButton
+            audioButtonView.setImageResource(R.drawable.play_back_icon)
+        }
+
+
 
     }
 
@@ -309,6 +343,7 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
     }
 
     override fun sharePostToFb(taskDrop: MerchantChallengeListPojo) {
+        storyId = taskDrop.merchantStatusId
         if(taskDrop.merchantStatusVideoLink.isNullOrEmpty()) {
             Log.d("StoryTag",taskDrop.storyTag.toString())
             if(!taskDrop.storyTag.isNullOrEmpty()) {
@@ -323,11 +358,23 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
                         )
                     }
                     .setNegativeButton("Facebook Post") { _: DialogInterface?, _: Int ->
-                        ImageShareUtil.shareImageOnPost(
-                            taskDrop.merchantStatusImageLink,
-                            taskDrop.storyTag,
-                            requireActivity()
-                        )
+                        taskDrop.merchantStatusImageLink?.let {
+                            if (isPermissionForSavingImageGiven()) {
+                                Log.d("PermissionGranted", "Granted")
+                                taskDrop.storyTag?.let { it1 ->
+                                    handleImageDownloadToDeviceAndShare(
+                                        it,
+                                        it1
+                                    )
+                                }
+                            } else {
+                                ActivityCompat.requestPermissions(
+                                    requireActivity(),
+                                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                                    1
+                                )
+                            }
+                        }
                         //shareImageOnPost(taskDrop.merchantStatusImageLink,taskDrop.storyTag)
                     }
                     .setNeutralButton("Facebook Story") { _: DialogInterface?, _: Int ->
@@ -336,7 +383,12 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
                             taskDrop.merchantStatusId,
                             requireContext(),
                             requireActivity()
-                        )
+                        ){
+                            storyId,storyObjId->
+                            Log.d("StoryId",storyId.toString())
+                            Log.d("StoryObjId",storyObjId.toString())
+
+                        }
                         //shareImageOnStory(taskDrop.merchantStatusImageLink,taskDrop.merchantStatusId)
                     }
                 val alert = builder!!.create()
@@ -358,7 +410,11 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
                             taskDrop.merchantStatusId,
                             requireContext(),
                             requireActivity()
-                        )
+                        ){
+                            storyId,storyObjId->
+                            Log.d("StoryId",storyId.toString())
+                            Log.d("StoryObjId",storyObjId.toString())
+                        }
                         //shareImageOnStory(taskDrop.merchantStatusImageLink,taskDrop.merchantStatusId)
                     }
                 val alert = builder!!.create()
@@ -370,6 +426,57 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
         }
     }
 
+
+    private fun isPermissionForSavingImageGiven():Boolean{
+        context?.let {
+            val result: Int = ContextCompat.checkSelfPermission(
+                it,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            return result == PackageManager.PERMISSION_GRANTED
+        }
+        return false
+    }
+
+
+    private fun handleImageDownloadToDeviceAndShare(imageLink:String,storyTag:String){
+        ImageDownloaderUtil(requireActivity()).downloadImageToDevice(imageLink) {
+            Log.d("ImageLinkShared",it)
+            ImageShareUtil.shareImageOnPost(
+                it,
+                storyTag,
+                requireActivity()
+            ){postId,ObjId->
+                //save postId and ObjectId to users sharable record
+                if(!postId.isNullOrEmpty() && !ObjId.isNullOrEmpty())
+                    savePostIdAndObjectId(postId,ObjId)
+            }
+        }
+    }
+
+    private fun savePostIdAndObjectId(postId:String,ObjId:String){
+        val db = FirebaseFirestore.getInstance()
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+        val dateShared = DateHelper().setPublishedAtDate()
+        val fbPostDetail = FBPostData(postId,ObjId,dateShared)
+
+        val empty = SetEmpty("empty")
+
+        db.collection("sharable").document(sessionManager.getEmail().toString()).set(empty)
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    db.collection("sharable").document(sessionManager.getEmail().toString()).collection("fbpost").document(storyId.toString()).set(fbPostDetail)
+                        .addOnCompleteListener {shared->
+                            if(shared.isSuccessful){
+                                Toast.makeText(requireContext(),"Post shared successfully, check Your Claims shortly for rewards",Toast.LENGTH_LONG).show()
+                            }
+                        }
+                }
+            }
+    }
     private fun showDialogGuide(
         shareDuration: Int?,
         minViewRewarding: Int?,

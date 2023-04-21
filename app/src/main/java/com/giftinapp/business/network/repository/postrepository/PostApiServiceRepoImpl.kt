@@ -11,4 +11,8 @@ class PostApiServiceRepoImpl @Inject constructor(private val postApiServiceMetho
     override suspend fun fetchPosts(): List<Post>{
         return postApiServiceMethod.fetchPosts()
     }
+
+    override suspend fun getPostDetail(postId: Int): Post {
+        return postApiServiceMethod.getPostDetail(postId)
+    }
 }

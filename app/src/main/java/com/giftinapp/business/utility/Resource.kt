@@ -1,5 +1,7 @@
 package com.giftinapp.business.utility
 
+import com.giftinapp.business.model.gptcontent.Choice
+
 data class Resource<out T>(
         val status:Status,
         val data: T?,

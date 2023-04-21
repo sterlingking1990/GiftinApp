@@ -34,6 +34,8 @@ class RemoteConfigUtil{
     private val REVENUE_MULTIPLIER = "revenue_multiplier"
     private val CHALLENGE_WORTH = "challenge_worth"
     private val NAIRA_TO_MPESA_CONVERSION = "naira_to_mpesa_conversion"
+    private val STORY_COVER = "story_cover"
+    private val GPT_TOPIC = "gpt_topic"
 
     private val DEFAULTS: HashMap<String, Any> =
         hashMapOf(
@@ -57,7 +59,9 @@ class RemoteConfigUtil{
             IMAGE_VIEW_DURATION to 100,
             REVENUE_MULTIPLIER to 0.1,
             CHALLENGE_WORTH to 50,
-            NAIRA_TO_MPESA_CONVERSION  to 5.0
+            NAIRA_TO_MPESA_CONVERSION  to 5.0,
+            STORY_COVER  to "https://png.pngitem.com/pimgs/s/33-330702_what-200-calories-look-like-click-me-with.png",
+            GPT_TOPIC  to "Agriculture"
 
         )
 
@@ -91,6 +95,8 @@ class RemoteConfigUtil{
 
     fun getCarouselThreeImage(): String = getFirebaseRemoteConfig().getString(CAROUSEL_THREE)
 
+    fun getStoryCover(): String = getFirebaseRemoteConfig().getString(STORY_COVER)
+
     fun getEarnMoreImageOne(): String = getFirebaseRemoteConfig().getString(EARN_MORE_IMAGE_ONE)
     fun getEarnMoreImageTwo(): String = getFirebaseRemoteConfig().getString(EARN_MORE_IMAGE_TWO)
     fun getEarnMoreImageThree(): String = getFirebaseRemoteConfig().getString(EARN_MORE_IMAGE_THREE)
@@ -112,4 +118,6 @@ class RemoteConfigUtil{
     fun getRevenueMultiplier(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[REVENUE_MULTIPLIER]
     fun getChallengeWorth(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[CHALLENGE_WORTH]
     fun getNairaToMpesaConversion(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[NAIRA_TO_MPESA_CONVERSION]
+
+    fun getGptTopicFromRemoteConfig(): String = getFirebaseRemoteConfig().getString(GPT_TOPIC)
     }

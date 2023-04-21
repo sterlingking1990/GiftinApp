@@ -39,7 +39,9 @@
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:exported="false"
+            />
         <activity
             android:name=".InfluencerSharersActivity"
             android:exported="false"
@@ -80,13 +82,19 @@
         </activity>
         <activity
             android:name=".GiftinAppAuthorityActivity"
-            android:theme="@style/Theme.Merchant" />
+            android:theme="@style/Theme.Merchant"
+            android:exported="false"
+            />
         <activity
             android:name=".MerchantActivity"
-            android:theme="@style/Theme.Merchant" />
+            android:theme="@style/Theme.Merchant"
+            android:exported="false"
+            />
         <activity
             android:name=".LoginActivity"
-            android:theme="@style/Theme.Merchant" />
+            android:theme="@style/Theme.Merchant"
+            android:exported="false"
+            />
         <activity
             android:name=".SignUpActivity"
             android:exported="true"

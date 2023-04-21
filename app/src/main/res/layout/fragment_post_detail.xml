@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".customer.PostDetailFragment">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingBottom="16dp"
+            >
+
+            <TextView
+                android:id="@+id/post_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Post Title"
+                android:textSize="36sp"
+                android:textColor="#333333"
+                android:textStyle="bold"
+                android:fontFamily="@font/lato"/>
+
+            <ImageView
+                android:id="@+id/post_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"
+                android:background="@drawable/image_border_background"
+                android:layout_marginTop="10dp"
+                />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                >
+                <TextView
+                    android:id="@+id/tvAttributionStart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Photo by "
+                    android:textSize="12sp"
+                    android:layout_weight="1"
+                    android:textColor="#333333"
+                    android:textStyle="italic"
+                    android:fontFamily="@font/lato"/>
+
+                <TextView
+                    android:id="@+id/tvOwnerName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Andrew"
+                    android:textStyle="italic"
+                    android:textColorLink="@color/main_blue"
+                    android:autoLink="web"
+                    android:textSize="13sp"
+                    android:fontFamily="@font/lato"/>
+                <TextView
+                    android:id="@+id/brand"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" on Unsplash"
+                    android:textSize="13sp"
+                    android:textStyle="italic"
+                    android:fontFamily="@font/lato"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/post_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="body text"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:layout_marginTop="10dp"
+                android:fontFamily="sans-serif"
+                android:lineSpacingMultiplier="1.5" />
+        </LinearLayout>
+
+</ScrollView>

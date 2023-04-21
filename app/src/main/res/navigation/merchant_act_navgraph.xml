@@ -51,7 +51,11 @@
         android:id="@+id/carouselHome2"
         android:name="com.giftinapp.business.homefragment.CarouselHome"
         android:label="fragment_carousel_home"
-        tools:layout="@layout/fragment_carousel_home" />
+        tools:layout="@layout/fragment_carousel_home" >
+        <action
+            android:id="@+id/action_carouselHome2_to_postDetailFragment2"
+            app:destination="@id/postDetailFragment2" />
+    </fragment>
     <fragment
         android:id="@+id/giftinAboutForMerchant"
         android:name="com.giftinapp.business.business.GiftinAboutForMerchant"
@@ -77,4 +81,13 @@
         android:name="com.giftinapp.business.business.BrandFundWalletFragment"
         android:label="fragment_brand_fund_wallet"
         tools:layout="@layout/fragment_brand_fund_wallet" />
+    <fragment
+        android:id="@+id/postDetailFragment2"
+        android:name="com.giftinapp.business.customer.PostDetailFragment"
+        android:label="fragment_post_detail"
+        tools:layout="@layout/fragment_post_detail" >
+        <action
+            android:id="@+id/action_postDetailFragment2_to_carouselHome2"
+            app:destination="@id/carouselHome2" />
+    </fragment>
 </navigation>

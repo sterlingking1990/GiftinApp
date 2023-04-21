@@ -119,17 +119,14 @@ public class GiftACustomerFragment extends Fragment {
         lvCustomerFanToRewardList.setAdapter(arrayAdapter);
 
 
-        lvCustomerFanToRewardList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                        arrayAdapter.remove(list.get(position));
-                        arrayAdapter.notifyDataSetChanged();
-                        if(list.size()==0){
-                            btnRewardCustomerFan.setEnabled(false);
-                            btnRewardCustomerFan.setBackgroundColor(getResources().getColor(R.color.gray_scale));
-                        }
-                        return false;
-            }
+        lvCustomerFanToRewardList.setOnItemLongClickListener((parent, view1, position, id) -> {
+                    arrayAdapter.remove(list.get(position));
+                    arrayAdapter.notifyDataSetChanged();
+                    if(list.size()==0){
+                        btnRewardCustomerFan.setEnabled(false);
+                        btnRewardCustomerFan.setBackgroundColor(getResources().getColor(R.color.gray_scale));
+                    }
+                    return false;
         });
 
         lvCustomerFanToRewardList.setOnItemClickListener(new AdapterView.OnItemClickListener() {

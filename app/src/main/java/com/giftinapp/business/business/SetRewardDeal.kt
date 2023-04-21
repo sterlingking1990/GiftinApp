@@ -46,6 +46,7 @@ import com.giftinapp.business.model.SharableCondition
 import com.giftinapp.business.model.StatusReachAndWorthPojo
 import com.giftinapp.business.utility.*
 import com.giftinapp.business.utility.base.BaseFragment
+import com.giftinapp.business.utility.helpers.DateHelper
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.slider.Slider
 import com.google.firebase.auth.FirebaseAuth
@@ -171,9 +172,15 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 
     private val videoResultLauncher = registerForActivityResult(StartActivityForResult()) {videoResult->
         if(videoResult.resultCode == RESULT_OK){
-            videoUriToUpload = Uri.parse(videoResult.data!!.dataString)
-
-            videoString = videoResult.data!!.dataString
+            videoUriToUpload = Uri.parse(videoResult.data?.data.toString())
+//            try {
+//                artWorkBitmap = getBmpArtWorkFromMedia()
+//                mmr.release()
+//
+//            }catch (e:Exception){
+//                Log.d("NoVidFrameRet","NoVidFrameRet")
+//            }
+            videoString = videoResult.data?.data.toString()
             Log.d("VideoRecord",videoUriToUpload.toString())
             checkVideoDuration(videoUriToUpload)
         }
@@ -181,8 +188,15 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 
     private val videoFromGalleryLauncher = registerForActivityResult(StartActivityForResult()) { videoFromGalleryResult ->
         if(videoFromGalleryResult.resultCode == RESULT_OK){
-            videoUriToUpload = Uri.parse(videoFromGalleryResult.data!!.dataString)
-            videoString = videoFromGalleryResult.data!!.dataString
+            videoUriToUpload = Uri.parse(videoFromGalleryResult.data?.data.toString())
+//            try {
+//                artWorkBitmap = getBmpArtWorkFromMedia()
+//                mmr.release()
+//
+//            }catch (e:Exception){
+//                Log.d("NoVideoRetriver","NoVidRet")
+//            }
+            videoString = videoFromGalleryResult.data?.data.toString()
             checkVideoDuration(videoUriToUpload)
         }
     }
@@ -527,18 +541,25 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         }
     }
 
-    private fun getBmpArtWorkFromMedia(): Bitmap {
+    private fun getBmpArtWorkFromMedia(): Bitmap? {
 
+        Log.d("VideoUri", videoUriToUpload.toString())
+        try {
         mmr = FFmpegMediaMetadataRetriever()
-        mmr.setDataSource(requireContext(), videoUriToUpload)
-        mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_ALBUM)
-        mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_ARTIST)
 
-        return mmr.getFrameAtTime(
-            10000000,
-            FFmpegMediaMetadataRetriever.OPTION_CLOSEST
-        )
+            mmr.setDataSource(requireContext(), videoUriToUpload)
+            mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_ALBUM)
+            mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_ARTIST)
+
+            return mmr.getFrameAtTime(
+                10000000,
+                FFmpegMediaMetadataRetriever.OPTION_CLOSEST
+            )
+        }catch (e:Exception){
+            Log.d("Exception","VideoRetriever")
+        }
         //val artwork = mmr.embeddedPicture
+        return null
     }
 
     private fun uploadVideoCaptionProvided(){
@@ -587,11 +608,14 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
             binding.tvVideoDownloadUri.text = downloadUri.toString()
             binding.pgUploading.visibility = View.GONE
             //uploadUriAndStoryTagToFireStore()
-            if(artWorkBitmap==null) {
-                artWorkBitmap = getBmpArtWorkFromMedia()
-                mmr.release()
+//            if(artWorkBitmap==null) {
+//                artWorkBitmap = getBmpArtWorkFromMedia()
+//                mmr.release()
+//            }
+            if(artWorkBitmap!=null) {
+                uploadArtWord(artWorkBitmap!!)
             }
-            uploadArtWord(artWorkBitmap!!)
+            uploadUriAndStoryTagToFireStore()
 //            firebaseMediaUploader.uploadImage(bmp,{
 //                videoArtWork = it
 //                uploadUriAndStoryTagToFireStore()
@@ -855,7 +879,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                 merchantStoryListPojo.statusReachAndWorthPojo = statusReachAndWorthPojo
                 merchantStoryListPojo.sharableCondition = sharableSetting
                 merchantStoryListPojo.viewers = arrayListOf()
-                merchantStoryListPojo.publishedAt = setPublishedAtDate()
+                merchantStoryListPojo.publishedAt = DateHelper().setPublishedAtDate()
 
                 if(isChallenge){
                     if(statusWorth < challengeWorthCustomizable){
@@ -939,17 +963,6 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 //            val alert = builder!!.create()
 //            alert.show()
         }
-    }
-
-    private fun setPublishedAtDate():String{
-        val sdf = SimpleDateFormat("MM-dd-yyyy HH:mm");
-        val now = Date()
-        val cal: Calendar =
-            GregorianCalendar()
-
-        cal.time = now
-
-        return sdf.format(cal.time)
     }
 
     private fun sendNotificationForSharable(shareStartTime: String?, shareDuration: Int?) {

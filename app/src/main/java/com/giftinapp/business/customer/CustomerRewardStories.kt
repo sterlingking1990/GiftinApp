@@ -34,6 +34,7 @@ import com.giftinapp.business.dialogs.MessageDialog
 import com.giftinapp.business.model.*
 import com.giftinapp.business.utility.*
 import com.giftinapp.business.utility.base.BaseFragment
+import com.giftinapp.business.utility.helpers.StatusView
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
@@ -129,6 +130,12 @@ class CustomerRewardStories : Fragment() {
     var image_view_duration = 100
 
     var revenue_multiplier = 0.1
+
+    lateinit var statusView:StatusView
+
+    var statusDescriptionLength:Int = 0
+    var currentProgressOfStory:Int = 0
+    var lastStatusBeforeNextStory:Boolean = false
 
     @Inject
     lateinit var audioRecorderPlayer: AudioRecorderPlayer
@@ -245,7 +252,9 @@ class CustomerRewardStories : Fragment() {
                 player
                 .also { exoPlayer ->
                     videoPlayerView.player = exoPlayer
+                    removeParentVideoGroup()
                     binding.llStatus.addView(videoPlayerView)
+                    binding.llStatus.addView(binding.statusView)
                     val mediaItem = MediaItem.fromUri(s)
                     exoPlayer?.setMediaItem(mediaItem)
                     exoPlayer?.addListener(playbackStateListener)
@@ -365,6 +374,7 @@ class CustomerRewardStories : Fragment() {
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
                 )
+                imageStatusView.scaleType = ImageView.ScaleType.FIT_XY
                 //imageUrl.merchantStatusImageLink?.let { imageStatusView.loadImage(it) }
                 val audioLink = if(imageUrl.storyAudioLink.isNullOrEmpty()) "empty" else imageUrl.storyAudioLink
                 audioLinks.add(audioLink)
@@ -475,44 +485,59 @@ class CustomerRewardStories : Fragment() {
 
     private fun moveToNextStatus() {
         if ( mCurrentIndex < imagesList?.size!!-1) {
+            lastStatusBeforeNextStory = false
             mCurrentProgress = 0
             mDisposable?.dispose()
             mDisposable = null
-            runOnUiThread {
-                updateStoryAsViewed(mCurrentIndex)
-                releasePlayer()
-                //1 ll_status.removeView(viewList[mCurrentIndex])
-                binding.llStatus.removeAllViews()
-                mCurrentIndex++
-                if(viewList[mCurrentIndex] is ImageView) {
-                    Log.d("SecondStatIsImage", (viewList[mCurrentIndex] is ImageView).toString())
-                    imagesList?.get(mCurrentIndex)?.merchantStatusImageLink?.let {
-                        imageStatusView.loadImage(
-                            it
+            if(statusDescriptionLength<120) {
+                runOnUiThread {
+                    updateStoryAsViewed(mCurrentIndex)
+                    releasePlayer()
+                    //1 ll_status.removeView(viewList[mCurrentIndex])
+                    binding.llStatus.removeAllViews()
+                    mCurrentIndex++
+                    if (viewList[mCurrentIndex] is ImageView) {
+                        Log.d(
+                            "SecondStatIsImage",
+                            (viewList[mCurrentIndex] is ImageView).toString()
                         )
+                        imagesList?.get(mCurrentIndex)?.merchantStatusImageLink?.let {
+                            imageStatusView.loadImage(
+                                it
+                            )
+                        }
+                        removeParentGroup()
+                        binding.llStatus.addView(imageStatusView)
+                        binding.llStatus.addView(binding.statusView)
+
                     }
-                    binding.llStatus.addView(imageStatusView)
+                    playAudio(audioLinks[mCurrentIndex])
                 }
-                playAudio(audioLinks[mCurrentIndex])
+                indexPos += 1
+                emitStatusProgress()
             }
-            indexPos+=1
-            emitStatusProgress()
         } else {
             runOnUiThread {
                 if(currentStoryPos!! < (allStories?.size?.minus(1)!!)) {
+                    lastStatusBeforeNextStory = true
                     Log.d("AmBeforeLast","last")
                     updateStoryAsViewed(mCurrentIndex) //find a way to get to the next brand and start displaying its status story
                     currentSlide = true
                     releasePlayer()
-                    displayAd(currentSlide!!)
+                    if(statusDescriptionLength<180) {
+                        displayAd(currentSlide!!)
+                    }
                 }
                 else {
+                    lastStatusBeforeNextStory = true
                     Log.d("AmAtLast","last")
                     releasePlayer()
                     updateStoryAsViewed(mCurrentIndex)
                     //implement admob here before disposing
                     currentSlide = false
-                    displayAd(currentSlide!!)
+                    if(statusDescriptionLength < 180) {
+                        displayAd(currentSlide!!)
+                    }
 
                 }
             }
@@ -995,13 +1020,18 @@ class CustomerRewardStories : Fragment() {
         }
         //progressLength = if(audioLinks[0] =="empty") 40 else 230
         runOnUiThread {
-            binding.tvRewardStatusTag.text = imagesList?.get(mCurrentIndex)?.storyTag
+            //binding.tvRewardStatusTag.text = imagesList?.get(mCurrentIndex)?.storyTag
+            if(imagesList?.get(mCurrentIndex)?.storyTag!=null || imagesList?.get(mCurrentIndex)?.storyTag!="") {
+                binding.statusView.setDescription(imagesList?.get(mCurrentIndex)?.storyTag.toString())
+            }
             getNumberOfViews(imagesList?.get(mCurrentIndex)?.merchantStatusId.toString())
             getNumberOfLikes(imagesList?.get(mCurrentIndex)?.merchantStatusId.toString())
             getStatusWorthAndNumberOfViewsFor(imagesList?.get(mCurrentIndex)?.merchantStatusId.toString())
             binding.tvNumberOfViewers.text = numberOfStatusView.toString()
             binding.tvLikeBrandStory.text = numberOfLikes.toString()
             statusTag = imagesList?.get(mCurrentIndex)?.storyTag
+            statusDescriptionLength = imagesList?.get(mCurrentIndex)?.storyTag?.length?:0
+            currentProgressOfStory = progress.toInt()
         }
         //indexPos=mCurrentIndex+1
 
@@ -1043,7 +1073,11 @@ class CustomerRewardStories : Fragment() {
                     it
                 )
             }
+            removeParentGroup()
             binding.llStatus.addView(imageStatusView)
+            binding.llStatus.addView(binding.statusView)
+
+
         }
             runOnUiThread {
                 playAudio(audioLinks[mCurrentIndex])
@@ -1115,7 +1149,10 @@ class CustomerRewardStories : Fragment() {
                             it
                         )
                     }
+                    removeParentGroup()
                     binding.llStatus.addView(imageStatusView)
+                    binding.llStatus.addView(binding.statusView)
+
                 }
                 if (mCurrentIndex != imagesList?.size!!-1) {
                     releasePlayer()
@@ -1133,7 +1170,10 @@ class CustomerRewardStories : Fragment() {
                             it
                         )
                     }
+                    removeParentGroup()
                     binding.llStatus.addView(imageStatusView)
+                    binding.llStatus.addView(binding.statusView)
+
                 }
                 indexPos = mCurrentIndex
                 releasePlayer()
@@ -1147,6 +1187,10 @@ class CustomerRewardStories : Fragment() {
     private fun startStatusNext() {
         mCurrentProgress = 0
         runOnUiThread {
+            if(statusDescriptionLength>=120 && currentProgressOfStory>=99){
+                updateStoryAsViewed(mCurrentIndex)
+                releasePlayer()
+            }
             if (mCurrentIndex != imagesList?.size!!-1) {
                 val durationOne = if(audioLinks[mCurrentIndex]=="empty") 40 else 230
                 (binding.llProgressBar[mCurrentIndex] as? ProgressBar)?.progress = progressMax[mCurrentIndex]
@@ -1160,7 +1204,10 @@ class CustomerRewardStories : Fragment() {
                             it
                         )
                     }
+                    removeParentGroup()
                     binding.llStatus.addView(imageStatusView)
+                    binding.llStatus.addView(binding.statusView)
+
                 }
                 emitStatusProgress()
                 indexPos=mCurrentIndex
@@ -1168,7 +1215,11 @@ class CustomerRewardStories : Fragment() {
                 releasePlayer()
                 playAudio(audioLinks[mCurrentIndex])
             }else{
-                moveToNextStatus()
+                if(lastStatusBeforeNextStory){
+                    displayAd(currentSlide!!)
+                }else {
+                    moveToNextStatus()
+                }
             }
         }
     }
@@ -1214,6 +1265,24 @@ class CustomerRewardStories : Fragment() {
             player = null
         }catch (e:Exception){
 
+        }
+    }
+
+    private fun removeParentGroup(){
+        if(imageStatusView.parent!=null){
+            (imageStatusView.parent as ViewGroup).removeView(imageStatusView)
+        }
+        if(binding.statusView.parent!=null){
+            (binding.statusView.parent as ViewGroup).removeView(binding.statusView)
+        }
+    }
+
+    private fun removeParentVideoGroup(){
+        if(videoPlayerView.parent!=null){
+            (videoPlayerView.parent as ViewGroup).removeView(videoPlayerView)
+        }
+        if(binding.statusView.parent!=null){
+            (binding.statusView.parent as ViewGroup).removeView(binding.statusView)
         }
     }
 }

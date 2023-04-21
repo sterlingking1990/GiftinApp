@@ -107,4 +107,8 @@
     <string name="expiry_slash">%1$s/</string>
     <string name="view_more">view more</string>
     <string name="view_less">view less</string>
+    <string name="brand_following">Brands following \n%1$s</string>
+    <string name="your_brc">Your BrC \n%1$s</string>
+    <string name="influencer_followers">Influencer followers \n%1$s</string>
+    <string name="brand_value">Brand value \n%1$s</string>
 </resources>

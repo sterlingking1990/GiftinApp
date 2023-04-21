@@ -45,7 +45,11 @@
         android:id="@+id/carouselHome"
         android:name="com.giftinapp.business.homefragment.CarouselHome"
         android:label="@string/app_name"
-        tools:layout="@layout/fragment_carousel_home" />
+        tools:layout="@layout/fragment_carousel_home" >
+        <action
+            android:id="@+id/action_carouselHome_to_postDetailFragment"
+            app:destination="@id/postDetailFragment" />
+    </fragment>
     <fragment
         android:id="@+id/customerRewardStories"
         android:name="com.giftinapp.business.customer.CustomerRewardStories"
@@ -89,4 +93,13 @@
         android:name="com.giftinapp.business.customer.MpesaCashoutFragment"
         android:label="fragment_mpesa_cashout"
         tools:layout="@layout/fragment_mpesa_cashout" />
+    <fragment
+        android:id="@+id/postDetailFragment"
+        android:name="com.giftinapp.business.customer.PostDetailFragment"
+        android:label="fragment_post_detail"
+        tools:layout="@layout/fragment_post_detail" >
+        <action
+            android:id="@+id/action_postDetailFragment_to_carouselHome"
+            app:destination="@id/carouselHome" />
+    </fragment>
 </navigation>
