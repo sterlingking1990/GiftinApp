@@ -4,11 +4,15 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.FileProvider
+import com.facebook.AccessToken
+import com.facebook.GraphRequest
+import com.facebook.GraphResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -25,7 +29,8 @@ object VideoShareUtil {
         merchantStatusVideoLink: String,
         merchantStatusId: String?,
         context: Context,
-        activity: Activity
+        activity: Activity,
+        callback:(String?,String?)->Unit
     ) {
         // show loading
         showWarning("Loading, wait...", context)
@@ -36,7 +41,7 @@ object VideoShareUtil {
             if (saveBackgroundVideoAsset(merchantStatusVideoLink, merchantStatusId)) {
                 withContext(Dispatchers.Main) {
                     // show posting
-                    showWarning("Done, now i'm posting...", context)
+                    showWarning("You can post now...", context)
 
                     // create intent
                     // val providerAssetUri = getProviderFileUri(getImageAssetFile())
@@ -61,6 +66,23 @@ object VideoShareUtil {
 
                     // open intent
                     openIntent(shareIntent, context,activity)
+                    val storyIdRequest = GraphRequest.newGraphPathRequest(
+                        AccessToken.getCurrentAccessToken(),
+                        "me",
+                        object : GraphRequest.Callback {
+                            override fun onCompleted(response: GraphResponse) {
+                                val data = response.getJSONObject()?.getJSONObject("posts")?.getJSONArray("data")
+                                Log.d("FBData",data.toString())
+                                val storyId = data?.getJSONObject(0)?.getString("id")
+                                val storyObjectId = data?.getJSONObject(0)?.getString("object_id")
+                                // Handle the post ID as needed
+                                callback(storyId,storyObjectId)
+                            }
+                        })
+                    val parameters = Bundle()
+                    parameters.putString("fields", "id,posts{story,id,object_id}")
+                    storyIdRequest.parameters = parameters
+                    storyIdRequest.executeAsync()
                 }
             } else {
                 withContext(Dispatchers.Main) {

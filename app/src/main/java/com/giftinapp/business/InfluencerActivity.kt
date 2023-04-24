@@ -207,6 +207,10 @@ open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
             //binding.carouselView.visibility = View.GONE
             navController.navigate(R.id.myReferralDealFragment)
         }
+
+        if(menuitem.itemId == R.id.navigation_shared_posts){
+            navController.navigate(R.id.sharedPostsNRewardFragment)
+        }
 //        if (menuitem.itemId == R.id.navigation_share_n_earn) {
 //            //binding.carouselView.visibility = View.GONE
 //            Log.d("AccessToken",AccessToken.getCurrentAccessToken()?.token.toString())
@@ -573,5 +577,4 @@ open class InfluencerActivity : BaseActivity<ActivityInfluencerBinding>() {
                 }
             }
     }
-
 }

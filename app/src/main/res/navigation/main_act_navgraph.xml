@@ -102,4 +102,9 @@
             android:id="@+id/action_postDetailFragment_to_carouselHome"
             app:destination="@id/carouselHome" />
     </fragment>
+    <fragment
+        android:id="@+id/sharedPostsNRewardFragment"
+        android:name="com.giftinapp.business.customer.SharedPostsNRewardFragment"
+        android:label="fragment_shared_posts_n_reward"
+        tools:layout="@layout/fragment_shared_posts_n_reward" />
 </navigation>

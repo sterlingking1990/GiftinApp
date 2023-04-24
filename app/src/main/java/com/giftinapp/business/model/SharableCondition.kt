@@ -7,4 +7,7 @@ data class SharableCondition(
     var rewardingStartTime: String? = null,
     var minViewRewarding: Int? = null,
     var targetCountry:String? = null,
+    var minLike:Int? = null,
+    var minShare:Int? = null,
+    var daysPostLasting:Int? = null
 )

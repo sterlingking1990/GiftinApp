@@ -123,9 +123,9 @@ class MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):R
                     clickableChallenge.deleteChallenge(imageLink,videoLink,audioLink,artWorkLink,challengeId,position)
             }
 
-            btnShare.setOnClickListener {
-                clickableChallenge.sharePostToFb(merchantChallengeListPojo[position])
-            }
+//            btnShare.setOnClickListener {
+//                clickableChallenge.sharePostToFb(merchantChallengeListPojo[position])
+//            }
 
             numberOfResponders.setOnClickListener {
                 if(numberOfResponders.text.toString().toInt()>0) {
@@ -202,7 +202,7 @@ class MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):R
         fun viewResponders(challengeOwner:String?,challengeId:String?,challengeWorth:Int?)
         fun onAudioClicked(audioLink:String, audioBtn:View)
         fun deleteMerchantChallenge(challengeId:String, positionId:Int)
-        fun sharePostToFb(taskDrop:MerchantChallengeListPojo)
+        //fun sharePostToFb(taskDrop:MerchantChallengeListPojo)
     }
 
     fun clear(position:Int) {

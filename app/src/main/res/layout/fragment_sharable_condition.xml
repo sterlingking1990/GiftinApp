@@ -76,10 +76,58 @@
                 android:hint="min total view for all share i.e 10"
                 android:imeOptions="actionNext"
                 android:inputType="number"
+                android:visibility="gone"
                 android:maxLines="1"
                 android:textSize="16sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etMinLikeForRewarding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="min likes for rewarding i.e 10"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textSize="16sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etMinShareForRewarding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="min shares for rewarding i.e 10"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textSize="16sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDaysPostingLasts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="rewarding should last (in days) i.e 10 "
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textSize="16sp" />
+        </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:id="@+id/etRewardingTime"
@@ -90,6 +138,7 @@
                 android:id="@+id/etRewardingTimeInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:hint="click to pick rewarding time"
                 android:imeOptions="actionNext"
                 android:inputType="time"
@@ -106,6 +155,7 @@
             android:textColor="#000"
             app:hintText="Select Target Country"
             android:textSize="18sp"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/llShareCondition" />

@@ -783,6 +783,7 @@ class CustomerRewardStories : Fragment() {
                                 //recreate it
                                 db.collection("users").document(sessionManager.getEmail().toString()).collection("rewards").document("GiftinAppBonus").set(rewardPojo)
                                 numberOfTimeUserGotRewardOnABrandStatus += 1
+                                updateStoryOwnerWalletBasedOnView(storyWorth)
                                 playCongratulationsMusic()
                                 storyWorth = 0
                             }

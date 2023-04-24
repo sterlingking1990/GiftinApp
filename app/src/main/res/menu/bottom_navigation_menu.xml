@@ -20,7 +20,15 @@
         <item
             android:id="@+id/navigation_view_reward_deal"
             android:icon="@drawable/ic_view_reward_deal"
-            android:title="View Stories"/>
+            android:title="Stories N Sharable"/>
+
+
+        <item
+            android:id="@+id/navigation_shared_posts"
+            android:icon="@drawable/ic_shared_posts"
+            android:title="Shared Posts N Reward"/>
+
+
 
 <!--        <item-->
 <!--            android:id="@+id/navigation_share_n_earn"-->

@@ -8,101 +8,109 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.FileProvider
 import com.facebook.*
-import com.facebook.share.ShareApi
 import com.facebook.share.Sharer
 import com.facebook.share.model.ShareHashtag
-import com.facebook.share.model.ShareLinkContent
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.widget.ShareDialog
+import com.giftinapp.business.model.FBPostShareCountModel
+import com.google.android.material.internal.ContextUtils.getActivity
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
-import java.net.URLDecoder
 
 object ImageShareUtil {
-    fun shareImageOnPost(merchantStatusImageLink: String?,
-                         storyTag: String?,
-                         context: Activity, callback:(postId: String?,objectId:String?)->Unit) {
-        Log.d("ImageLink",merchantStatusImageLink.toString())
+    fun shareImageOnPost(
+        merchantStatusImageLink: String?,
+        storyTag: String?,
+        context: Activity, callback: (postId: String?, objectId: String?) -> Unit
+    ) {
+        Log.d("ImageLink", merchantStatusImageLink.toString())
         val imageFile = merchantStatusImageLink?.let { File(it) }
         val imageUri = Uri.fromFile(imageFile)
 
         val content = SharePhotoContent.Builder()
             .addPhoto(
                 SharePhoto.Builder()
-                .setBitmap(null)
-                .setImageUrl(imageUri)
-                .build())
+                    .setBitmap(null)
+                    .setImageUrl(imageUri)
+                    .build()
+            )
             .setShareHashtag(
                 ShareHashtag.Builder()
                     .setHashtag("#Brandible")
-                    .build())
+                    .build()
+            )
             .build()
         val shareDialog = ShareDialog(context)
-        shareDialog.registerCallback(CallbackManager.Factory.create(), object : FacebookCallback<Sharer.Result> {
-            override fun onCancel() {
-               Log.d("Cancel","Cancelled")
-            }
+        shareDialog.registerCallback(
+            CallbackManager.Factory.create(),
+            object : FacebookCallback<Sharer.Result> {
+                override fun onCancel() {
+                    Log.d("Cancel", "Cancelled")
+                }
 
-            override fun onError(error: FacebookException) {
-                Log.d("Error",error.toString())
-            }
+                override fun onError(error: FacebookException) {
+                    Log.d("Error", error.toString())
+                }
 
-            override fun onSuccess(result: Sharer.Result) {
-                val postIdRequest = GraphRequest.newGraphPathRequest(
-                    AccessToken.getCurrentAccessToken(),
-                    "me",
-                    object : GraphRequest.Callback {
-                        override fun onCompleted(response: GraphResponse) {
-                            val data = response.getJSONObject()?.getJSONObject("posts")?.getJSONArray("data")
-                            Log.d("FBData",data.toString())
-                            val postId = data?.getJSONObject(0)?.getString("id")
-                            val objectId = data?.getJSONObject(0)?.getString("object_id")
-                            // Handle the post ID as needed
-                            callback(postId,objectId)
-                        }
-                })
-                val parameters = Bundle()
-                parameters.putString("fields", "id,posts{id,object_id}")
-                postIdRequest.parameters = parameters
-                postIdRequest.executeAsync()
-            }
+                override fun onSuccess(result: Sharer.Result) {
+                    val postIdRequest = GraphRequest.newGraphPathRequest(
+                        AccessToken.getCurrentAccessToken(),
+                        "me",
+                        object : GraphRequest.Callback {
+                            override fun onCompleted(response: GraphResponse) {
+                                val data = response.getJSONObject()?.getJSONObject("posts")
+                                    ?.getJSONArray("data")
+                                Log.d("FBData", data.toString())
+                                val postId = data?.getJSONObject(0)?.getString("id")
+                                val objectId = data?.getJSONObject(0)?.getString("object_id")
+                                // Handle the post ID as needed
+                                callback(postId, objectId)
+                            }
+                        })
+                    val parameters = Bundle()
+                    parameters.putString("fields", "id,posts{id,object_id}")
+                    postIdRequest.parameters = parameters
+                    postIdRequest.executeAsync()
+                }
 
-        })
+            })
 
         // Show the share dialog
         shareDialog.show(content)
     }
 
-    fun shareImageOnStory(merchantStatusImageLink: String?,
-                          merchantStatusId: String?,
-                          context: Context,activity: Activity,
-                          callback:(storyId: String?,storyObjectId:String?)->Unit
+    fun shareImageOnStory(
+        merchantStatusImageLink: String?,
+        merchantStatusId: String?,
+        context: Context, activity: Activity,
+        callback: (storyId: String?, storyObjectId: String?) -> Unit
     ) {
         // show loading
-        showWarning("Loading, wait...",context)
+        showWarning("Loading, wait...", context)
 
         // save asset image
         GlobalScope.launch {
-            if (saveBackgroundImageAsset(merchantStatusImageLink,merchantStatusId)) {
+            if (saveBackgroundImageAsset(merchantStatusImageLink, merchantStatusId)) {
                 withContext(Dispatchers.Main) {
                     // show posting
-                    showWarning("Done, now i'm posting...",context)
+                    showWarning("You can post now...", context)
 
                     // create intent
                     //val providerAssetUri = getProviderFileUri(getImageAssetFile())
                     val providerBackgroundAssetUri = getProviderFileUri(
-                        getBackgroundImageAssetFile(merchantStatusId),context
+                        getBackgroundImageAssetFile(merchantStatusId), context
                     )
 
                     val shareIntent = Intent("com.facebook.stories.ADD_TO_STORY").apply {
@@ -116,24 +124,36 @@ object ImageShareUtil {
                         //putExtra("interactive_asset_uri", providerAssetUri)
                     }
 
+                    val appactivity: Activity = Activity()
+                    if (appactivity.packageManager.resolveActivity(shareIntent, 101) != null) {
+                        activity.startActivityForResult(shareIntent, 101)
+                    }
                     // grant permission to downloaded files
                     //grantPermission(providerAssetUri)
-                    grantPermission(providerBackgroundAssetUri,context)
+                    grantPermission(providerBackgroundAssetUri, context)
+
 
                     // open intent
-                    val storyDetails = openIntent(shareIntent,context,activity)
-                    Log.d("StoryDetals",storyDetails.toString())
+                    //val storyDetails = openIntent(shareIntent, context, activity)
+
+//                    val storyId = storyDetails?.getString("com.facebook.platform.extra.STORY_ID")
+//                    val storyObjectId =
+//                        storyDetails?.getString("com.facebook.platform.extra.STORY_OBJECT_ID")
+//                    Log.d("storyIdIs", storyId.toString())
+//                    Log.d("storyObjIdIs", storyObjectId.toString())
+
                     val storyIdRequest = GraphRequest.newGraphPathRequest(
                         AccessToken.getCurrentAccessToken(),
                         "me",
                         object : GraphRequest.Callback {
                             override fun onCompleted(response: GraphResponse) {
-                                val data = response.getJSONObject()?.getJSONObject("posts")?.getJSONArray("data")
-                                Log.d("FBData",data.toString())
-                                val storyId = data?.getJSONObject(0)?.getString("id")
-                                val storyObjectId = data?.getJSONObject(0)?.getString("object_id")
+                                val data = response.getJSONObject()?.getJSONObject("posts")
+                                    ?.getJSONArray("data")
+                                Log.d("FBData", data.toString())
+                                val storyIdCb = data?.getJSONObject(0)?.getString("id")
+                                val storyObjectIdCb = data?.getJSONObject(0)?.getString("object_id")
                                 // Handle the post ID as needed
-                                callback(storyId,storyObjectId)
+                                callback(storyIdCb, storyObjectIdCb)
                             }
                         })
                     val parameters = Bundle()
@@ -143,13 +163,16 @@ object ImageShareUtil {
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    showError("Error: Background image asset cannot be download",context)
+                    showError("Error: Background image asset cannot be download", context)
                 }
             }
         }
     }
 
-    private fun saveBackgroundImageAsset(merchantStatusImageLink: String?,imgExtOnDrive:String?): Boolean {
+    private fun saveBackgroundImageAsset(
+        merchantStatusImageLink: String?,
+        imgExtOnDrive: String?
+    ): Boolean {
         val request = merchantStatusImageLink?.let { Request.Builder().url(it).build() }
         val client = OkHttpClient.Builder().build()
         val response = request?.let { client.newCall(it).execute() }
@@ -191,8 +214,9 @@ object ImageShareUtil {
         return false
     }
 
-    private fun getBackgroundImageAssetFile(imageExtOnDrive:String?): File {
-        val folder = Environment.getExternalStorageDirectory().absolutePath.toString() + "/DCIM/Camera/"
+    private fun getBackgroundImageAssetFile(imageExtOnDrive: String?): File {
+        val folder =
+            Environment.getExternalStorageDirectory().absolutePath.toString() + "/DCIM/Camera/"
         return File("$folder/$imageExtOnDrive.jpg")
     }
 
@@ -204,7 +228,7 @@ object ImageShareUtil {
         )
     }
 
-    private fun grantPermission(uri: Uri?,context: Context) {
+    private fun grantPermission(uri: Uri?, context: Context) {
         uri?.let {
             context.grantUriPermission(
                 "com.facebook.katana", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -224,26 +248,118 @@ object ImageShareUtil {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
     }
 
-    private fun openIntent(shareIntent: Intent, context: Context,activity: Activity): Pair<String?,String?>? {
+    private fun openIntent(shareIntent: Intent, context: Context, activity: Activity): Bundle? {
         if (context.packageManager?.resolveActivity(shareIntent, 0) != null) {
             startActivityForResult(activity, shareIntent, 0, null)
-            val storyId = shareIntent.let {
-                val extras = it.extras
-                if (extras != null && extras.containsKey("com.facebook.platform.extra.STORY_ID")) {
-                    extras.getString("com.facebook.platform.extra.STORY_ID")
-                } else {
-                    null
-                }
-            }
-            val storyDetails = shareIntent.extras?.getString("com.facebook.platform.extra.STORY_ENCODED_PATH")
-            val jsonObject = if (storyDetails != null) {
-                JSONObject(URLDecoder.decode(storyDetails, "UTF-8"))
-            } else {
-                null
-            }
-            val objectId = jsonObject?.optString("object_id")
-            return Pair(storyId, objectId)
+            return shareIntent.extras
+//            val storyId = shareIntent.let {
+//                val extras = it.extras
+//                if (extras != null && extras.containsKey("com.facebook.platform.extra.STORY_ID")) {
+//                    extras.getString("com.facebook.platform.extra.STORY_ID")
+//                } else {
+//                    null
+//                }
+//            }
+//            val storyDetails = shareIntent.extras?.getString("com.facebook.platform.extra.STORY_ENCODED_PATH")
+//            val jsonObject = if (storyDetails != null) {
+//                JSONObject(URLDecoder.decode(storyDetails, "UTF-8"))
+//            } else {
+//                null
+//            }
+//            val objectId = jsonObject?.optString("object_id")
+//            return Pair(storyId, objectId)
+//        }
+//        return null
         }
         return null
+    }
+
+
+    fun getPostLikes(postObjId: String, callback: (Int) -> Unit) {
+        val request = GraphRequest.newGraphPathRequest(
+            AccessToken.getCurrentAccessToken(),
+            "/$postObjId?fields=likes.summary(true)",
+            object : GraphRequest.Callback {
+                override fun onCompleted(response: GraphResponse) {
+                    val data = response.getJSONObject()?.getJSONObject("likes")
+                    val summary = data?.getJSONObject("summary")
+                    val count = summary?.get("total_count")
+                    Log.d("Post Likes,", count.toString())
+                    if (count != null) {
+                        callback(count as Int)
+                    }
+                }
+
+            })
+        request.executeAsync()
+    }
+
+
+    fun getPostStoryViews(storyObjId: String, callback: (Int) -> Unit) {
+        Log.d("StoryObjId", storyObjId)
+        val request = GraphRequest.newGraphPathRequest(
+            AccessToken.getCurrentAccessToken(),
+            "/$storyObjId/insights?metric=story_views_by_action_type&access_token=${AccessToken.getCurrentAccessToken()?.token}",
+            object : GraphRequest.Callback {
+                override fun onCompleted(response: GraphResponse) {
+                    val data = response.jsonObject?.getJSONArray("data")
+                    val value = data?.getJSONObject(0)?.getJSONArray("values")?.getJSONObject(0)
+                        ?.getInt("value")
+                    Log.d("Story Views:", value.toString())
+                    if (value != null) {
+                        callback(value)
+                    }
+                }
+
+            })
+        request.executeAsync()
+    }
+
+    fun getNumberOfPostShares(postId: String, callback: (Int) -> Unit) {
+        val request = GraphRequest.newGraphPathRequest(
+            AccessToken.getCurrentAccessToken(),
+            "/me?fields=feed{shares}",
+            object : GraphRequest.Callback {
+                override fun onCompleted(response: GraphResponse) {
+                    val feed = response.getJSONObject()?.getJSONObject("feed")
+                    val data = feed?.getJSONArray("data")
+                    val gson = Gson()
+                    var shareCount = 0
+                    data?.let {
+                        for (i in 0 until it.length()) {
+                            val shares = gson.fromJson(
+                                it[i].toString(),
+                                FBPostShareCountModel::class.java
+                            )
+                            if (shares.shares != null) {
+                                if (shares.id == postId) {
+                                    shareCount = shares.shares!!.count
+                                }
+                            }
+                        }
+                    }
+                    callback(shareCount)
+                }
+            })
+        request.executeAsync()
+    }
+
+//    val contract = ActivityResultContracts.StartActivityForResult()
+//    val launcher = getActivity.regis(contract) { result ->
+//        if (result.resultCode == Activity.RESULT_OK) {
+//            val data = result.data
+//            val resultValue = data?.getStringExtra("result_key")
+//            // Do something with the result value
+//        } else if (result.resultCode == Activity.RESULT_CANCELED) {
+//            // Handle the case where the user cancels the activity
+//        }
+//    }
+
+    fun displayActionButtonTextBasedOn(likes:Int,reShare:Int,businessLikes:Int?,businessShare:Int?,callback: (String,String) -> Unit){
+        if(likes>= businessLikes!! && reShare>= businessShare!!){
+            callback("Click to Claim BRC","green")
+        }else {
+            callback("pending BRC", "red")
+        }
     }
 }

@@ -25,6 +25,9 @@ class SharableConditionFragment : BottomSheetDialogFragment(), AdapterView.OnIte
     private var callback: ((sharableCondition: SharableCondition) -> Unit)? = null
     lateinit var  etShareStartTime:EditText
     lateinit var etRewardingTime:EditText
+    lateinit var etMinLikeForRewarding:EditText
+    lateinit var etMinShareForRewarding:EditText
+    lateinit var etDaysPostLasting:EditText
     lateinit var etRewardingTimeView:TextInputLayout
     lateinit var etShareStartTimeView:TextInputLayout
     lateinit var btnSaveSharingSettings:MaterialButton
@@ -49,7 +52,9 @@ class SharableConditionFragment : BottomSheetDialogFragment(), AdapterView.OnIte
         etShareStartTimeView = view.findViewById(R.id.etShareStartTime)
         etRewardingTimeView = view.findViewById(R.id.etRewardingTime)
         etRewardingTime = view.findViewById(R.id.etRewardingTimeInput)
-
+        etMinLikeForRewarding = view.findViewById(R.id.etMinLikeForRewarding)
+        etMinShareForRewarding = view.findViewById(R.id.etMinShareForRewarding)
+        etDaysPostLasting = view.findViewById(R.id.etDaysPostingLasts)
         btnSaveSharingSettings = view.findViewById(R.id.btnFinishSettingShareCondition)
         etShareDuration = view.findViewById(R.id.etDurationForShare)
         etMinView = view.findViewById(R.id.etMinViewRewarding)
@@ -123,7 +128,14 @@ class SharableConditionFragment : BottomSheetDialogFragment(), AdapterView.OnIte
 
     private fun saveSharingSettings(){
         val sharableCondition = SharableCondition(
-            etShareStartTime.text.toString(),etShareDuration.text.toString().toInt(),etRewardingTime.text.toString(),etMinView.text.toString().toInt(),targetCountry
+            etShareStartTime.text.toString(),
+            etShareDuration.text.toString().toInt(),
+            null,
+            null,
+            null,
+            etMinLikeForRewarding.text.toString().toInt(),
+            etMinShareForRewarding.text.toString().toInt(),
+            etDaysPostLasting.text.toString().toInt()
         )
         callback?.invoke(sharableCondition)
     }
