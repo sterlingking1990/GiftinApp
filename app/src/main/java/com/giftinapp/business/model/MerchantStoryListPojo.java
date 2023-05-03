@@ -25,6 +25,8 @@ import java.util.ArrayList;
     public SharableCondition sharableCondition = null;
     public String publishedAt = null;
 
+    public String challengeType = "";
+
     public MerchantStoryListPojo (){}
 
 }

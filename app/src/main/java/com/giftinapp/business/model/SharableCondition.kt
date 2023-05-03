@@ -9,5 +9,8 @@ data class SharableCondition(
     var targetCountry:String? = null,
     var minLike:Int? = null,
     var minShare:Int? = null,
-    var daysPostLasting:Int? = null
+    var daysPostLasting:Int? = null,
+    var fbPlatformShared:String? = null,
+    var minView:Int? = null,
+    var minReactions:Int? = null
 )

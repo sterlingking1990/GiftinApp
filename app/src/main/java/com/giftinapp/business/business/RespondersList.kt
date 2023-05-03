@@ -143,8 +143,9 @@ class RespondersList : BottomSheetDialogFragment(),RespondersListAdapter.Clickab
                         val respondersName = eachRes.get("respondersName")
                         val respondersReview = eachRes.get("review")
                         val status = eachRes.get("status")
+                        val challengeTypeFromDb = eachRes.getString("challengeType")
 
-                        respondersResponseModel.add(RespondersResponseModel(respondersName = respondersName.toString(),respondersReview.toString(), status = status.toString(),sessionManager.getEmail().toString()))
+                        respondersResponseModel.add(RespondersResponseModel(respondersName = respondersName.toString(),respondersReview.toString(), status = status.toString(),sessionManager.getEmail().toString(),challengeTypeFromDb))
                         respondersListAdapter.setRespondersList(respondersResponseModel)
                         rvRespondersList.adapter = respondersListAdapter
                         respondersListAdapter.notifyDataSetChanged()
@@ -161,17 +162,20 @@ class RespondersList : BottomSheetDialogFragment(),RespondersListAdapter.Clickab
         private const val CHALLENGE_OWNER = "challengeOwner"
         private const val CHALLENGE_ID = "challengeId"
         private const val CHALLENGE_WORTH = "challengeWorth"
+        private const val CHALLENGE_TYPE = "challengeType"
 
         fun newInstance(
             challengeOwner: String?,
             challengeId: String?,
             challengeWorth: Int,
+            challengeType:String,
             callBack:(Boolean)-> Unit
         ): RespondersList {
             val args = Bundle()
             args.putString(CHALLENGE_OWNER, challengeOwner)
             args.putString(CHALLENGE_ID,challengeId)
             args.putInt(CHALLENGE_WORTH, challengeWorth)
+            args.putString(CHALLENGE_TYPE,challengeType)
 
             val fragment = RespondersList()
             fragment.callback = callBack

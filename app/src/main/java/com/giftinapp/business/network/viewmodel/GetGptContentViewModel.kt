@@ -170,6 +170,15 @@ class GetGptContentViewModel @Inject constructor(
     private suspend fun saveNewGptContentToDB(newGptContent: GptDBContent) {
         gptContentDao.saveContent(newGptContent)
     }
+
+    fun getAnalyticsSummary(prompt: GptPrompt): Flow<String> = flow {
+
+        val gptRemoteContent = gptApiServiceRepo.getGptContent(prompt)
+        val text = formatText(gptRemoteContent.choices[0].text,prompt.max_tokens)
+
+        emit(text)
+    }
+
 }
 
 

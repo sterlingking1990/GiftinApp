@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -22,11 +23,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.squareup.picasso.Picasso
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):RecyclerView.Adapter<MerchantChallengeListAdapter.ViewHolder>() {
+class
+MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):RecyclerView.Adapter<MerchantChallengeListAdapter.ViewHolder>() {
 
     private lateinit var merchantChallengeListPojo: ArrayList<MerchantChallengeListPojo>
     lateinit var context:Context
@@ -63,6 +64,8 @@ class MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):R
             val delMerchantChallenge = this.findViewById<ImageView>(R.id.ivDeleteMerchantChallenge)
             val btnShare = this.findViewById<ImageView>(R.id.fbShareBtn)
             val tvShareTimeLeft = this.findViewById<TextView>(R.id.tvShareTimeLeft)
+            val displayAnalytics = this.findViewById<ImageView>(R.id.ivAnalytics)
+            val btnMerchantTaskableButton = this.findViewById<TextView>(R.id.btnMerchantTaskable)
 
 
 
@@ -74,12 +77,21 @@ class MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):R
             val audioLink = merchantChallengeListPojo[position].storyAudioLink?: ""
             val artWorkLink = merchantChallengeListPojo[position].videoArtWork?: ""
             val imageLink = merchantChallengeListPojo[position].merchantStatusImageLink?: ""
+            val challengeTTL = merchantChallengeListPojo[position].sharableCondition?.daysPostLasting
+            val publishedAt = merchantChallengeListPojo[position].publishedAt
+            val numberOfReach = merchantChallengeListPojo[position].statusReachAndWorthPojo?.status_reach
+            val challengeType = merchantChallengeListPojo[position].challengeType
 
 
+            btnMerchantTaskableButton.text = merchantChallengeListPojo[position].challengeType
+
+            btnShare.isEnabled = false
 
 
             imageText.text = merchantChallengeListPojo[position].storyTag.toString()
             numberOfResponders.text = merchantChallengeListPojo[position].numberOfResponders.toString()
+
+            numberOfApprovedResponders.isVisible = merchantChallengeListPojo[position].challengeType=="taskable"
             numberOfApprovedResponders.text = merchantChallengeListPojo[position].numberOfApproved.toString()
 
 
@@ -120,7 +132,15 @@ class MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):R
             }
 
             delMerchantChallenge.setOnClickListener {
-                    clickableChallenge.deleteChallenge(imageLink,videoLink,audioLink,artWorkLink,challengeId,position)
+                Log.d("ChallengeTTL",challengeTTL.toString())
+                Log.d("publishedAt",publishedAt.toString())
+                clickableChallenge.deleteChallenge(imageLink,videoLink,audioLink,artWorkLink,challengeId,position,challengeTTL,publishedAt)
+
+
+            }
+
+            displayAnalytics.setOnClickListener {
+                clickableChallenge.displayAnalytics(challengeId,numberOfReach!!)
             }
 
 //            btnShare.setOnClickListener {
@@ -129,7 +149,9 @@ class MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):R
 
             numberOfResponders.setOnClickListener {
                 if(numberOfResponders.text.toString().toInt()>0) {
-                    clickableChallenge.viewResponders(challengeOwner, challengeId, challengeWorth)
+                    if (challengeType != null) {
+                        clickableChallenge.viewResponders(challengeOwner, challengeId, challengeWorth,challengeType)
+                    }
                 }else{
                     Toast.makeText(context,"No responders yet",Toast.LENGTH_LONG).show()
                 }
@@ -198,11 +220,13 @@ class MerchantChallengeListAdapter(val clickableChallenge: ClickableChallenge):R
     }
 
     interface ClickableChallenge{
-        fun deleteChallenge(link: String, videoLink:String,audioLink:String,artWorkLink:String, id: String, positionId: Int)
-        fun viewResponders(challengeOwner:String?,challengeId:String?,challengeWorth:Int?)
+        fun deleteChallenge(link: String, videoLink:String,audioLink:String,artWorkLink:String, id: String, positionId: Int, challengeTTL:Int?,publishedAt:String?)
+        fun viewResponders(challengeOwner:String?,challengeId:String?,challengeWorth:Int?,challengeType:String)
         fun onAudioClicked(audioLink:String, audioBtn:View)
         fun deleteMerchantChallenge(challengeId:String, positionId:Int)
         //fun sharePostToFb(taskDrop:MerchantChallengeListPojo)
+
+        fun displayAnalytics(challengeId: String, numberOfReach: Int)
     }
 
     fun clear(position:Int) {

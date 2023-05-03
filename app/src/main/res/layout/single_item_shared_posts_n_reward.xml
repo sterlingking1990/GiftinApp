@@ -70,6 +70,16 @@
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/play_back_icon"
             android:contentDescription="Play Audio" />
+
+        <Button
+            android:id="@+id/btnTaskableSharableStats"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_gravity="top|end"
+            android:alpha="0.5"
+            android:layout_margin="5dp"
+            android:text="Taskable"
+            />
     </FrameLayout>
 
     <LinearLayout

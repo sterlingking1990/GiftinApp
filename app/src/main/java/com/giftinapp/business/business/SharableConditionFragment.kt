@@ -2,15 +2,12 @@ package com.giftinapp.business.business
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.fragment.app.DialogFragment
 import com.giftinapp.business.R
-import com.giftinapp.business.model.FetchBanksResponse
 import com.giftinapp.business.model.SharableCondition
 import com.giftinapp.business.utility.helpers.TimePickerFragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -38,6 +35,15 @@ class SharableConditionFragment : BottomSheetDialogFragment(), AdapterView.OnIte
     private lateinit var spTargetCountry: SearchableSpinner
     private var targetCountry: String? = null
 
+    lateinit var etMinBizView:EditText
+    lateinit var etMinBizReactions:EditText
+    private var fbSharedPlatform:String=""
+
+    var noLikesForRewarding:Int?=null
+    var noSharesForRewarding:Int? = null
+    var noViewForRewarding:Int? = null
+    var noReactionsForRewarding:Int? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -59,6 +65,26 @@ class SharableConditionFragment : BottomSheetDialogFragment(), AdapterView.OnIte
         etShareDuration = view.findViewById(R.id.etDurationForShare)
         etMinView = view.findViewById(R.id.etMinViewRewarding)
         spTargetCountry = view.findViewById(R.id.spTargetCountry)
+        etMinBizView = view.findViewById(R.id.etMinBizView)
+        etMinBizReactions = view.findViewById(R.id.etMinBizReaction)
+
+        when(fbSharedPlatform) {
+            "post-feed" -> {
+                etMinLikeForRewarding.visibility = View.VISIBLE
+                etMinShareForRewarding.visibility = View.VISIBLE
+            }
+            "post-story" -> {
+                etMinBizView.visibility = View.VISIBLE
+                etMinBizReactions.visibility = View.VISIBLE
+            }
+            else->{
+                etMinLikeForRewarding.visibility = View.VISIBLE
+                etMinShareForRewarding.visibility = View.VISIBLE
+                etMinBizView.visibility = View.VISIBLE
+                etMinBizReactions.visibility = View.VISIBLE
+            }
+        }
+
         spTargetCountry.onItemSelectedListener = this
 
         loadTargetCountry()
@@ -68,6 +94,26 @@ class SharableConditionFragment : BottomSheetDialogFragment(), AdapterView.OnIte
         etRewardingTime.setOnTouchListener(onTouchListener2)
 
         btnSaveSharingSettings.setOnClickListener {
+            noLikesForRewarding = if(etMinLikeForRewarding.text.toString()==""){
+                null
+            }else{
+                etMinLikeForRewarding.text.toString().toInt()
+            }
+            noSharesForRewarding = if(etMinShareForRewarding.text.toString()==""){
+                null
+            }else{
+                etMinShareForRewarding.text.toString().toInt()
+            }
+            noViewForRewarding = if(etMinBizView.text.toString()==""){
+                null
+            }else{
+                etMinBizView.text.toString().toInt()
+            }
+            noReactionsForRewarding = if(etMinBizReactions.text.toString()==""){
+                null
+            }else{
+                etMinBizReactions.text.toString().toInt()
+            }
             saveSharingSettings()
         }
     }
@@ -133,20 +179,25 @@ class SharableConditionFragment : BottomSheetDialogFragment(), AdapterView.OnIte
             null,
             null,
             null,
-            etMinLikeForRewarding.text.toString().toInt(),
-            etMinShareForRewarding.text.toString().toInt(),
-            etDaysPostLasting.text.toString().toInt()
+            noLikesForRewarding,
+            noSharesForRewarding,
+            etDaysPostLasting.text.toString().toInt(),
+            fbSharedPlatform,
+            noViewForRewarding,
+            noReactionsForRewarding
         )
         callback?.invoke(sharableCondition)
     }
     companion object {
 
         fun newInstance(
-            callBack:(SharableCondition)-> Unit
+            s: String,
+            callBack: (SharableCondition) -> Unit
         ): SharableConditionFragment {
 
             val fragment = SharableConditionFragment()
             fragment.callback = callBack
+            fragment.fbSharedPlatform = s
 
             return fragment
         }

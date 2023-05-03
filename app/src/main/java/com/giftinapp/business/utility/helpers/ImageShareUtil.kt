@@ -74,9 +74,13 @@ object ImageShareUtil {
                                     ?.getJSONArray("data")
                                 Log.d("FBData", data.toString())
                                 val postId = data?.getJSONObject(0)?.getString("id")
-                                val objectId = data?.getJSONObject(0)?.getString("object_id")
+                                try {
+                                    val objectId = data?.getJSONObject(0)?.getString("object_id")
+                                    callback(postId, objectId)
+                                }catch (e:Exception){
+                                    Toast.makeText(context,"kindly repost as last post did not return with needed properties",Toast.LENGTH_LONG).show()
+                                }
                                 // Handle the post ID as needed
-                                callback(postId, objectId)
                             }
                         })
                     val parameters = Bundle()
@@ -124,23 +128,12 @@ object ImageShareUtil {
                         //putExtra("interactive_asset_uri", providerAssetUri)
                     }
 
-                    val appactivity: Activity = Activity()
-                    if (appactivity.packageManager.resolveActivity(shareIntent, 101) != null) {
-                        activity.startActivityForResult(shareIntent, 101)
-                    }
                     // grant permission to downloaded files
                     //grantPermission(providerAssetUri)
                     grantPermission(providerBackgroundAssetUri, context)
 
+                    openIntent(shareIntent, context, activity)
 
-                    // open intent
-                    //val storyDetails = openIntent(shareIntent, context, activity)
-
-//                    val storyId = storyDetails?.getString("com.facebook.platform.extra.STORY_ID")
-//                    val storyObjectId =
-//                        storyDetails?.getString("com.facebook.platform.extra.STORY_OBJECT_ID")
-//                    Log.d("storyIdIs", storyId.toString())
-//                    Log.d("storyObjIdIs", storyObjectId.toString())
 
                     val storyIdRequest = GraphRequest.newGraphPathRequest(
                         AccessToken.getCurrentAccessToken(),
@@ -151,9 +144,9 @@ object ImageShareUtil {
                                     ?.getJSONArray("data")
                                 Log.d("FBData", data.toString())
                                 val storyIdCb = data?.getJSONObject(0)?.getString("id")
-                                val storyObjectIdCb = data?.getJSONObject(0)?.getString("object_id")
+                                //val storyObjectIdCb = data?.getJSONObject(0)?.getString("object_id")
                                 // Handle the post ID as needed
-                                callback(storyIdCb, storyObjectIdCb)
+                                callback(storyIdCb, storyIdCb)
                             }
                         })
                     val parameters = Bundle()
@@ -248,31 +241,23 @@ object ImageShareUtil {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
     }
 
-    private fun openIntent(shareIntent: Intent, context: Context, activity: Activity): Bundle? {
+    private fun openIntent(shareIntent: Intent, context: Context,activity: Activity) {
         if (context.packageManager?.resolveActivity(shareIntent, 0) != null) {
-            startActivityForResult(activity, shareIntent, 0, null)
-            return shareIntent.extras
-//            val storyId = shareIntent.let {
-//                val extras = it.extras
-//                if (extras != null && extras.containsKey("com.facebook.platform.extra.STORY_ID")) {
-//                    extras.getString("com.facebook.platform.extra.STORY_ID")
-//                } else {
-//                    null
-//                }
-//            }
-//            val storyDetails = shareIntent.extras?.getString("com.facebook.platform.extra.STORY_ENCODED_PATH")
-//            val jsonObject = if (storyDetails != null) {
-//                JSONObject(URLDecoder.decode(storyDetails, "UTF-8"))
-//            } else {
-//                null
-//            }
-//            val objectId = jsonObject?.optString("object_id")
-//            return Pair(storyId, objectId)
-//        }
-//        return null
+            startActivityForResult(activity,shareIntent, 0,null)
+            showSuccess("Done!", context)
+        } else {
+            showError("Cannot start activity with the required intent!", context)
         }
-        return null
     }
+
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 10001 && resultCode == Activity.RESULT_OK) {
+            val storyId = data?.getStringExtra("com.facebook.platform.extra.COMPLETION_GESTURE_TYPE")
+            val storyObjectId = data?.getStringExtra("com.facebook.platform.extra.COMPLETION_DATA")
+            // Perform actions based on the story ID and object ID
+        }
+    }
+
 
 
     fun getPostLikes(postObjId: String, callback: (Int) -> Unit) {
@@ -344,16 +329,6 @@ object ImageShareUtil {
         request.executeAsync()
     }
 
-//    val contract = ActivityResultContracts.StartActivityForResult()
-//    val launcher = getActivity.regis(contract) { result ->
-//        if (result.resultCode == Activity.RESULT_OK) {
-//            val data = result.data
-//            val resultValue = data?.getStringExtra("result_key")
-//            // Do something with the result value
-//        } else if (result.resultCode == Activity.RESULT_CANCELED) {
-//            // Handle the case where the user cancels the activity
-//        }
-//    }
 
     fun displayActionButtonTextBasedOn(likes:Int,reShare:Int,businessLikes:Int?,businessShare:Int?,callback: (String,String) -> Unit){
         if(likes>= businessLikes!! && reShare>= businessShare!!){

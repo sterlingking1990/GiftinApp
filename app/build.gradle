@@ -43,8 +43,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 33
         multiDexEnabled true
-        versionCode 109
-        versionName "1.93"
+        versionCode 113
+        versionName "1.94"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -234,6 +234,8 @@ dependencies {
 
     // Optional: Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
+
+    implementation 'com.restfb:restfb:2.22.0'
 
 }
 

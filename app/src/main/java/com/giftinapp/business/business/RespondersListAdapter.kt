@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
 import com.giftinapp.business.model.RespondersResponseModel
@@ -35,7 +36,11 @@ class RespondersListAdapter(private val clickableResponse:ClickableResponse):Rec
             val status = respondersList[position].status
             val respondersName = respondersList[position].respondersName
             val respondersResponse = respondersList[position].review
+            val challengeType = respondersList[position].challengeType
 
+            if(challengeType=="taskable"){
+                btnApproveResponderResponse.isVisible=true
+            }
             responderName.text = respondersName
             responderResponse.text = respondersResponse
 

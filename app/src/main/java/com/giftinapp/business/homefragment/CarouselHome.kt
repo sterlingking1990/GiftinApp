@@ -45,6 +45,7 @@ class CarouselHome : BaseFragment<FragmentCarouselHomeBinding>(), GptTopicsAdapt
     var following = 0
     var influencer_following = 0
     var contentIs = "Hello apsoskals alksalslkkls"
+    var totalWalletBalance = 0
 
 
     //private lateinit var imageList:List<Uri>
@@ -69,8 +70,8 @@ class CarouselHome : BaseFragment<FragmentCarouselHomeBinding>(), GptTopicsAdapt
             getTotalGiftCoin()
             numberOfFollowers
         } else {
-            getBrandValue()
             influencerFollowing
+            walletBalance
         }
 
         val animation =
@@ -305,6 +306,39 @@ class CarouselHome : BaseFragment<FragmentCarouselHomeBinding>(), GptTopicsAdapt
                 }
             }
     }
+
+    private val walletBalance: Unit
+        get() {
+            val db = FirebaseFirestore.getInstance()
+            // [END get_firestore_instance]
+
+            // [START set_firestore_settings]
+            val settings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+            db.firestoreSettings = settings
+            db.collection("merchants").document(sessionManager!!.getEmail()!!)
+                .collection("reward_wallet").document("deposit").get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        totalWalletBalance = 0L.toInt()
+                        val documentSnapshot = task.result
+                        if (documentSnapshot.exists()) {
+                            totalWalletBalance = (documentSnapshot["merchant_wallet_amount"] as Long).toInt()
+                            binding.tvBrcTotal.text = resources.getString(
+                                R.string.wallet_balance,
+                                totalWalletBalance
+                            )
+                        }
+                    } else {
+                        totalWalletBalance = 0
+                        binding.tvBrcTotal.text = resources.getString(
+                            R.string.wallet_balance,
+                            totalWalletBalance
+                        )
+                    }
+                }
+        }
 
 
 //    private var imageListener = ImageListener { position: Int, imageView: ImageView? ->

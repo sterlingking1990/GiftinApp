@@ -29,6 +29,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 class ViewRespondersAndRespondFragment : BottomSheetDialogFragment(), ViewRespondersAndRespondAdapter.ClickableRespondersResponse {
 
     private val challengeOwner by lazy { arguments?.getString(CHALLENGE_OWNER) }
+    private val challengeType by lazy { arguments?.getString(CHALLENGE_TYPE) }
     private val challengeId by lazy { arguments?.getString(CHALLENGE_ID) }
     private val submitTaskResponseState: ResponderResponseState by viewModels()
 
@@ -95,6 +96,7 @@ class ViewRespondersAndRespondFragment : BottomSheetDialogFragment(), ViewRespon
     }
 
     private fun sendTaskResponse(){
+        Log.d("ChallengeType",challengeType.toString())
         val db = FirebaseFirestore.getInstance()
 
         val settings = FirebaseFirestoreSettings.Builder()
@@ -104,7 +106,7 @@ class ViewRespondersAndRespondFragment : BottomSheetDialogFragment(), ViewRespon
 
         val responseText = etTaskResponse.text.toString()
 
-        val responseModel = RespondersResponseModel(respondersName = sessionManager.getEmail(),review=responseText,"",challengeOwner.toString())
+        val responseModel = RespondersResponseModel(respondersName = sessionManager.getEmail(),review=responseText,"",challengeOwner.toString(),challengeType)
 
         val sendGiftPojo= SendGiftPojo(empty = "")
         db.collection("challenge").document(challengeOwner.toString()).set(sendGiftPojo)
@@ -151,13 +153,15 @@ class ViewRespondersAndRespondFragment : BottomSheetDialogFragment(), ViewRespon
                                 val respondersName = eachRes.get("respondersName")
                                 val respondersReview = eachRes.get("review")
                                 val status = eachRes.get("status")
+                                val challengeTy = eachRes.getString("challengeType")
 
                                 respondersResponseModel.add(
                                     RespondersResponseModel(
                                         respondersName = respondersName.toString(),
                                         respondersReview.toString(),
                                         status = status.toString(),
-                                        challengeOwner.toString()
+                                        challengeOwner.toString(),
+                                        challengeTy
                                     )
                                 )
                                 respondersListAdapter.setRespondersList(respondersResponseModel)
@@ -183,11 +187,13 @@ class ViewRespondersAndRespondFragment : BottomSheetDialogFragment(), ViewRespon
 
         private const val CHALLENGE_OWNER = "challengeOwner"
         private const val CHALLENGE_ID = "challengeId"
+        private const val CHALLENGE_TYPE = "challengeType"
 
-        fun newInstance(challengeOwner: String?, challengeId: String?, callback: (Boolean)->Unit): ViewRespondersAndRespondFragment {
+        fun newInstance(challengeOwner: String?, challengeId: String?,challengeType:String, callback: (Boolean)->Unit): ViewRespondersAndRespondFragment {
             val args = Bundle()
             args.putString(CHALLENGE_OWNER, challengeOwner)
             args.putString(CHALLENGE_ID,challengeId)
+            args.putString(CHALLENGE_TYPE,challengeType)
 
             val fragment = ViewRespondersAndRespondFragment()
             fragment.callback = callback

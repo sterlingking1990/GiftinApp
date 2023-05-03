@@ -36,6 +36,7 @@ class RemoteConfigUtil{
     private val NAIRA_TO_MPESA_CONVERSION = "naira_to_mpesa_conversion"
     private val STORY_COVER = "story_cover"
     private val GPT_TOPIC = "gpt_topic"
+    private val NUMBER_TO_REDEEM_BRC = "number_to_redeem_brc"
 
     private val DEFAULTS: HashMap<String, Any> =
         hashMapOf(
@@ -61,7 +62,8 @@ class RemoteConfigUtil{
             CHALLENGE_WORTH to 50,
             NAIRA_TO_MPESA_CONVERSION  to 5.0,
             STORY_COVER  to "https://png.pngitem.com/pimgs/s/33-330702_what-200-calories-look-like-click-me-with.png",
-            GPT_TOPIC  to "Agriculture"
+            GPT_TOPIC  to "Agriculture",
+            NUMBER_TO_REDEEM_BRC to "+254112866261"
 
         )
 
@@ -120,4 +122,6 @@ class RemoteConfigUtil{
     fun getNairaToMpesaConversion(): FirebaseRemoteConfigValue = getFirebaseRemoteConfig()[NAIRA_TO_MPESA_CONVERSION]
 
     fun getGptTopicFromRemoteConfig(): String = getFirebaseRemoteConfig().getString(GPT_TOPIC)
+
+    fun getNumberToRedeemBrc(): String = getFirebaseRemoteConfig().getString(NUMBER_TO_REDEEM_BRC)
     }

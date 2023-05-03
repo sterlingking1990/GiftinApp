@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    tools:context=".admin.SetCanClaimBrC">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter customer email"
+            android:textSize="20sp"/>
+
+        <EditText
+            android:id="@+id/et_claim_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:imeOptions="actionNext"
+            android:inputType="textEmailAddress"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter amount to redeem"
+            android:textSize="20sp"/>
+        <EditText
+            android:id="@+id/et_claim_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:imeOptions="actionNext"
+            android:inputType="number"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter Sharable Id"
+            android:textSize="20sp"/>
+        <EditText
+            android:id="@+id/et_claim_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:imeOptions="actionNext"
+            android:inputType="text"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_update_claim"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:text="Update Claim Status"
+        android:textAllCaps="false"
+        android:textColor="@color/whitesmoke"
+        android:textSize="20sp"
+        android:textStyle="normal" />
+
+</LinearLayout>

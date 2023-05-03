@@ -5,4 +5,5 @@ data class RespondersResponseModel(
     var review:String?,
     var status:String?,
     var brandOwner:String?,
+    var challengeType:String?
 )

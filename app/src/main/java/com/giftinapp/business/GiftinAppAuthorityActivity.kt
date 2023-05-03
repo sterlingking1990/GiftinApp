@@ -293,20 +293,6 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
                 return true
             }
 
-            R.id.giftin_authority_add_gifts -> {
-                carouselViewGiftinAuthority?.visibility = View.GONE
-                val giftinAppAuthorityAddGiftsFragment = GiftinAppAuthorityAddGiftsFragment()
-                openFragment(giftinAppAuthorityAddGiftsFragment)
-                return true
-            }
-
-            R.id.giftin_authority_customers_to_redeem -> {
-                carouselViewGiftinAuthority?.visibility = View.GONE
-                val giftinAppAuthorityRedeemableCustomers = GiftinAppAuthorityRedeemableCustomers()
-                openFragment(giftinAppAuthorityRedeemableCustomers)
-                return true
-            }
-
 
             R.id.giftin_authority_exit -> {
                 val builder = AlertDialog.Builder(this)
@@ -336,15 +322,11 @@ class GiftinAppAuthorityActivity : AppCompatActivity() {
                 val verifyBusiness = GiftinAppAuthorityVerifyUserFragment()
                 openFragment(verifyBusiness)
             }
-            R.id.navigation_redeem_gift -> {
+
+            R.id.navigation_set_claim -> {
                 carouselViewGiftinAuthority?.visibility = View.GONE
-                val redeemGift = GiftinAppAuthorityRedeemGiftFragment()
-                openFragment(redeemGift)
-            }
-            R.id.navigation_gifted_customers -> {
-                carouselViewGiftinAuthority?.visibility = View.GONE
-                val redeemableCustomers = GiftinAppAuthorityRedeemedCustomersFragment()
-                openFragment(redeemableCustomers)
+                val setInfluencerClaim = SetCanClaimBrC()
+                openFragment(setInfluencerClaim)
             }
         }
         drawer!!.close()

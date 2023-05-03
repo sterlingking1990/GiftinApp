@@ -2,6 +2,7 @@ package com.giftinapp.business.customer
 
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,25 +61,48 @@ class SharedPostsNRewardAdapter(private val clickableSharedPosts:ClickableShared
             val numberOfReshare = this.findViewById<TextView>(R.id.tvSharedPostReshare)
             val brcWorth = this.findViewById<TextView>(R.id.tvRewardAmount)
             val tvSharedPostStatus = this.findViewById<TextView>(R.id.tvSharedPostStatus)
+            val btnTaskableButton = this.findViewById<TextView>(R.id.btnTaskableSharableStats)
 
+
+
+            btnTaskableButton.text = sharedPostsList[position].challengeType
 
             val rewardToBaseBrc = remoteConfigUtil.rewardToBRCBase().asLong()
             val revenue_multiplier = remoteConfigUtil.getRevenueMultiplier().asDouble()
 
             val taskWorth = sharedPostsList[position].statusWorth
 
+            val storyType = sharedPostsList[position].sharableType
+
+            val canClaimBrcAfterApproval = sharedPostsList[position].canClaim
+
+
             if (taskWorth != null) {
                 brcWorth.text =  ((taskWorth - (revenue_multiplier * taskWorth))/rewardToBaseBrc).toString()  + " BrC"
             }
 
 
-            sharedPostsList[position].postId?.let {
-                ImageShareUtil.getNumberOfPostShares(it){shares->
-                    numberOfReshare.text = shares.toString()
-                    numReshares = shares
-                    executeThirdBlockIfReady(position,tvSharedPostStatus)
+
+            if(storyType=="story"){
+                Log.d("CanClaim",canClaimBrcAfterApproval.toString())
+                if(!canClaimBrcAfterApproval) {
+                    numberOfLikes.visibility = View.GONE
+                    numberOfReshare.visibility = View.GONE
+                    tvSharedPostStatus.text = "Manual Rewarding- Click to Claim BrC"
+                }else{
+                    numberOfLikes.visibility = View.GONE
+                    numberOfReshare.visibility = View.GONE
+                    tvSharedPostStatus.setTextColor(R.color.main_blue)
+                    tvSharedPostStatus.text = "Approved- Click to Claim BrC"
                 }
-            }
+            }else {
+                sharedPostsList[position].postId?.let {
+                    ImageShareUtil.getNumberOfPostShares(it) { shares ->
+                        numberOfReshare.text = shares.toString()
+                        numReshares = shares
+                        executeThirdBlockIfReady(position, tvSharedPostStatus)
+                    }
+                }
                 sharedPostsList[position].objectId?.let {
                     ImageShareUtil.getPostLikes(it) { postLike ->
                         numberOfLikes.text = postLike.toString()
@@ -86,9 +110,17 @@ class SharedPostsNRewardAdapter(private val clickableSharedPosts:ClickableShared
                         executeThirdBlockIfReady(position, tvSharedPostStatus)
                     }
                 }
+            }
 
 
                 tvSharedPostStatus.setOnClickListener {
+                    if(tvSharedPostStatus.text =="Manual Rewarding- Click to Claim BrC"){
+                        sharedPostsList[position].challengeId?.let { it1 ->
+                            clickableSharedPosts.performManualRewarding(
+                                it1
+                            )
+                        }
+                    }else{
                     clickableSharedPosts.performOperationOnPostStats(
                         sharedPostsList[position].statusReach,
                         sharedPostsList[position].businessPostTTL,
@@ -98,9 +130,10 @@ class SharedPostsNRewardAdapter(private val clickableSharedPosts:ClickableShared
                         sharedPostsList[position].storyOwner,
                         sharedPostsList[position].postId,
                         sharedPostsList[position].objectId,
-                        position
+                        position,
+                        sharedPostsList[position].fbPlatformShared
                     )
-                }.toString()
+                }}.toString()
 
 
 
@@ -153,9 +186,11 @@ class SharedPostsNRewardAdapter(private val clickableSharedPosts:ClickableShared
             challengeOwner: String?,
             sharedPostId: String?,
             sharedPostObjId: String?,
-            position: Int
+            position: Int,
+            fbPlatformShared: String?
         )
         fun onAudioClicked(audioLink:String)
+        fun performManualRewarding(postId:String)
     }
 
     private fun executeThirdBlockIfReady(position: Int, tvSharedPostStatus: TextView) {

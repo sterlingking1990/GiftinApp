@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -62,6 +63,7 @@ class TaskDropAdapter(private val clickableTask: ClickableTask): RecyclerView.Ad
             val tvShareTimeLeft = this.findViewById<TextView>(R.id.tvShareTimeLeft)
             val btnSharingSoon = this.findViewById<ImageView>(R.id.fbSharingSoon)
             val tvShareClosed = this.findViewById<TextView>(R.id.tvShareClosed)
+            val btnTaskableButton = this.findViewById<TextView>(R.id.btnTaskable)
 
 
 
@@ -69,6 +71,7 @@ class TaskDropAdapter(private val clickableTask: ClickableTask): RecyclerView.Ad
 //            val formatter = DateTimeFormatter.ofPattern("HH:mm")
 //            val current = LocalDateTime.now().format(formatter)
 
+            btnTaskableButton.text = merchantTaskDropList[position].challengeType
 
 
             if(merchantTaskDropList[position].sharableCondition?.shareStartTime!=null){
@@ -116,9 +119,13 @@ class TaskDropAdapter(private val clickableTask: ClickableTask): RecyclerView.Ad
             val challengeOwner = merchantTaskDropList[position].merchantOwnerId
             val challengeId = merchantTaskDropList[position].merchantStatusId
             val taskWorth = merchantTaskDropList[position].statusReachAndWorthPojo?.status_worth
+            val challengeType = merchantTaskDropList[position].challengeType
 
             imageText.text = merchantTaskDropList[position].storyTag.toString()
             numberOfResponders.text = merchantTaskDropList[position].numberOfResponders.toString()
+
+
+            numberOfApprovedResponders.isVisible = merchantTaskDropList[position].challengeType=="taskable"
             numberOfApprovedResponders.text = merchantTaskDropList[position].numberOfApproved.toString()
 
             if (taskWorth != null) {
@@ -126,7 +133,9 @@ class TaskDropAdapter(private val clickableTask: ClickableTask): RecyclerView.Ad
             }
 
             numberOfResponders.setOnClickListener {
-                    clickableTask.viewResponsesAndRespond(challengeOwner, challengeId)
+                if (challengeType != null) {
+                    clickableTask.viewResponsesAndRespond(challengeOwner, challengeId,challengeType)
+                }
             }
 
             btnShare.setOnClickListener {
@@ -208,7 +217,7 @@ class TaskDropAdapter(private val clickableTask: ClickableTask): RecyclerView.Ad
     }
 
     interface ClickableTask{
-        fun viewResponsesAndRespond(challengeOwner:String?,challengeId:String?)
+        fun viewResponsesAndRespond(challengeOwner:String?,challengeId:String?, challengeType:String)
         fun sharePostToFb(taskDrop:MerchantChallengeListPojo)
         fun onAudioClicked(audioLink:String)
         fun sharableUpcoming(shareStartTime: String?, shareDuration: Int?, targetCountry:String?)

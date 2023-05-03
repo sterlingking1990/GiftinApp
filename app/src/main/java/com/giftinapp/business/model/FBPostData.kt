@@ -18,5 +18,10 @@ data class FBPostData(
     var businessLikes:Int? = 0,
     var businessShares:Int? = 0,
     var businessPostTTL:Int? = 0,
-    var challengeId:String? = ""
+    var challengeId:String? = "",
+    var canClaim:Boolean = false,
+    var fbPlatformShared:String? = "",
+    var businessMinView:Int? = 0,
+    var businessMinReactions:Int? = 0,
+    var challengeType:String? = ""
 )

@@ -91,6 +91,16 @@
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/play_back_icon"
             android:contentDescription="Play Audio" />
+
+        <Button
+            android:id="@+id/btnMerchantTaskable"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_gravity="top|end"
+            android:alpha="0.5"
+            android:layout_margin="5dp"
+            android:text="Taskable"
+            />
     </FrameLayout>
 
     <LinearLayout
@@ -99,13 +109,13 @@
         android:layout_gravity="top"
         android:gravity="center"
         android:orientation="horizontal"
-        android:weightSum="3">
+        android:weightSum="2">
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="center"
-            android:layout_weight="1">
+            android:layout_weight="0.2">
 
         <TextView
             android:id="@+id/tvNumberOfApprovedResponders"
@@ -116,7 +126,7 @@
             android:text="0"
             android:textColor="@color/black"
             android:textSize="20sp"
-            android:visibility="visible"
+            android:visibility="gone"
             app:drawableStartCompat="@drawable/ic_task_drop" />
 
         <TextView
@@ -178,6 +188,13 @@
             android:gravity="center"
             android:layout_marginEnd="20dp"
             android:weightSum="2">
+
+            <ImageView
+                android:id="@+id/ivAnalytics"
+                android:layout_marginStart="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_analytics"/>
 
             <ImageView
                 android:id="@+id/ivDeleteMerchantChallenge"

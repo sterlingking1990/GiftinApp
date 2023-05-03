@@ -1,8 +1,12 @@
 package com.giftinapp.business.customer
 
 import android.Manifest
+import android.app.Activity.RESULT_OK
+import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -29,6 +33,7 @@ import com.giftinapp.business.utility.showBottomSheet
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import java.util.UUID
 
 
 class TaskDrop : Fragment(), TaskDropAdapter.ClickableTask, ListenToSubmittedTaskResponse {
@@ -63,6 +68,10 @@ class TaskDrop : Fragment(), TaskDropAdapter.ClickableTask, ListenToSubmittedTas
     var postTimeToLive:Int? = 0
     var postMinLike:Int? = 0
     var postMinShare:Int? = 0
+    var platformShared:String? = ""
+    var businessSetMinView:Int? = 0
+    var businessSetMinReaction:Int?= 0
+    var challengeType:String? = ""
 
     private lateinit var sessionManager: SessionManager
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,6 +128,7 @@ class TaskDrop : Fragment(), TaskDropAdapter.ClickableTask, ListenToSubmittedTas
                             merchantChallengeListPojo.merchantStatusId = eachStatus.id
                             merchantChallengeListPojo.sharableCondition = eachStatus.get("sharableCondition",SharableCondition::class.java)
                             merchantChallengeListPojo.publishedAt = eachStatus.getString("publishedAt")?:"2022-12-25 07:00"
+                            merchantChallengeListPojo.challengeType = eachStatus.getString("challengeType")
 
                             val map: Map<String, Any> = eachStatus.data
                             var statusWorth = 0
@@ -187,8 +197,8 @@ class TaskDrop : Fragment(), TaskDropAdapter.ClickableTask, ListenToSubmittedTas
         }
     }
 
-    override fun viewResponsesAndRespond(challengeOwner: String?, challengeId: String?) {
-       showBottomSheet(ViewRespondersAndRespondFragment.newInstance(storyOwner,challengeId,::onResponderResponded))
+    override fun viewResponsesAndRespond(challengeOwner: String?, challengeId: String?,challengeType:String) {
+       showBottomSheet(ViewRespondersAndRespondFragment.newInstance(storyOwner,challengeId,challengeType,::onResponderResponded))
     }
 
     override fun sharePostToFb(taskDrop: MerchantChallengeListPojo) {
@@ -202,86 +212,202 @@ class TaskDrop : Fragment(), TaskDropAdapter.ClickableTask, ListenToSubmittedTas
         postTimeToLive = taskDrop.sharableCondition?.daysPostLasting
         postMinLike = taskDrop.sharableCondition?.minLike
         postMinShare = taskDrop.sharableCondition?.minShare
+        platformShared = taskDrop.sharableCondition?.fbPlatformShared
+        businessSetMinView = taskDrop.sharableCondition?.minView
+        businessSetMinReaction = taskDrop.sharableCondition?.minReactions
+        challengeType = taskDrop.challengeType
 
         if(taskDrop.merchantStatusVideoLink.isNullOrEmpty()) {
-            builder!!.setMessage("Select a section to share?")
-                .setCancelable(true)
-                .setPositiveButton("Sharing Guide") { dialog: DialogInterface?, id: Int ->
-                    showDialogGuide(taskDrop.sharableCondition?.shareDuration,taskDrop.sharableCondition?.minLike,taskDrop.sharableCondition?.minShare, taskDrop.sharableCondition?.daysPostLasting)
-                }
-                .setNegativeButton("Facebook Post") { dialog2: DialogInterface?, id: Int ->
-                    taskDrop.merchantStatusImageLink?.let {
-                        if(isPermissionForSavingImageGiven()) {
-                            Log.d("PermissionGranted","Granted")
-                            taskDrop.storyTag?.let { it1 ->
-                                taskDrop.statusReachAndWorthPojo?.status_reach?.let { it2 ->
-                                    taskDrop.statusReachAndWorthPojo?.status_worth?.let { it3 ->
-                                        taskDrop.sharableCondition?.daysPostLasting?.let { it4 ->
-                                            taskDrop.sharableCondition?.minLike?.let { it5 ->
-                                                taskDrop.sharableCondition?.minShare?.let { it6 ->
-                                                    handleImageDownloadToDeviceAndShare(it,
-                                                        it1,
-                                                        taskDrop.merchantStatusImageLink!!, it2, it3, storyOwner,
-                                                        it4,
-                                                        it5,
-                                                        it6
-                                                    )
+            if (taskDrop.sharableCondition?.fbPlatformShared == "post-feed-and-story") {
+                builder!!.setMessage("Select a section to share?")
+                    .setCancelable(true)
+                    .setPositiveButton("Sharing Guide") { dialog: DialogInterface?, id: Int ->
+                        showDialogGuide(
+                            taskDrop.sharableCondition?.shareDuration,
+                            taskDrop.sharableCondition?.minLike,
+                            taskDrop.sharableCondition?.minShare,
+                            taskDrop.sharableCondition?.daysPostLasting
+                        )
+                    }
+                    .setNegativeButton("Facebook Post") { dialog2: DialogInterface?, id: Int ->
+                        taskDrop.merchantStatusImageLink?.let {
+                            if (isPermissionForSavingImageGiven()) {
+                                Log.d("PermissionGranted", "Granted")
+                                taskDrop.storyTag?.let { it1 ->
+                                    taskDrop.statusReachAndWorthPojo?.status_reach?.let { it2 ->
+                                        taskDrop.statusReachAndWorthPojo?.status_worth?.let { it3 ->
+                                            taskDrop.sharableCondition?.daysPostLasting?.let { it4 ->
+                                                taskDrop.sharableCondition?.minLike?.let { it5 ->
+                                                    taskDrop.sharableCondition?.minShare?.let { it6 ->
+                                                        handleImageDownloadToDeviceAndShare(
+                                                            it,
+                                                            it1,
+                                                            taskDrop.merchantStatusImageLink!!,
+                                                            it2,
+                                                            it3,
+                                                            storyOwner,
+                                                            it4,
+                                                            it5,
+                                                            it6
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                            } else {
+                                ActivityCompat.requestPermissions(
+                                    requireActivity(),
+                                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                                    1
+                                )
                             }
-                        }else{
-                            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),1)
+                        }
+                        //shareImageOnPost(taskDrop.merchantStatusImageLink,taskDrop.storyTag)
+                    }
+                    .setNeutralButton("Facebook Story") { dialog3: DialogInterface?, id: Int ->
+                        ImageShareUtil.shareImageOnStory(
+                            taskDrop.merchantStatusImageLink,
+                            taskDrop.merchantStatusId,
+                            requireContext(),
+                            requireActivity()
+                        ) { storyId, storyObjId ->
+                            Log.d("StoryId", storyId.toString())
+                            Log.d("StoryObjId", storyObjId.toString())
+                            if (storyId != null) {
+                                if (storyObjId != null) {
+                                    taskDrop.statusReachAndWorthPojo?.status_reach?.let {
+                                        taskDrop.statusReachAndWorthPojo?.status_worth?.let { it1 ->
+                                            taskDrop.merchantStatusImageLink?.let { it2 ->
+                                                saveStoryIdAndStoryObjectId(
+                                                    storyId, storyObjId, it2,
+                                                    "", it, it1, storyOwner
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                        //shareImageOnStory(taskDrop.merchantStatusImageLink,taskDrop.merchantStatusId)
+                    }
+                val alert = builder!!.create()
+                alert.show()
+            }else if(taskDrop.sharableCondition?.fbPlatformShared=="post-feed"){
+                builder!!.setMessage("Select a section to share?")
+                    .setCancelable(true)
+                    .setPositiveButton("Sharing Guide") { dialog: DialogInterface?, id: Int ->
+                        showDialogGuide(
+                            taskDrop.sharableCondition?.shareDuration,
+                            taskDrop.sharableCondition?.minLike,
+                            taskDrop.sharableCondition?.minShare,
+                            taskDrop.sharableCondition?.daysPostLasting
+                        )
+                    }
+                    .setNegativeButton("Facebook Post") { dialog2: DialogInterface?, id: Int ->
+                        taskDrop.merchantStatusImageLink?.let {
+                            if (isPermissionForSavingImageGiven()) {
+                                Log.d("PermissionGranted", "Granted")
+                                taskDrop.storyTag?.let { it1 ->
+                                    taskDrop.statusReachAndWorthPojo?.status_reach?.let { it2 ->
+                                        taskDrop.statusReachAndWorthPojo?.status_worth?.let { it3 ->
+                                            taskDrop.sharableCondition?.daysPostLasting?.let { it4 ->
+                                                taskDrop.sharableCondition?.minLike?.let { it5 ->
+                                                    taskDrop.sharableCondition?.minShare?.let { it6 ->
+                                                        handleImageDownloadToDeviceAndShare(
+                                                            it,
+                                                            it1,
+                                                            taskDrop.merchantStatusImageLink!!,
+                                                            it2,
+                                                            it3,
+                                                            storyOwner,
+                                                            it4,
+                                                            it5,
+                                                            it6
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                Log.d("NoPermission","NoPermission")
+                                ActivityCompat.requestPermissions(
+                                    requireActivity(),
+                                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                                    1
+                                )
+                            }
+                        }
+                        //shareImageOnPost(taskDrop.merchantStatusImageLink,taskDrop.storyTag)
+                    }
+                val alert = builder!!.create()
+                alert.show()
+            }else{
+                builder!!.setMessage("Select a section to share?")
+                    .setCancelable(true)
+                    .setPositiveButton("Sharing Guide") { dialog: DialogInterface?, id: Int ->
+                        showDialogGuide(
+                            taskDrop.sharableCondition?.shareDuration,
+                            taskDrop.sharableCondition?.minLike,
+                            taskDrop.sharableCondition?.minShare,
+                            taskDrop.sharableCondition?.daysPostLasting
+                        )
+                    }
+                    .setNegativeButton("Facebook Story") { dialog3: DialogInterface?, id: Int ->
+                        ImageShareUtil.shareImageOnStory(
+                            taskDrop.merchantStatusImageLink,
+                            taskDrop.merchantStatusId,
+                            requireContext(),
+                            requireActivity()
+                        ) { storyId, storyObjId ->
+                            Log.d("StoryId", storyId.toString())
+                            Log.d("StoryObjId", storyObjId.toString())
+                            if (storyId != null) {
+                                if (storyObjId != null) {
+                                    taskDrop.statusReachAndWorthPojo?.status_reach?.let {
+                                        taskDrop.statusReachAndWorthPojo?.status_worth?.let { it1 ->
+                                            taskDrop.merchantStatusImageLink?.let { it2 ->
+                                                saveStoryIdAndStoryObjectId(
+                                                    storyId, storyObjId, it2,
+                                                    "", it, it1, storyOwner
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                        //shareImageOnStory(taskDrop.merchantStatusImageLink,taskDrop.merchantStatusId)
+                    }
+                val alert = builder!!.create()
+                alert.show()
+            }
+        }else{
+            VideoShareUtil.shareVideoOnStory(taskDrop.merchantStatusVideoLink!!,taskDrop.merchantStatusId,requireContext(),requireActivity()){
+                videoStoryId,videoStoryObj->
+                if (videoStoryId != null) {
+                    if (videoStoryObj != null) {
+                        statusReach?.let {
+                            statusWorth?.let { it1 ->
+                                saveStoryIdAndStoryObjectId(videoStoryId,videoStoryObj,"",
+                                    taskDrop.merchantStatusVideoLink!!,it, it1,storyOwner)
+                            }
                         }
                     }
-                    //shareImageOnPost(taskDrop.merchantStatusImageLink,taskDrop.storyTag)
                 }
-//                .setNeutralButton("Facebook Story") { dialog3: DialogInterface?, id: Int ->
-//                    ImageShareUtil.shareImageOnStory(taskDrop.merchantStatusImageLink,taskDrop.merchantStatusId,requireContext(),requireActivity()){
-//                        storyId,storyObjId->
-//                        Log.d("StoryId",storyId.toString())
-//                        Log.d("StoryObjId",storyObjId.toString())
-//                        if (storyId != null) {
-//                            if (storyObjId != null) {
-//                                taskDrop.statusReachAndWorthPojo?.status_reach?.let {
-//                                    taskDrop.statusReachAndWorthPojo?.status_worth?.let { it1 ->
-//                                        taskDrop.merchantStatusImageLink?.let { it2 ->
-//                                            saveStoryIdAndStoryObjectId(storyId,storyObjId, it2,
-//                                                "",it, it1,storyOwner
-//                                            )
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//
-//                    }
-//                    //shareImageOnStory(taskDrop.merchantStatusImageLink,taskDrop.merchantStatusId)
-//                }
-            val alert = builder!!.create()
-            alert.show()
-        }else{
-//            VideoShareUtil.shareVideoOnStory(taskDrop.merchantStatusVideoLink!!,taskDrop.merchantStatusId,requireContext(),requireActivity()){
-//                videoStoryId,videoStoryObj->
-//                if (videoStoryId != null) {
-//                    if (videoStoryObj != null) {
-//                        statusReach?.let {
-//                            statusWorth?.let { it1 ->
-//                                saveStoryIdAndStoryObjectId(videoStoryId,videoStoryObj,"",
-//                                    taskDrop.merchantStatusVideoLink!!,it, it1,storyOwner)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+            }
             //shareVideoOnStory(taskDrop.merchantStatusVideoLink!!,taskDrop.merchantStatusId)
         }
 
         //doShareVideo()
 
     }
+
 
     private fun handleImageDownloadToDeviceAndShare(
         imageLink: String,
@@ -351,7 +477,12 @@ class TaskDrop : Fragment(), TaskDropAdapter.ClickableTask, ListenToSubmittedTas
             minLike,
             minShare,
             postTTL,
-            storyId
+            storyId,
+            false,
+            platformShared,
+            businessSetMinView,
+            businessSetMinReaction,
+            challengeType
         )
 
         val empty = SetEmpty("empty")
@@ -363,6 +494,7 @@ class TaskDrop : Fragment(), TaskDropAdapter.ClickableTask, ListenToSubmittedTas
                         .addOnCompleteListener {shared->
                             if(shared.isSuccessful){
                                 Toast.makeText(requireContext(),"After posting, check Your Claims for rewards",Toast.LENGTH_LONG).show()
+                                updateSharedPostsRecord(fbPostDetail)
                             }
                         }
                 }
@@ -384,9 +516,31 @@ class TaskDrop : Fragment(), TaskDropAdapter.ClickableTask, ListenToSubmittedTas
             .build()
         db.firestoreSettings = settings
         val dateShared = DateHelper().setPublishedAtDate()
+        val fbStoId = UUID.randomUUID().toString().split("-")[0] + UUID.randomUUID().toString().split("-")[0]
+        val fbStoryObj = UUID.randomUUID().toString().split("-")[0] + UUID.randomUUID().toString().split("-")[0]
         val fbStoryDetail =
-            FBPostData(fbStoryId,storyObjId,dateShared,
-                merchantStatusImageLink,merchantStatusVideoLink,statusReach,statusWorth,storyOwner,0,0,statusAudioLink,"","story")
+            FBPostData(fbStoId,fbStoryObj,dateShared,
+                merchantStatusImageLink,
+                merchantStatusVideoLink,
+                statusReach,
+                statusWorth,
+                storyOwner,
+                0,
+                0,
+                statusAudioLink,
+                "",
+                "story",
+                false,
+                0,
+                0,
+                postTimeToLive,
+                storyId,
+                false,
+                platformShared,
+                businessSetMinView,
+                businessSetMinReaction,
+                challengeType
+            )
 
         val empty = SetEmpty("empty")
 
@@ -399,10 +553,32 @@ class TaskDrop : Fragment(), TaskDropAdapter.ClickableTask, ListenToSubmittedTas
                         .addOnCompleteListener {shared->
                             if(shared.isSuccessful){
                                 Toast.makeText(requireContext(),"After posting, check your Claims for rewards",Toast.LENGTH_LONG).show()
+                                updateSharedPostsRecord(fbStoryDetail)
                             }
                         }
                 }
             }
+    }
+
+    private fun updateSharedPostsRecord(fbStoryDetail: FBPostData)
+    {
+        val db = FirebaseFirestore.getInstance()
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        val empty = SetEmpty("empty")
+        db.collection("sharedpostsrecord").document(storyId.toString()).set(empty)
+            .addOnCompleteListener {
+                if(it.isSuccessful){
+                    db.collection("sharedpostsrecord").document(storyId.toString()).collection("sharers").document(sessionManager.getEmail().toString()).set(fbStoryDetail)
+                        .addOnCompleteListener {
+
+                        }
+                }
+            }
+
     }
 
     private fun isPermissionForSavingImageGiven():Boolean{

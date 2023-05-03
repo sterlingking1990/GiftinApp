@@ -1,6 +1,8 @@
 package com.giftinapp.business.customer
 
+import android.content.Intent
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -22,9 +24,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import org.aviran.cookiebar2.CookieBar
+import java.net.URLEncoder
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.collections.ArrayList
 
 class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.ClickableSharedPosts {
 
@@ -44,6 +48,7 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
     var challengeStoryId:String?=""
     var storyOwner:String?=""
     var sharedPostPosition:Int = 0
+    var numberToRedeemBrc:String = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -58,6 +63,7 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
         remoteConfigUtil = RemoteConfigUtil()
         sessionManager = SessionManager(requireContext())
         revenue_multiplier = remoteConfigUtil!!.getRevenueMultiplier().asDouble()
+        numberToRedeemBrc = remoteConfigUtil!!.getNumberToRedeemBrc()
         sharedPostLayoutManager = LinearLayoutManager(requireContext(),RecyclerView.VERTICAL,false)
         sharedPostListAdapter = SharedPostsNRewardAdapter(this)
 
@@ -87,11 +93,15 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
                             var postLikes = 0
                             var storyViews = 0
                             var countNoRewardingPost = 0
+
                             for (eachSharable in sharableId) {
 
                                 val sharedPostModel = FBPostData()
                                 val shareType = eachSharable?.getString("sharableType")
                                 val hasRedeemedPost = eachSharable?.getBoolean("redeemedPostReward")
+                                val challengeOwner = eachSharable?.getString("storyOwner")
+                                val postTimeToLive = eachSharable?.get("businessPostTTL").toString().toInt()
+                                val postDate = eachSharable.getString("dateShared")
 //                            if(shareType == "post"){
 //                                val postObjId = eachSharable.getString("objectId")
 //                                ImageShareUtil.getPostLikes(postObjId as String){postLike->
@@ -106,7 +116,14 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
 //                                }
 //                            }
 
-                                if (shareType == "post" && !hasRedeemedPost!!) {
+
+                                var challengeStillRunning = false
+                                isChallengeNotEnded(eachSharable.id,challengeOwner.toString()){
+                                    Log.d("ChallengeRunning",it.toString())
+                                    challengeStillRunning = it==true
+                                }
+
+                                if (!hasRedeemedPost!! && !postTTLNotReached(postTimeToLive,postDate)) {
                                     with(sharedPostModel) {
                                         postId = eachSharable.getString("postId")
                                         objectId = eachSharable.getString("objectId")
@@ -137,6 +154,8 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
                                         businessPostTTL =
                                             eachSharable.get("businessPostTTL").toString().toInt()
                                         challengeId = eachSharable.getString("challengeId")
+                                        canClaim = eachSharable.getBoolean("canClaim")!!
+                                        challengeType = eachSharable.getString("challengeType")
                                     }.let {
                                         sharedPosts.add(sharedPostModel)
                                         if (sharedPosts.size > 0) {
@@ -175,6 +194,31 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
 
     }
 
+
+    private fun isChallengeNotEnded(challengeId:String,challengeOwner:String,callback:(Boolean)->Unit){
+        Log.d("MerchantOwner",challengeOwner)
+        Log.d("MerchantOwnerChallengeId",challengeId)
+        val db = FirebaseFirestore.getInstance()
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("merchants").document(challengeOwner).collection("challengelist").document(challengeId).get()
+            .addOnCompleteListener {merchantChallengeRef->
+                if(merchantChallengeRef.isSuccessful){
+                    val challengeRef = merchantChallengeRef.result.get("merchantStatusId")
+                    if(challengeRef==challengeId){
+                        callback(true)
+                    }else{
+                        callback(false)
+                    }
+                }else{
+                    callback(false)
+                }
+            }
+    }
+
     override fun performOperationOnPostStats(
         businessTarget: Int?,
         businessPostTTL: Int?,
@@ -184,13 +228,15 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
         challengeOwner: String?,
         sharedPostId: String?,
         sharedPostObjId: String?,
-        position: Int
+        position: Int,
+        fbPlatformShared: String?
     ) {
         //reward the user based on the criteria
         //1. check that the TTL has not been reached
         //2. check that the rewarded list has not been exhausted based on target
 
         Log.d("ChallengeId",challengId.toString())
+        Log.d("BusinessTarget",businessTarget.toString())
         challengeWorth = statusWorth
         challengeStoryId = challengId
         storyOwner = challengeOwner
@@ -216,9 +262,8 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
                                         it1, dateShared
                                     )
                                 } == false) {
-                                val latestWorth =
-                                    statusWorth?.minus((revenue_multiplier * statusWorth))
-
+                                val latestWorth = returnStatusWorth(fbPlatformShared, statusWorth)
+                                Log.d("IsExisting",latestWorth.toString())
                                 val rewardeeModel = SharedPostRewardModel(
                                     challengeOwner,
                                     challengId,
@@ -242,6 +287,8 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
                                                 }
                                         }
                                     }
+                            }else{
+                                Toast.makeText(requireContext(),"Either Duration for redeeming BrC has exceeded or Number of Target Exceeded",Toast.LENGTH_LONG).show()
                             }
                         }
                     } else {
@@ -251,7 +298,9 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
                                     it1, dateShared
                                 )
                             } == false) {
-                            val latestWorth = statusWorth?.minus((revenue_multiplier * statusWorth))
+
+                            val latestWorth= returnStatusWorth(fbPlatformShared, statusWorth)
+                            Log.d("IsFirstTime",latestWorth.toString())
                             //write the rewardees record
                             val rewardeeModel = SharedPostRewardModel(
                                 challengeOwner,
@@ -274,11 +323,23 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
                                             }
                                     }
                                 }
+                        }else{
+                            Toast.makeText(requireContext(),"Duration for redeeming BrC has exceeded",Toast.LENGTH_LONG).show()
                         }
                     }
+                }else{
+                    Toast.makeText(requireContext(),"Unable to proceed with rewarding, try again later",Toast.LENGTH_LONG).show()
                 }
             }
 
+    }
+
+    private fun returnStatusWorth(fbPlatformShared: String?, statusWorth: Int?): Double? {
+        return if (fbPlatformShared == "post-feed-and-story") {
+            (statusWorth?.minus(revenue_multiplier * statusWorth))?.div(2)
+        } else {
+            statusWorth?.minus((revenue_multiplier * statusWorth))
+        }
     }
 
     private fun postTTLNotReached(postTTL:Int,dateShared:String?):Boolean{
@@ -410,5 +471,21 @@ class SharedPostsNRewardFragment : Fragment(), SharedPostsNRewardAdapter.Clickab
 
     override fun onAudioClicked(audioLink: String) {
 
+    }
+
+    override fun performManualRewarding(postId:String) {
+
+        val phoneNumber = numberToRedeemBrc
+        val message = "Hello, Brandible. I would like to claim my reward for a shared story\nEmail is- ${sessionManager.getEmail().toString()}\nsharable-Id is $postId"
+
+// Check if WhatsApp is installed on the device
+        try {
+            val url = "https://api.whatsapp.com/send?phone=${phoneNumber + "&text=" + URLEncoder.encode(message, "UTF-8")}"
+            val i = Intent(Intent.ACTION_VIEW)
+            i.data = Uri.parse(url)
+            startActivity(i)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(),"whatsApp Not Found Please Install whatsApp to continue chat",Toast.LENGTH_SHORT)
+        }
     }
 }

@@ -62,7 +62,6 @@ import wseemann.media.FFmpegMediaMetadataRetriever
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 import kotlin.concurrent.timerTask
@@ -141,8 +140,13 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 
     lateinit var notificationManagerCompat:NotificationManagerCompat
 
+    private var imageStringToUpload:String?=null
 
     var artWorkBitmap:Bitmap? = null
+
+    var allExp = false
+
+    var challengeType:String? = null
 
     private val resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -244,11 +248,19 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
             .setNegativeButton("Upload Video story") { dialog2: DialogInterface?, id:Int->
               videoUpload()
             }
+            .setNeutralButton("") { _, _ ->
+
+            }
         val alert = builder!!.create()
         alert.show()
     }
 
+    private fun ifCancelled():Boolean{
+        isChallenge = false
+        return true
+    }
     private fun videoRecording(){
+        imageStringToUpload=null
         Intent(MediaStore.ACTION_VIDEO_CAPTURE).also { videoIntent->
             activity?.packageManager?.let {
                 videoIntent.resolveActivity(it)?.also {
@@ -259,6 +271,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
     }
 
     private fun videoUpload(){
+        imageStringToUpload = null
         val intent = Intent()
         intent.type = "video/*"
         intent.action = Intent.ACTION_GET_CONTENT
@@ -326,6 +339,9 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                     requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO),
                         RECORD_AUDIO_REQUEST_CODE)
                 }
+            }
+            .setNeutralButton(""){_,_->
+
             }
         val alert = builder!!.create()
         alert.show()
@@ -880,6 +896,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                 merchantStoryListPojo.sharableCondition = sharableSetting
                 merchantStoryListPojo.viewers = arrayListOf()
                 merchantStoryListPojo.publishedAt = DateHelper().setPublishedAtDate()
+                merchantStoryListPojo.challengeType = challengeType
 
                 if(isChallenge){
                     if(statusWorth < challengeWorthCustomizable){
@@ -928,6 +945,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                                         clearUri()
                                         fetchUploadedStatsOnLoad()
                                         fetchUploadedChallengeTotalWorth()
+                                            allExp =  false
                                     }
                                 }
                         }
@@ -965,6 +983,38 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         }
     }
 
+    private fun allStoryExpired(callback:(Boolean)->Unit){
+        val db = FirebaseFirestore.getInstance()
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+
+        db.collection("merchants").document(sessionManager.getEmail().toString()).collection("statuslist").get()
+            .addOnCompleteListener {
+                val allStoriesRef = it.result.documents
+                var expiredStory = false
+                var stories = 0
+                Log.d("StoriesSize",allStoriesRef.size.toString())
+                for (i in allStoriesRef){
+                    val storyPublishedDate = i.getString("publishedAt")
+                    val storyNotExpired = storyPublishedDate?.let { it1 ->
+                        DateHelper().nowDateBeforePublishedDate(
+                            it1
+                        )
+                    }
+                    if(!storyNotExpired!!){
+                        stories+=1
+                    }
+                }
+                Log.d("StoriesCount",stories.toString())
+                if(stories==allStoriesRef.size) {
+                    callback(true)
+                }else{
+                    callback(false)
+                }
+            }
+    }
     private fun sendNotificationForSharable(shareStartTime: String?, shareDuration: Int?) {
         var contentText = "A new sharable has been published by a brand, will start at $shareStartTime \nto end after $shareDuration min"
         var contentTitle = "New Sharable Published"
@@ -1159,7 +1209,14 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                                             }
                                         }
                                     }catch (e:Exception){
-                                        showErrorCookieBar("Deletion Error!","An error occurred while completing deletion, Try again later")
+//                                        showErrorCookieBar("Deletion Error!","An error occurred while completing deletion, Try again later")
+                                        showCookieBar(
+                                            "Reward Story Removed",
+                                            "You have successfully removed reward story",
+                                            position = CookieBar.BOTTOM
+                                        )
+                                        fetchUploadedStatsOnLoad()
+                                        fetchUploadedChallengeTotalWorth()
                                     }
                                 }else {
                                     //delete mediaRef, try delete audioRef
@@ -1238,12 +1295,14 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         if(url.isEmpty()){
             runOnUiThread {
                 initializePlayer(videoLink)
+                videoString=videoLink
             }
         }else {
             releasePlayer()
             binding.viewVideo.visibility = View.GONE
             binding.viewImage.visibility = View.VISIBLE
             Picasso.get().load(url).into(binding.viewImage)
+            imageStringToUpload=url
         }
             if (audioLink.isNotEmpty()) {
                 binding.playAudioBtn.visibility = View.VISIBLE
@@ -1335,6 +1394,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 
 
     private fun chooseImageGallery() {
+        videoUriToUpload = null
         if (tempFileFromSource == null) {
             try {
                 tempFileFromSource = File.createTempFile("choose", "png", requireContext().externalCacheDir);
@@ -1370,14 +1430,63 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
                             Toast.makeText(requireContext(),"Please publish at least one Status Story before publishing a Challenge",Toast.LENGTH_LONG).show()
                             binding.chkIsChallenge.isChecked = false
                             isChallenge = false
+                        }else if(allExp) {
+                            Toast.makeText(requireContext(),"All Published stories have expired, Please publish at least one Status Story before publishing a Challenge",Toast.LENGTH_LONG).show()
+                            binding.chkIsChallenge.isChecked = false
+                            isChallenge = false
                         }else{
-                            setSharableNoteAndCondition()
+                            //ask for which platform to be shared
+                            //bring up a dialog box asking user if its a task or a sharable
+                            builder!!.setTitle("Sharable")
+                                .setMessage("Select Sharable is you want the content to be shared across Influencers social media.\n Select Taskable if you want Influencers to perform an assignment from the content")
+                                .setCancelable(false)
+                                .setPositiveButton("Sharable") { dialog: DialogInterface?, id: Int ->
+                                    challengeType = "sharable"
+                                    if (imageStringToUpload != null) {
+                                        builder!!.setMessage("Where should Influencers share your content?")
+                                            .setCancelable(true)
+                                            .setPositiveButton("Share on Facebook Post") { dialog: DialogInterface?, id: Int ->
+                                                setSharableNoteAndCondition(
+                                                    "post-feed"
+                                                )
+                                            }
+                                            .setNegativeButton("Share on Facebook Story") { _, _ ->
+                                                setSharableNoteAndCondition(
+                                                    "post-story"
+                                                )
+                                            }
+                                            .setNeutralButton("Share on Both") { _, _ ->
+                                                setSharableNoteAndCondition(
+                                                    "post-feed-and-story"
+                                                )
+                                            }
+                                        val alert = builder!!.create()
+                                        alert.show()
+                                    } else if(videoUriToUpload !=null) {
+                                        setSharableNoteAndCondition(
+                                            "post-story"
+                                        )
+                                    }else{
+                                        Toast.makeText(requireContext(),"Please upload either image or video content",Toast.LENGTH_LONG).show()
+                                    }
+
+                                }
+                                .setNegativeButton("Taskable"){_,_->
+                                    challengeType = "taskable"
+
+                                }
+                                .setNeutralButton(""){_,_->
+
+                                }
+                            val alert = builder!!.create()
+                            alert.show()
+                    }
+
                         }
                     }
 
             }
         }
-    }
 
     override fun onRequestPermissionsResult(
             requestCode: Int,
@@ -1409,6 +1518,7 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
             val fragment:Fragment = this
             if(fragment==this) {
                 val imageUri = data.data
+                imageStringToUpload = data.data?.path
                 releasePlayer()
                 binding.viewVideo.visibility = View.GONE
                 binding.viewImage.visibility = View.VISIBLE
@@ -1474,13 +1584,13 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
         player = null
     }
 
-    private fun setSharableNoteAndCondition(){
-        showBottomSheet(SharableConditionFragment.newInstance(::onSharableConditionCompleted))
+    private fun setSharableNoteAndCondition(s: String) {
+        showBottomSheet(SharableConditionFragment.newInstance(s,::onSharableConditionCompleted))
     }
 
     private fun onSharableConditionCompleted(sharableCondition: SharableCondition) {
         sharableSetting = sharableCondition
-        Toast.makeText(requireContext(),"Share settings have been saved",Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(),"Share settings have been saved, click publish to make the sharable public",Toast.LENGTH_LONG).show()
 
     }
 
@@ -1629,6 +1739,11 @@ open class SetRewardDeal : BaseFragment<FragmentSetRewardDealBinding>(), Uploade
 
         binding.recordVideoBtn.setOnClickListener {
             checkWhatVideoTypeToUpload()
+        }
+
+
+        allStoryExpired {allExpired->
+            allExp = allExpired == true
         }
 
         return binding

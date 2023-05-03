@@ -65,7 +65,11 @@
         android:id="@+id/merchantChallengeList"
         android:name="com.giftinapp.business.business.MerchantChallengeList"
         android:label="fragment_merchant_challenge_list"
-        tools:layout="@layout/fragment_merchant_challenge_list" />
+        tools:layout="@layout/fragment_merchant_challenge_list" >
+        <action
+            android:id="@+id/action_merchantChallengeList_to_merchantAnalytics"
+            app:destination="@id/merchantAnalytics" />
+    </fragment>
     <fragment
         android:id="@+id/taskDrop"
         android:name="com.giftinapp.business.customer.TaskDrop"
@@ -89,5 +93,14 @@
         <action
             android:id="@+id/action_postDetailFragment2_to_carouselHome2"
             app:destination="@id/carouselHome2" />
+    </fragment>
+    <fragment
+        android:id="@+id/merchantAnalytics"
+        android:name="com.giftinapp.business.business.MerchantAnalytics"
+        android:label="fragment_merchant_analytics"
+        tools:layout="@layout/fragment_merchant_analytics" >
+        <action
+            android:id="@+id/action_merchantAnalytics_to_merchantChallengeList"
+            app:destination="@id/merchantChallengeList" />
     </fragment>
 </navigation>

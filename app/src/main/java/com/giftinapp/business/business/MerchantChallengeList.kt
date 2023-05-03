@@ -1,8 +1,5 @@
 package com.giftinapp.business.business
 
-import android.Manifest
-import android.content.DialogInterface
-import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -11,22 +8,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.giftinapp.business.R
 import com.giftinapp.business.model.*
 import com.giftinapp.business.utility.*
-import com.giftinapp.business.utility.helpers.DateHelper
-import com.giftinapp.business.utility.helpers.ImageDownloaderUtil
-import com.giftinapp.business.utility.helpers.ImageShareUtil
-import com.giftinapp.business.utility.helpers.VideoShareUtil
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -34,6 +25,8 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.ArrayList
 
 @AndroidEntryPoint
@@ -108,6 +101,8 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
                             merchantChallengeListPojo.storyTag = eachStatus.getString("storyTag")
                             merchantChallengeListPojo.videoArtWork = eachStatus.getString("videoArtWork")?:""
                             merchantChallengeListPojo.merchantStatusId = eachStatus.id
+                            merchantChallengeListPojo.publishedAt = eachStatus.getString("publishedAt")
+                            merchantChallengeListPojo.challengeType = eachStatus.getString("challengeType")
                             merchantChallengeListPojo.sharableCondition = eachStatus.get("sharableCondition",
                                 SharableCondition::class.java)
 
@@ -186,15 +181,18 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
         audioLink: String,
         artWorkLink: String,
         id: String,
-        positionId: Int
+        positionId: Int,
+        challengeTTL:Int?,
+        publishedAt:String?
     ) {
+
 
         var mediaLink = ""
         mediaLink = link.ifEmpty {
             videoLink
         }
 
-        val artWork = (mediaLink==videoLink).let {
+        val artWork = (mediaLink == videoLink).let {
             artWorkLink
         }
 
@@ -211,97 +209,136 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
             .build()
         db.firestoreSettings = settings
 
-        if(FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
-            //delete gift from cart
-            sessionManager.getEmail()?.let {
-                db.collection("merchants").document(it).collection("challengelist").document(id)
-                    .delete()
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            //delete from firebase storage
-                            if(mediaLink==videoLink){
-                                //delete mediaRef and artwork
-                                try {
+        if (FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
+
+            if (postTTLReached(challengeTTL, publishedAt) ) {
+                //delete gift from cart
+                sessionManager.getEmail()?.let {
+                    db.collection("merchants").document(it).collection("challengelist").document(id)
+                        .delete()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                //delete from firebase storage
+                                if (mediaLink == videoLink) {
+                                    //delete mediaRef and artwork
                                     mediaRef.delete().addOnCompleteListener { deleteVideo ->
                                         if (deleteVideo.isSuccessful) {
-                                            val artWorkRef: StorageReference =
-                                                FirebaseStorage.getInstance()
-                                                    .getReferenceFromUrl(artWork)
-                                            if (artWork.isNotEmpty()) {
-                                                artWorkRef.delete()
-                                                    .addOnCompleteListener { deleteArtWork ->
-                                                        if (deleteArtWork.isSuccessful) {
+                                            try {
+                                                val artWorkRef: StorageReference =
+                                                    FirebaseStorage.getInstance()
+                                                        .getReferenceFromUrl(artWork)
+                                                if (artWork.isNotEmpty()) {
+                                                    artWorkRef.delete()
+                                                        .addOnCompleteListener { deleteArtWork ->
+                                                            if (deleteArtWork.isSuccessful) {
+                                                                pgLoading.visibility = View.GONE
+                                                                uploadedChallengeListAdapter.clear(
+                                                                    positionId
+                                                                )
+                                                                uploadedChallengeListAdapter.notifyDataSetChanged()
+
+                                                                Toast.makeText(
+                                                                    requireContext(),
+                                                                    "Challenge Removed successfully",
+                                                                    Toast.LENGTH_LONG
+                                                                ).show()
+                                                                fetchChallengeList()
+                                                            }
+
+                                                        }
+                                                }
+                                            } catch (e: Exception) {
+                                                Toast.makeText(
+                                                    requireContext(),
+                                                    "Deletion Error! An error occurred while completing deletion, Try again later",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    //delete mediaRef, try delete audioRef
+                                    mediaRef.delete().addOnCompleteListener { deletePhote ->
+                                        if (deletePhote.isSuccessful) {
+                                            try {
+                                                val audioRef = FirebaseStorage.getInstance()
+                                                    .getReferenceFromUrl(audioLink)
+                                                audioRef.delete()
+                                                    .addOnCompleteListener { audioDel ->
+                                                        if (audioDel.isSuccessful) {
                                                             pgLoading.visibility = View.GONE
                                                             uploadedChallengeListAdapter.clear(
                                                                 positionId
                                                             )
                                                             uploadedChallengeListAdapter.notifyDataSetChanged()
-
                                                             Toast.makeText(
                                                                 requireContext(),
-                                                                "Sharable Removed successfully",
+                                                                "Challenge Removed Successfully",
                                                                 Toast.LENGTH_LONG
                                                             ).show()
                                                             fetchChallengeList()
-                                                        }
 
+                                                        }
                                                     }
+                                            } catch (e: Exception) {
+                                                pgLoading.visibility = View.GONE
+                                                uploadedChallengeListAdapter.clear(positionId)
+                                                uploadedChallengeListAdapter.notifyDataSetChanged()
+                                                Toast.makeText(
+                                                    requireContext(),
+                                                    "Challenge Removed Successfully",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                                fetchChallengeList()
                                             }
                                         }
-                                    }
-                                }catch (e:Exception){
-                                    Toast.makeText(requireContext(),"Deletion Error! An error occurred while completing deletion, Try again later", Toast.LENGTH_LONG).show()
-                                }
-                            }else {
-                                //delete mediaRef, try delete audioRef
-                                mediaRef.delete().addOnCompleteListener { deletePhote ->
-                                    if (deletePhote.isSuccessful) {
-                                        try {
-                                            val audioRef = FirebaseStorage.getInstance()
-                                                .getReferenceFromUrl(audioLink)
-                                            audioRef.delete()
-                                                .addOnCompleteListener { audioDel ->
-                                                    if (audioDel.isSuccessful) {
-                                                        pgLoading.visibility = View.GONE
-                                                        uploadedChallengeListAdapter.clear(positionId)
-                                                        uploadedChallengeListAdapter.notifyDataSetChanged()
-                                                        Toast.makeText(requireContext(),"Sharable Removed Successfully", Toast.LENGTH_LONG).show()
-                                                        fetchChallengeList()
 
-                                                    }
-                                                }
-                                        } catch (e: Exception) {
-                                            pgLoading.visibility = View.GONE
-                                            uploadedChallengeListAdapter.clear(positionId)
-                                            uploadedChallengeListAdapter.notifyDataSetChanged()
-                                            Toast.makeText(requireContext(),"Sharable Removed Successfully", Toast.LENGTH_LONG).show()
-                                            fetchChallengeList()
-                                        }
                                     }
-
                                 }
+                            } else {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Deletion Error!, Unable to complete deletion, please try again",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                fetchChallengeList()
+
                             }
-                        }else{
-                            Toast.makeText(requireContext(),"Deletion Error!, Unable to complete deletion, please try again", Toast.LENGTH_LONG).show()
-                            fetchChallengeList()
-
                         }
-                    }
+                }
+            }else{
+                pgLoading.visibility = View.GONE
+                Toast.makeText(requireContext(),"Sorry you cant delete this challenge until after $challengeTTL days of publishing",Toast.LENGTH_LONG).show()
             }
-        }else{
+        } else{
+            pgLoading.visibility = View.GONE
             Toast.makeText(requireContext(),"Account Unverified, You need to verify your account to delete added stories, please check your mail to verify your account", Toast.LENGTH_LONG).show()
             FirebaseAuth.getInstance().currentUser!!.sendEmailVerification()
         }
     }
 
+    private fun postTTLReached(postTTL:Int?,dateShared:String?):Boolean{
+        Log.d("PostTTL",postTTL.toString())
+        Log.d("dateSharred",dateShared.toString())
+        if(postTTL==null||postTTL==0){
+            return true
+        }else {
+            val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm")
+            val givenDateTime = LocalDateTime.parse(dateShared, formatter)
+            val currentDate = LocalDateTime.now()
+            val deadline = givenDateTime.plusDays(postTTL.toLong())
+            return currentDate.isAfter(deadline)
+        }
+    }
     override fun viewResponders(
         challengeOwner: String?,
         challengeId: String?,
-        challengeWorth: Int?
+        challengeWorth: Int?,
+        challengeType:String
     ) {
         challengeWorth?.let {
             RespondersList.newInstance(challengeOwner,challengeId,
-                it,::onRespondersResponseApproved
+                it,challengeType,::onRespondersResponseApproved
             )
         }?.let { showBottomSheet(it) }
     }
@@ -340,5 +377,12 @@ class MerchantChallengeList : Fragment(), MerchantChallengeListAdapter.Clickable
 
     override fun deleteMerchantChallenge(challengeId: String, positionId: Int) {
 
+    }
+
+    override fun displayAnalytics(challengeId: String, numberOfReach: Int) {
+        val bundle = Bundle()
+        bundle.putString("ChallengeId",challengeId)
+        bundle.putInt("numberOfReach",numberOfReach)
+        findNavController().navigate(R.id.action_merchantChallengeList_to_merchantAnalytics,bundle)
     }
 }

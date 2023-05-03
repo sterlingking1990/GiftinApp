@@ -14,5 +14,6 @@ data class MerchantChallengeListPojo(
     var totalChallengeWorth:Int = 0,
     var statusReachAndWorthPojo: StatusReachAndWorthPojo? = null,
     var sharableCondition: SharableCondition? = null,
-    var publishedAt: String? = null
+    var publishedAt: String? = null,
+    var challengeType:String? = ""
 )

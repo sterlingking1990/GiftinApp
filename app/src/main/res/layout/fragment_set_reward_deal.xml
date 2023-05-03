@@ -41,7 +41,7 @@
             <ImageView
                 android:id="@+id/viewImage"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:scaleType="fitXY"
                 android:elevation="10dp"
                 android:visibility="visible"
@@ -294,7 +294,7 @@
                 android:layout_height="match_parent"
                 android:checked="false"
                 android:textColor="@color/mainText"
-                android:text="make this a sharable for Influencers"/>
+                android:text="set as sharable or taskable for Influencers"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
